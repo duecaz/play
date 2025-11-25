@@ -1,0 +1,138 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+% Configuracion de hipervinculos (sin colores)
+\hypersetup{
+    colorlinks=false,
+    pdfborder={0 0 0},
+    pdfauthor={Richard Pascual Huallpa Yapo},
+    pdftitle={Richard Pascual Huallpa Yapo - Resume}
+}
+
+% Eliminar numeracion de paginas
+\pagestyle{empty}
+
+% Comando para encabezado centrado
+\newcommand{\resumeheader}[3]{
+    \begin{center}
+        \textbf{#1} \\
+        #2 \\
+        #3
+    \end{center}
+}
+
+% Comando para secciones
+\newcommand{\resumesection}[1]{
+    \vspace{0.5em}
+    \noindent\textbf{#1}
+    \vspace{0.2em}
+    \hrule
+    \vspace{0.3em}
+}
+
+% Comando para entradas de experiencia/educacion
+\newcommand{\resumeentry}[4]{
+    \textbf{#1} \hfill #2 \\
+    #3 \hfill #4
+}
+
+% Comando para subseccion de experiencia con bullets
+\newcommand{\resumesubentry}[1]{
+    \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=2pt]
+        #1
+    \end{itemize}
+    \vspace{0.3em}
+}
+
+\begin{document}
+
+% Encabezado
+\resumeheader{Richard Pascual Huallpa Yapo}{
+    ricpascual29@gmail.com $\bullet$ github.com/psskal $\bullet$ linkedin.com/in/richardpascualhuallpa \\
+    Lima, Peru $\bullet$ Machine Learning \& Mechatronics Engineer
+}{}
+
+\vspace{1em}
+
+% Educacion
+\resumesection{Education}
+
+\resumeentry{Universidad Peruana de Ciencias Aplicadas}{Lima, Peru}
+{Mechatronics Engineering}{2021 -- Present}
+
+\resumeentry{High-Performance Schools (COAR - Cusco)}{Cusco, Peru}
+{Secondary Education}{2015 -- 2018}
+
+% Experiencia
+\resumesection{Experience}
+
+\resumeentry{PSSKAL}{Lima, Peru}
+{Software Engineer}{May 2025 -- Nov 2025}
+\resumesubentry{
+    \item Designed and launched a SaaS platform for restaurants with QR digital menus, POS, and real-time ordering (B2B).
+    \item Modeled order states (placed, accepted, preparing, ready, served) and a prioritized kitchen view to shorten service times.
+    \item Implemented granular roles and permissions (owner, manager, cashier, waiter, kitchen) with access control and auditability.
+    \item Built metric dashboards (real-time sales, top dishes, activity) and per-restaurant branding to support Facebook/IG campaigns.
+}
+
+\resumeentry{Avrtec Peru}{Lima, Peru}
+{Machine Learning Engineer}{Jan 2025 -- May 2025}
+\resumesubentry{
+    \item Worked with sensor streams and heavy-equipment logs to train predictive maintenance models and early-failure detection.
+    \item Designed ingestion, cleaning, and labeling pipelines for operational data, aligning metrics with the field engineering team.
+    \item Trained and validated models that improved safety and availability by reducing unplanned downtime.
+    \item Automated model performance monitoring and actionable reports to optimize remote fleet utilization in mining.
+}
+
+% Leadership
+\resumesection{Leadership \& Activities}
+
+\resumeentry{Steel Royal Space}{Cusco, Peru}
+{Co-founder}{Mar 2024 -- Oct 2024}
+\resumesubentry{
+    \item Led an experimental rocket project for the Latin American Space Challenge (Brazil), integrating aerodynamics, propulsion, avionics, and telemetry.
+    \item Coordinated cross-disciplinary engineering teams and test campaigns to de-risk flight readiness.
+    \item Defined system interfaces and integration checkpoints to align mechanical, electrical, and software workstreams.
+}
+
+% Skills
+\resumesection{Hard Skills}
+
+\textbf{Data Science \& ML:} Python (pandas, scikit-learn), predictive maintenance, anomaly detection, feature engineering \\
+\textbf{MLOps \& Pipelines:} Data ingestion/cleaning/labeling, model validation, performance monitoring, reporting \\
+\textbf{Analytics \& Simulation:} MATLAB, statistical analysis, dashboards (product metrics, operations) \\
+\textbf{Software \& Systems:} Python, TypeScript, SQL/MySQL, MongoDB; C/C++ for embedded interfaces \\
+\textbf{Collaboration:} Git, GitHub
+
+% Idiomas
+\resumesection{Languages}
+
+Quechua: Native \hfill Spanish: Native \hfill English: A2 Level
+
+% Soft skills
+\resumesection{Soft Skills}
+
+\begin{itemize}[leftmargin=*,topsep=0pt,itemsep=2pt]
+    \item Problem-solving and teamwork
+    \item Analytical thinking and proactive learning
+    \item Leadership, adaptability, and field collaboration
+\end{itemize}
+
+% Certifications
+\resumesection{Certifications}
+
+\begin{itemize}[leftmargin=*,topsep=0pt,itemsep=2pt]
+    \item Google Data Analytics | Google | 2025
+    \item Embedded Software Development with C | Educba | 2024
+    \item Embedded Software and Hardware Architecture | University of Colorado Boulder | 2024
+    \item Rust Fundamentals | Duke University | 2024
+    \item Sampling People, Networks and Records | University of Michigan | 2022
+    \item Combining and Analyzing Complex Data | University of Maryland, College Park | 2022
+    \item Questionnaire Design for Social Surveys | University of Michigan | 2023
+    \item Framework for Data Collection and Analysis | University of Maryland, College Park | 2022
+\end{itemize}
+
+\end{document}
