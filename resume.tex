@@ -4,94 +4,132 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 
+% Configuracion de hipervinculos (sin colores)
 \hypersetup{
     colorlinks=false,
     pdfborder={0 0 0},
-    pdfauthor={Liz Eliana Condori Supho},
-    pdftitle={CV - Liz Eliana Condori Supho}
+    pdfauthor={Richard Pascual Huallpa Yapo},
+    pdftitle={Richard Pascual Huallpa Yapo - Resume}
 }
 
+% Eliminar numeracion de paginas
 \pagestyle{empty}
 
-\newcommand{\resumeheader}[2]{
+% Comando para encabezado centrado
+\newcommand{\resumeheader}[3]{
     \begin{center}
-        {\LARGE\textbf{#1}} \\
-        #2
+        \textbf{#1} \\
+        #2 \\
+        #3
     \end{center}
 }
 
+% Comando para secciones
 \newcommand{\resumesection}[1]{
-    \vspace{0.52em}
+    \vspace{0.5em}
     \noindent\textbf{#1}
     \vspace{0.2em}
     \hrule
     \vspace{0.3em}
 }
 
+% Comando para entradas de experiencia/educacion
 \newcommand{\resumeentry}[4]{
     \textbf{#1} \hfill #2 \\
     #3 \hfill #4
 }
 
-\begin{document}
-
-\resumeheader{Liz Eliana Condori Supho}{
-    Cusco, Peru $\bullet$ Ayudante de cocina \\
-    Telefono: +51 923 450 522 $\bullet$ Correo: lizelianacondorisupho@gmail.com 
+% Comando para subseccion de experiencia con bullets
+\newcommand{\resumesubentry}[1]{
+    \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=2pt]
+        #1
+    \end{itemize}
+    \vspace{0.3em}
 }
 
-\vspace{0.6em}
+\begin{document}
 
-\resumesection{Perfil profesional}
+% Encabezado
+\resumeheader{Richard Pascual Huallpa Yapo}{
+    ricpascual29@gmail.com $\bullet$ github.com/psskal $\bullet$ linkedin.com/in/richardpascualhuallpa \\
+    Lima, Peru $\bullet$ Machine Learning \& Mechatronics Engineer
+}{}
 
-Estudiante del ultimo ciclo de Gastronomia en el Instituto Tuinen de Cusco, con experiencia continua en cocina y cafetines escolares. Me caracterizo por la organizacion, limpieza, trabajo en equipo y rapidez en la preparacion de alimentos, cumpliendo buenas practicas de manipulacion e higiene.
+\vspace{1em}
 
-\resumesection{Formacion academica}
+% Educacion
+\resumesection{Education}
 
-\resumeentry{Instituto Tuinen de Cusco}{Cusco, Peru}
-{Gastronomia - Ultimo ciclo}{Actualidad}
+\resumeentry{Universidad Peruana de Ciencias Aplicadas}{Lima, Peru}
+{Mechatronics Engineering, 10th Cycle (Final Year)}{2021 -- Present}
 
-\resumesection{Experiencia laboral}
+% Experiencia
+\resumesection{Experience}
 
-\resumeentry{Cocina vegetariana}{Cusco, Peru}
-{Ayudante de cocina}{2022}
-\begin{itemize}[leftmargin=*,topsep=2pt,itemsep=2pt]
-    \item Apoyo en mise en place, lavado, desinfeccion y corte de insumos.
-    \item Preparacion de bases y acompanamientos bajo indicaciones del cocinero principal.
-    \item Mantenimiento del orden y limpieza del area de trabajo.
+\resumeentry{PSSKAL}{Lima, Peru}
+{Software Engineer Jr}{May 2025 -- Nov 2025}
+\resumesubentry{
+    \item Designed and launched a SaaS platform for restaurants with QR digital menus, POS, and real-time ordering (B2B).
+    \item Modeled order states (placed, accepted, preparing, ready, served) and a prioritized kitchen view to shorten service times.
+    \item Implemented granular roles and permissions (owner, manager, cashier, waiter, kitchen) with access control and auditability.
+    \item Built metric dashboards (real-time sales, top dishes, activity) and per-restaurant branding to support Facebook/IG campaigns.
+}
+
+\resumeentry{Avrtec Peru}{Lima, Peru}
+{Embedded Engineer Jr}{Jan 2025 -- May 2025}
+\resumesubentry{
+    \item Developed embedded control systems for mining tractors, implementing real-time sensor acquisition and equipment monitoring.
+    \item Proposed and designed digital twin architecture for mining equipment to enable remote diagnostics, predictive maintenance, and operational optimization.
+    \item Integrated autonomous capabilities and fleet management logic to reduce operator workload and improve mining productivity.
+    \item Collaborated with field teams to validate control algorithms and ensure seamless integration with existing mining infrastructure.
+}
+
+% Leadership
+\resumesection{Leadership \& Activities}
+
+\resumeentry{Steel Royal Space}{Cusco, Peru}
+{Co-founder}{Mar 2024 -- Oct 2024}
+\resumesubentry{
+    \item Led an experimental rocket project for the Latin American Space Challenge (Brazil), integrating aerodynamics, propulsion, avionics, and telemetry.
+    \item Coordinated cross-disciplinary engineering teams and test campaigns to de-risk flight readiness.
+    \item Defined system interfaces and integration checkpoints to align mechanical, electrical, and software workstreams.
+}
+
+% Skills
+\resumesection{Hard Skills}
+
+\textbf{Data Science \& ML:} Python (pandas, scikit-learn), predictive maintenance, anomaly detection, feature engineering \\
+\textbf{MLOps \& Pipelines:} Data ingestion/cleaning/labeling, model validation, performance monitoring, reporting \\
+\textbf{Analytics \& Simulation:} MATLAB, statistical analysis, dashboards (product metrics, operations) \\
+\textbf{Software \& Systems:} Python, TypeScript, SQL/MySQL, MongoDB; C/C++ for embedded interfaces \\
+\textbf{Collaboration:} Git, GitHub
+
+% Idiomas
+\resumesection{Languages}
+
+Quechua: Native \hfill Spanish: Native \hfill English: A2 Level
+
+% Soft skills
+\resumesection{Soft Skills}
+
+\begin{itemize}[leftmargin=*,topsep=0pt,itemsep=2pt]
+    \item Problem-solving and teamwork
+    \item Analytical thinking and proactive learning
+    \item Leadership, adaptability, and field collaboration
 \end{itemize}
 
-\resumeentry{Cafetin de colegio e Instituto Santa Rosa}{Cusco, Peru}
-{Ayudante de cocina}{2023}
-\begin{itemize}[leftmargin=*,topsep=2pt,itemsep=2pt]
-    \item Elaboracion de desayunos, refrigerios y almuerzos en tiempos de alta demanda.
-    \item Atencion en despacho y apoyo en control basico de porciones.
-    \item Limpieza de utensilios, equipos y superficies al cierre de turno.
-\end{itemize}
+% Certifications
+\resumesection{Certifications}
 
-\resumeentry{Cafetin del Colegio Secundario de San Sebastian}{Cusco, Peru}
-{Ayudante de cocina}{2024}
-\begin{itemize}[leftmargin=*,topsep=2pt,itemsep=2pt]
-    \item Preparacion y servido de alimentos para estudiantes y personal.
-    \item Apoyo en recepcion y almacenamiento de productos.
-    \item Cumplimiento de normas de higiene y seguridad alimentaria.
-\end{itemize}
-
-\resumeentry{Restaurante turistico (Centro de la ciudad)}{Cusco, Peru}
-{Ayudante de cocina}{2025}
-\begin{itemize}[leftmargin=*,topsep=2pt,itemsep=2pt]
-    \item Asistencia en produccion para platos de carta y menus del dia.
-    \item Coordinacion con cocina para despacho oportuno y presentacion de platos.
-    \item Manejo responsable de insumos y apoyo en inventario diario.
-\end{itemize}
-
-\resumesection{Habilidades}
-
-\begin{itemize}[leftmargin=*,topsep=2pt,itemsep=2pt]
-    \item Preparacion basica y preelaboracion de alimentos.
-    \item Orden, limpieza y desinfeccion en cocina.
-    \item Trabajo bajo presion y en equipo.
-    \item Puntualidad, responsabilidad y buena actitud de servicio.
+\begin{itemize}[leftmargin=*,topsep=0pt,itemsep=2pt]
+    \item Google Data Analytics | Google | 2025
+    \item Embedded Software Development with C | Educba | 2024
+    \item Embedded Software and Hardware Architecture | University of Colorado Boulder | 2024
+    \item Rust Fundamentals | Duke University | 2024
+    \item Sampling People, Networks and Records | University of Michigan | 2022
+    \item Combining and Analyzing Complex Data | University of Maryland, College Park | 2022
+    \item Questionnaire Design for Social Surveys | University of Michigan | 2023
+    \item Framework for Data Collection and Analysis | University of Maryland, College Park | 2022
 \end{itemize}
 
 \end{document}
