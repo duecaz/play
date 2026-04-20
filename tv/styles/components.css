@@ -346,6 +346,13 @@
 .stat-value { font-size: var(--font-xl);  font-weight: 700; }
 .stat-label { font-size: var(--font-sm);  color: var(--skin-text-muted); }
 
+.end-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .btn-restart {
   display: inline-flex;
   align-items: center;
@@ -365,3 +372,20 @@
   background: var(--skin-card-hover);
   border-color: var(--skin-primary);
 }
+
+.btn-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  background: transparent;
+  border: 2px solid var(--skin-border);
+  color: var(--skin-text-muted);
+  font-size: var(--font-lg);
+  font-weight: 600;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--skin-btn-radius);
+  cursor: pointer;
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+.btn-home:hover { color: var(--skin-text); border-color: var(--skin-text-muted); }

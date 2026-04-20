@@ -54,7 +54,7 @@
 
 html, body {
   height: 100%;
-  overflow: hidden;
+  /* overflow managed per-view: player locks, others scroll */
 }
 
 body {
