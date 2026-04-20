@@ -189,5 +189,24 @@ export const activities = [
         }
       ]
     }
+  },
+
+  {
+    id: 'act-004',
+    title: 'Tildes: El café de José',
+    subtitle: 'Lengua · 3.º Primaria',
+    template: 'textCorrection',
+    config: {
+      timer:     120,
+      showTimer: true,
+      showScore: true,
+      sound:     false,
+      skin:      'default'
+    },
+    content: {
+      textOriginal: 'El cafe esta abierto. Jose corre rapido al salon.',
+      textCorrect:  'El café está abierto. José corre rápido al salón.',
+      instruction:  'Pon las tildes que faltan con el stylus'
+    }
   }
 ]

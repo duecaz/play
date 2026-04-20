@@ -9,11 +9,11 @@ const TEMPLATES = [
     ready: true
   },
   {
-    id:   'detectErrors',
-    icon: '🔍',
-    name: 'Detectar errores',
-    desc: 'Encuentra las palabras incorrectas en un texto',
-    ready: false
+    id:   'textCorrection',
+    icon: '✍️',
+    name: 'Corrección de textos',
+    desc: 'Pon las tildes con el stylus sobre el texto',
+    ready: true
   },
   {
     id:   'match',
