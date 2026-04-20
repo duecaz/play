@@ -1,0 +1,55 @@
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT — Player grid (HUD | main | controls)
+   ═══════════════════════════════════════════════════════════ */
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: stretch;
+}
+
+#player-container {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  position: relative;
+}
+
+/* ─── HUD (top bar) ──────────────────────────────────────── */
+#hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-lg);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--skin-border);
+  min-height: 72px;
+  z-index: 10;
+}
+
+/* ─── Main content area ───────────────────────────────────── */
+#main-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ─── Teacher controls (bottom bar) ──────────────────────── */
+#controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--skin-border);
+  min-height: 72px;
+  z-index: 10;
+}
