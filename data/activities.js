@@ -206,7 +206,8 @@ export const activities = [
     content: {
       textOriginal: 'El cafe esta abierto. Jose corre rapido al salon.',
       textCorrect:  'El café está abierto. José corre rápido al salón.',
-      instruction:  'Pon las tildes que faltan con el stylus'
+      instruction:  'Pon las tildes que faltan con el stylus',
+      maxScore:     50
     }
   }
 ]
