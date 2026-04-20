@@ -126,10 +126,10 @@ function _save() {
   if (orig && correct && orig.length !== correct.length)
     errors.push(`Los textos deben tener el mismo número de caracteres (sin tildes: ${orig.length}, con tildes: ${correct.length}).`)
 
+  let zoneCount = 0
   if (orig && correct && orig.length === correct.length) {
-    let zones = 0
-    for (let i = 0; i < orig.length; i++) if (orig[i] !== correct[i]) zones++
-    if (zones === 0) errors.push('Los textos son idénticos. Comprueba que el segundo texto tenga las tildes.')
+    for (let i = 0; i < orig.length; i++) if (orig[i] !== correct[i]) zoneCount++
+    if (zoneCount === 0) errors.push('Los textos son idénticos. Comprueba que el segundo texto tenga las tildes.')
   }
 
   if (errors.length) {
@@ -150,7 +150,8 @@ function _save() {
     content: {
       textOriginal: orig,
       textCorrect:  correct,
-      instruction:  instruction || 'Pon las tildes que faltan'
+      instruction:  instruction || 'Pon las tildes que faltan',
+      maxScore:     zoneCount * 10
     }
   }
 
