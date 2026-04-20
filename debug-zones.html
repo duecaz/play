@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EduPlay · Debug Zonas</title>
+<title>EduPlay · Debug Zonas v2</title>
 <style>
 :root {
   --bg:      #0f0f23;
@@ -188,6 +188,10 @@ button:hover { opacity: 0.85; }
     <label>M3 · % mín. del trazo en zona <span id="lbl-pct">30</span>%</label>
     <input type="range" id="sl-pct" min="5" max="90" value="30">
   </div>
+  <div class="sl-group">
+    <label>M4 · Longitud mín. segmento continuo <span id="lbl-seg">20</span>px</label>
+    <input type="range" id="sl-seg" min="5" max="120" value="20">
+  </div>
 
   <div class="method-row">
     <label>Método de detección activo</label>
@@ -195,6 +199,7 @@ button:hover { opacity: 0.85; }
       <button class="tab" data-m="1">M1 · Cualquier punto</button>
       <button class="tab active" data-m="2">M2 · Mín. puntos</button>
       <button class="tab" data-m="3">M3 · % del trazo</button>
+      <button class="tab" data-m="4">M4 · Segmento continuo ★</button>
     </div>
   </div>
 
@@ -234,7 +239,7 @@ const ORIG    = 'El cafe esta abierto. Jose corre rapido al salon.'
 const CORRECT = 'El café está abierto. José corre rápido al salón.'
 
 // ── State ────────────────────────────────────────────────────
-let PX = 16, PY_TOP = 42, PY_BOT = 8, MIN_PTS = 4, MIN_PCT = 30
+let PX = 16, PY_TOP = 42, PY_BOT = 8, MIN_PTS = 4, MIN_PCT = 30, MIN_SEG = 20
 let METHOD = 2
 let strokes = []      // [{x,y}[]]
 let current = null
@@ -406,38 +411,97 @@ canvas.addEventListener('pointerup', e => {
 })
 canvas.addEventListener('pointercancel', () => { drawing = false; current = null })
 
+// ── Helpers de análisis de trazo ─────────────────────────────
+function segPhysLen(seg) {
+  // Longitud física (px) de una secuencia de puntos
+  let len = 0
+  for (let i = 1; i < seg.length; i++) {
+    const dx = seg[i].x - seg[i-1].x
+    const dy = seg[i].y - seg[i-1].y
+    len += Math.sqrt(dx*dx + dy*dy)
+  }
+  return len
+}
+
+function bestContiguousSegment(stroke, z) {
+  // Devuelve el segmento contiguo más largo (longitud física) dentro de z
+  let best = [], current = []
+  let bestLen = 0
+
+  stroke.forEach(p => {
+    if (inZone(p, z)) {
+      current.push(p)
+    } else {
+      if (current.length) {
+        const l = segPhysLen(current)
+        if (l > bestLen) { bestLen = l; best = current }
+      }
+      current = []
+    }
+  })
+  // Último segmento
+  if (current.length) {
+    const l = segPhysLen(current)
+    if (l > bestLen) { bestLen = l; best = current }
+  }
+  return { seg: best, len: bestLen }
+}
+
+function hSpan(seg) {
+  if (!seg.length) return 0
+  const xs = seg.map(p => p.x)
+  return Math.max(...xs) - Math.min(...xs)
+}
+
 // ── Detection ────────────────────────────────────────────────
 function detect() {
   recalcZones()
 
   zones.forEach(z => {
-    z.ptsInside = 0
-    z.bestPct   = 0
-    z.hit       = false
+    z.ptsInside  = 0
+    z.bestPct    = 0
+    z.bestSegLen = 0
+    z.bestSegSpan = 0
+    z.hit        = false
   })
 
   strokes.forEach(stroke => {
     const len = stroke.length
     zones.forEach(z => {
+      // Puntos dentro (M1/M2)
       let inside = 0
       stroke.forEach(p => { if (inZone(p, z)) inside++ })
       z.ptsInside += inside
+
+      // % trazo (M3)
       const pct = len > 0 ? inside / len * 100 : 0
       if (pct > z.bestPct) z.bestPct = pct
+
+      // Segmento contiguo (M4)
+      const { seg, len: sLen } = bestContiguousSegment(stroke, z)
+      if (sLen > z.bestSegLen) {
+        z.bestSegLen  = sLen
+        z.bestSegSpan = hSpan(seg)
+      }
     })
   })
 
   zones.forEach(z => {
+    const minHSpan = z.lw * 0.20  // 20% del ancho de la letra como mínimo
+
     if (METHOD === 1) {
       z.hit = z.ptsInside >= 1
 
     } else if (METHOD === 2) {
       z.hit = z.ptsInside >= MIN_PTS
 
-    } else {
-      // M3: al menos un trazo tiene >= MIN_PCT% de sus puntos en la zona
-      // AND al menos MIN_PTS puntos absolutos (evita trazos de 1 punto)
+    } else if (METHOD === 3) {
       z.hit = z.ptsInside >= 3 && z.bestPct >= MIN_PCT
+
+    } else {
+      // M4: segmento continuo de longitud física >= MIN_SEG
+      //     Y amplitud horizontal >= 20% del ancho de la letra
+      z.hit = z.bestSegLen >= MIN_SEG && z.bestSegSpan >= minHSpan
     }
   })
 }
@@ -452,17 +516,22 @@ function renderStats(final) {
   if (!zones.length || strokes.length === 0) { el.innerHTML = ''; return }
 
   el.innerHTML = zones.map(z => {
-    const cls = final ? (z.hit ? 'hit' : 'miss') : ''
-    const m2ok = z.ptsInside >= MIN_PTS
-    const m3ok = z.ptsInside >= 3 && z.bestPct >= MIN_PCT
+    const cls   = final ? (z.hit ? 'hit' : 'miss') : ''
+    const m2ok  = z.ptsInside >= MIN_PTS
+    const m3ok  = z.ptsInside >= 3 && z.bestPct >= MIN_PCT
+    const minHS = (z.lw * 0.20).toFixed(0)
+    const m4ok  = z.bestSegLen >= MIN_SEG && z.bestSegSpan >= z.lw * 0.20
     return `
       <div class="zone-card ${cls}">
         <div class="zc-char ${cls}">${z.cor}</div>
         <div class="zc-line">Pts dentro: <b>${z.ptsInside}</b></div>
-        <div class="zc-line">Mejor trazo: <b>${z.bestPct.toFixed(0)}%</b></div>
-        <div class="zc-line">M1 (≥1 pt): <b>${z.ptsInside>=1?'✓':'✗'}</b></div>
-        <div class="zc-line">M2 (≥${MIN_PTS} pts): <b>${m2ok?'✓':'✗'}</b></div>
+        <div class="zc-line">Mejor %: <b>${z.bestPct.toFixed(0)}%</b></div>
+        <div class="zc-line">Seg. contiguo: <b>${z.bestSegLen.toFixed(0)}px</b> / <b>${z.bestSegSpan.toFixed(0)}px ancho</b></div>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin:4px 0">
+        <div class="zc-line">M1 (≥1pt): <b>${z.ptsInside>=1?'✓':'✗'}</b></div>
+        <div class="zc-line">M2 (≥${MIN_PTS}pts): <b>${m2ok?'✓':'✗'}</b></div>
         <div class="zc-line">M3 (≥${MIN_PCT}%): <b>${m3ok?'✓':'✗'}</b></div>
+        <div class="zc-line" style="color:${m4ok?'var(--correct)':'var(--muted)'}">M4★ (≥${MIN_SEG}px,≥${minHS}px ancho): <b>${m4ok?'✓':'✗'}</b></div>
         ${final ? `<div class="zc-result ${z.hit?'hit':'miss'}">${z.hit ? '✓ DETECTADA' : '✗ FALLA'}</div>` : ''}
       </div>`
   }).join('')
@@ -506,6 +575,7 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   ['sl-py-bot', 'lbl-py-bot', v => { PY_BOT = v }],
   ['sl-min',    'lbl-min',    v => { MIN_PTS = v }],
   ['sl-pct',    'lbl-pct',    v => { MIN_PCT = v }],
+  ['sl-seg',    'lbl-seg',    v => { MIN_SEG = v }],
 ].forEach(([id, lbl, fn]) => {
   document.getElementById(id).addEventListener('input', e => {
     document.getElementById(lbl).textContent = e.target.value
