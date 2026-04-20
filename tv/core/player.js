@@ -30,7 +30,7 @@ export const Player = {
     this._onHome  = onHome || null
     this.activity = activity
     this.score    = 0
-    this.maxScore = activity.content.items.reduce((s, i) => s + (i.points || 10), 0)
+    this.maxScore = (activity.content.items || []).reduce((s, i) => s + (i.points || 10), 0)
     this.timeLeft = activity.config.timer || 0
     this.timeUsed = 0
 
@@ -60,7 +60,7 @@ export const Player = {
       ? Math.round((this.score / this.maxScore) * 100) : 0
     renderEndScreen(this._els.main, {
       score:    this.score,
-      total:    this.activity.content.items.length,
+      total:    this.activity.content.items?.length ?? 0,
       maxScore: this.maxScore,
       pct,
       timeUsed: this.timeUsed,

@@ -20,10 +20,11 @@ export function renderEndScreen(container, { score, total, maxScore, pct, timeUs
             <span class="stat-value">${score}</span>
             <span class="stat-label">Puntos</span>
           </div>
+          ${total > 0 ? `
           <div class="end-stat">
             <span class="stat-value">${total}</span>
             <span class="stat-label">Preguntas</span>
-          </div>
+          </div>` : ''}
           ${timeUsed > 0 ? `
           <div class="end-stat">
             <span class="stat-value">${timeUsed}s</span>
