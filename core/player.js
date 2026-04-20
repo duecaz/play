@@ -15,6 +15,7 @@ export const Player = {
   timeLeft:  0,
   timeUsed:  0,
   _interval: null,
+  _onHome:   null,
   _els:      { hud: null, main: null, controls: null },
 
   /* ── Bootstrap ─────────────────────────────────────────── */
@@ -25,7 +26,8 @@ export const Player = {
   },
 
   /* ── Load activity ─────────────────────────────────────── */
-  load(activity) {
+  load(activity, { onHome } = {}) {
+    this._onHome  = onHome || null
     this.activity = activity
     this.score    = 0
     this.maxScore = activity.content.items.reduce((s, i) => s + (i.points || 10), 0)
@@ -62,7 +64,8 @@ export const Player = {
       maxScore: this.maxScore,
       pct,
       timeUsed: this.timeUsed,
-      onRestart: () => this._reset()
+      onRestart: () => this._reset(),
+      onHome:    this._onHome
     })
   },
 
