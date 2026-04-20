@@ -1,6 +1,6 @@
 export function renderStartScreen(container, activity, { onStart } = {}) {
   const { title, subtitle, content, config } = activity
-  const total = content.items.length
+  const total = content.items?.length ?? null
 
   container.innerHTML = `
     <div class="start-screen fade-in">
@@ -9,7 +9,7 @@ export function renderStartScreen(container, activity, { onStart } = {}) {
         <h1 class="start-title">${_esc(title)}</h1>
         ${subtitle ? `<p class="start-subtitle">${_esc(subtitle)}</p>` : ''}
         <div class="start-meta">
-          <span>${total} pregunta${total !== 1 ? 's' : ''}</span>
+          ${total !== null ? `<span>${total} pregunta${total !== 1 ? 's' : ''}</span>` : ''}
           ${config.timer ? `<span>${config.timer} segundos</span>` : ''}
         </div>
         <button class="btn-start" id="btn-start">▶ Comenzar</button>
