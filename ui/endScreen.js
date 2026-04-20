@@ -1,4 +1,4 @@
-export function renderEndScreen(container, { score, total, maxScore, pct, timeUsed, onRestart } = {}) {
+export function renderEndScreen(container, { score, total, maxScore, pct, timeUsed, onRestart, onHome } = {}) {
   const emoji = pct >= 80 ? '🎉' : pct >= 50 ? '👍' : '💪'
   const msg   = pct >= 80 ? '¡Excelente trabajo!'
               : pct >= 50 ? '¡Bien hecho!'
@@ -31,10 +31,14 @@ export function renderEndScreen(container, { score, total, maxScore, pct, timeUs
           </div>` : ''}
         </div>
 
-        <button class="btn-restart" id="btn-restart">↺ Jugar de nuevo</button>
+        <div class="end-actions">
+          <button class="btn-restart" id="btn-restart">↺ Jugar de nuevo</button>
+          ${onHome ? `<button class="btn-home" id="btn-home">🏠 Inicio</button>` : ''}
+        </div>
       </div>
     </div>
   `
 
   document.getElementById('btn-restart')?.addEventListener('click', onRestart)
+  document.getElementById('btn-home')?.addEventListener('click', onHome)
 }
