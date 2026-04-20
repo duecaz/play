@@ -1,9 +1,9 @@
 import { BaseTemplate } from './base.js'
 import Events           from '../core/events.js'
 
-const PX = 22   // horizontal padding around zone
-const PY_TOP = 55  // upward padding (tilde goes above letter)
-const PY_BOT = 14  // downward padding
+const PX = 16    // horizontal padding around zone
+const PY_TOP = 42  // upward padding (tilde stroke goes above letter)
+const PY_BOT = 8   // downward padding
 
 export class TextCorrectionTemplate extends BaseTemplate {
   static requiresTools = ['pen']
@@ -178,10 +178,13 @@ export class TextCorrectionTemplate extends BaseTemplate {
     const correct = this._zones.filter(z => z.hit).length
     const total   = this._zones.length
 
-    /* Color zone spans */
+    /* Reveal correct accent and color zones */
     document.getElementById('corr-wrapper')
       ?.querySelectorAll('.acc-zone')
-      .forEach((span, i) => span.classList.add(this._zones[i]?.hit ? 'zone-ok' : 'zone-miss'))
+      .forEach((span, i) => {
+        span.textContent = span.dataset.correct   // show accented char
+        span.classList.add(this._zones[i]?.hit ? 'zone-ok' : 'zone-miss')
+      })
 
     /* Draw result circles */
     const ctx = this._ctx
@@ -214,7 +217,8 @@ function _buildHTML(orig, correct) {
   let html = ''
   for (let i = 0; i < orig.length; i++) {
     if (orig[i] !== correct[i]) {
-      html += `<span class="acc-zone">${_esc(correct[i])}</span>`
+      // Show unaccented char; data-correct stores the accented version for reveal
+      html += `<span class="acc-zone" data-correct="${_esc(correct[i])}">${_esc(orig[i])}</span>`
     } else {
       html += _esc(orig[i])
     }

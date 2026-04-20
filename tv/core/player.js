@@ -30,7 +30,8 @@ export const Player = {
     this._onHome  = onHome || null
     this.activity = activity
     this.score    = 0
-    this.maxScore = (activity.content.items || []).reduce((s, i) => s + (i.points || 10), 0)
+    this.maxScore = activity.content.maxScore
+      ?? (activity.content.items || []).reduce((s, i) => s + (i.points || 10), 0)
     this.timeLeft = activity.config.timer || 0
     this.timeUsed = 0
 
