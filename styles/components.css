@@ -389,3 +389,125 @@
   transition: color var(--t-fast), border-color var(--t-fast);
 }
 .btn-home:hover { color: var(--skin-text); border-color: var(--skin-text-muted); }
+
+/* ─── Text Correction Template ────────────────────────────── */
+.corr-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+}
+
+.corr-instruction {
+  font-size: var(--font-lg);
+  color: var(--skin-text-muted);
+  text-align: center;
+}
+
+.corr-wrapper {
+  position: relative;
+  background: var(--skin-card-bg);
+  border: 1px solid var(--skin-border);
+  border-radius: var(--skin-card-radius);
+  padding: var(--space-xl) var(--space-lg);
+  width: 100%;
+  max-width: 1080px;
+}
+
+.corr-text {
+  font-size: var(--font-xl);
+  font-weight: 600;
+  line-height: 2.4;
+  text-align: center;
+  color: var(--skin-text);
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.corr-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.acc-zone {
+  position: relative;
+  color: var(--skin-primary);
+  background: rgba(74, 144, 226, 0.14);
+  border-radius: 4px;
+  padding: 0 2px;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+
+.acc-zone.zone-ok   { color: var(--skin-correct); background: var(--skin-correct-bg); }
+.acc-zone.zone-miss { color: var(--skin-wrong);   background: var(--skin-wrong-bg);   }
+
+.btn-corr-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  background: var(--skin-primary);
+  color: #fff;
+  font-size: var(--font-lg);
+  font-weight: 700;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--skin-btn-radius);
+  min-width: 280px;
+  transition: background var(--t-fast), transform var(--t-fast);
+  box-shadow: 0 8px 28px rgba(74, 144, 226, 0.3);
+}
+
+.btn-corr-check:hover:not(:disabled) {
+  background: var(--skin-primary-dark);
+  transform: translateY(-2px);
+}
+
+.btn-corr-check:disabled { opacity: 0.7; cursor: default; }
+
+/* ─── Text Correction Editor preview ──────────────────────── */
+.section-hint {
+  font-size: var(--font-sm);
+  color: var(--skin-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.corr-preview-box {
+  background: var(--skin-card-bg);
+  border: 1px solid var(--skin-border);
+  border-radius: var(--skin-card-radius);
+  padding: var(--space-md) var(--space-lg);
+  margin-top: var(--space-md);
+}
+
+.preview-label { font-size: var(--font-sm); color: var(--skin-text-muted); margin-bottom: var(--space-xs); }
+
+.preview-text {
+  font-size: var(--font-base);
+  font-weight: 600;
+  line-height: 2;
+  color: var(--skin-text);
+}
+
+.prev-zone {
+  color: var(--skin-primary);
+  background: rgba(74, 144, 226, 0.14);
+  border-radius: 4px;
+  padding: 0 3px;
+  border-bottom: 2px solid var(--skin-primary);
+}
+
+.char-count       { font-size: var(--font-sm); margin-top: var(--space-xs); }
+.char-count--ok   { color: var(--skin-correct); }
+.char-count--err  { color: var(--skin-wrong); }
