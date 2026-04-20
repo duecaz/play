@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduPlay · Debug Zonas</title>
+<style>
+:root {
+  --bg:      #0f0f23;
+  --surface: #1a1a35;
+  --card:    rgba(255,255,255,0.06);
+  --border:  rgba(255,255,255,0.1);
+  --text:    #fff;
+  --muted:   rgba(255,255,255,0.45);
+  --primary: #4a90e2;
+  --correct: #4caf50;
+  --wrong:   #f44336;
+  --orange:  #ff9800;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 1.2rem;
+  min-height: 100%;
+}
+
+/* ── Header ─────────────────────────────────── */
+.header { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.header h1 { font-size: 1.1rem; color: var(--primary); }
+.header p  { font-size: 0.8rem; color: var(--muted); }
+
+/* ── Controls ───────────────────────────────── */
+.controls {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  align-items: flex-end;
+}
+.sl-group { display: flex; flex-direction: column; gap: 4px; min-width: 180px; }
+.sl-group label { font-size: 0.75rem; color: var(--muted); display: flex; justify-content: space-between; }
+.sl-group label span { color: var(--primary); font-weight: 700; }
+input[type=range] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+
+.method-row { display: flex; flex-direction: column; gap: 6px; }
+.method-row label { font-size: 0.75rem; color: var(--muted); }
+.method-tabs { display: flex; gap: 6px; }
+.tab {
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 150ms;
+}
+.tab.active { background: var(--primary); color: #fff; border-color: transparent; }
+
+.btn-row { display: flex; gap: 8px; }
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: opacity 150ms;
+}
+button:hover { opacity: 0.85; }
+.btn-clear { background: var(--card); border: 1px solid var(--border); color: var(--text); }
+.btn-check { background: var(--primary); color: #fff; }
+.btn-reset-view { background: var(--orange); color: #fff; }
+
+/* ── Canvas zone ────────────────────────────── */
+.canvas-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  flex: 1;
+}
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+.text-layer {
+  font-size: clamp(1.3rem, 2.8vw, 2rem);
+  font-weight: 700;
+  line-height: 2.8;
+  text-align: center;
+  color: var(--text);
+  user-select: none;
+  pointer-events: none;
+  position: relative;
+  z-index: 1;
+}
+.acc-zone { color: var(--primary); position: relative; }
+#canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 2;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+/* ── Legend ─────────────────────────────────── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.2rem;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.leg { display: flex; align-items: center; gap: 5px; }
+.dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+.sq  { width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── Stats ──────────────────────────────────── */
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: flex-start;
+}
+.zone-card {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 200ms;
+}
+.zone-card.hit  { border-color: var(--correct); }
+.zone-card.miss { border-color: var(--wrong); }
+.zc-char { font-size: 1.6rem; font-weight: 800; text-align: center; }
+.zc-char.hit  { color: var(--correct); }
+.zc-char.miss { color: var(--wrong); }
+.zc-line { font-size: 0.72rem; color: var(--muted); }
+.zc-line b { color: var(--text); font-weight: 700; }
+.zc-result { font-size: 0.8rem; font-weight: 700; text-align: center; margin-top: 2px; }
+.zc-result.hit  { color: var(--correct); }
+.zc-result.miss { color: var(--wrong); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🔬 Debug · Detección de Zonas de Tilde</h1>
+  <p>Dibuja trazos sobre el texto y ajusta los parámetros en tiempo real</p>
+</div>
+
+<!-- Controls -->
+<div class="controls">
+  <div class="sl-group">
+    <label>PX — margen horizontal <span id="lbl-px">16</span>px</label>
+    <input type="range" id="sl-px" min="0" max="70" value="16">
+  </div>
+  <div class="sl-group">
+    <label>PY_TOP — margen arriba (tilde) <span id="lbl-py-top">42</span>px</label>
+    <input type="range" id="sl-py-top" min="0" max="120" value="42">
+  </div>
+  <div class="sl-group">
+    <label>PY_BOT — margen abajo <span id="lbl-py-bot">8</span>px</label>
+    <input type="range" id="sl-py-bot" min="0" max="50" value="8">
+  </div>
+  <div class="sl-group">
+    <label>M2 · Mín. puntos en zona <span id="lbl-min">4</span></label>
+    <input type="range" id="sl-min" min="1" max="40" value="4">
+  </div>
+  <div class="sl-group">
+    <label>M3 · % mín. del trazo en zona <span id="lbl-pct">30</span>%</label>
+    <input type="range" id="sl-pct" min="5" max="90" value="30">
+  </div>
+
+  <div class="method-row">
+    <label>Método de detección activo</label>
+    <div class="method-tabs" id="method-tabs">
+      <button class="tab" data-m="1">M1 · Cualquier punto</button>
+      <button class="tab active" data-m="2">M2 · Mín. puntos</button>
+      <button class="tab" data-m="3">M3 · % del trazo</button>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:6px;justify-content:flex-end">
+    <div class="btn-row">
+      <button class="btn-clear" id="btn-clear">🗑 Limpiar trazos</button>
+      <button class="btn-check" id="btn-check">✓ Comprobar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Canvas -->
+<div class="canvas-wrap">
+  <div class="wrapper" id="wrapper">
+    <div class="text-layer" id="text-layer"></div>
+    <canvas id="canvas"></canvas>
+  </div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <span>Zonas:</span>
+  <span class="leg"><span class="sq" style="background:rgba(255,152,0,0.3);border:1px dashed var(--orange)"></span>PY_TOP — área de tilde (arriba)</span>
+  <span class="leg"><span class="sq" style="background:rgba(74,144,226,0.2);border:1px dashed var(--primary)"></span>PX — margen lateral</span>
+  <span class="leg"><span class="sq" style="background:rgba(76,175,80,0.2);border:1px dashed var(--correct)"></span>PY_BOT — margen abajo</span>
+  <span class="leg"><span class="sq" style="border:1.5px solid rgba(255,255,255,0.5)"></span>Letra (sin padding)</span>
+  <span style="margin-left:0.5rem">Puntos:</span>
+  <span class="leg"><span class="dot" style="background:var(--correct)"></span>Dentro de zona</span>
+  <span class="leg"><span class="dot" style="background:var(--wrong)"></span>Fuera de zona</span>
+</div>
+
+<!-- Stats -->
+<div class="stats-row" id="stats"></div>
+
+<script>
+const ORIG    = 'El cafe esta abierto. Jose corre rapido al salon.'
+const CORRECT = 'El café está abierto. José corre rápido al salón.'
+
+// ── State ────────────────────────────────────────────────────
+let PX = 16, PY_TOP = 42, PY_BOT = 8, MIN_PTS = 4, MIN_PCT = 30
+let METHOD = 2
+let strokes = []      // [{x,y}[]]
+let current = null
+let drawing = false
+let zones   = []
+
+// ── Build text ───────────────────────────────────────────────
+const textLayer = document.getElementById('text-layer')
+function buildHTML() {
+  let html = ''
+  for (let i = 0; i < ORIG.length; i++) {
+    const ch = ORIG[i]
+    if (ch !== CORRECT[i]) {
+      html += `<span class="acc-zone" data-orig="${ch}" data-cor="${CORRECT[i]}">${ch}</span>`
+    } else {
+      // Preserve spaces; escape < > &
+      html += ch === '&' ? '&amp;' : ch === '<' ? '&lt;' : ch
+    }
+  }
+  return html
+}
+textLayer.innerHTML = buildHTML()
+
+// ── Canvas ───────────────────────────────────────────────────
+const wrapper = document.getElementById('wrapper')
+const canvas  = document.getElementById('canvas')
+const ctx     = canvas.getContext('2d')
+
+function sizeCanvas() {
+  const r = wrapper.getBoundingClientRect()
+  canvas.width  = Math.round(r.width)
+  canvas.height = Math.round(r.height)
+}
+
+function recalcZones() {
+  const wr = wrapper.getBoundingClientRect()
+  const spans = wrapper.querySelectorAll('.acc-zone')
+  zones = Array.from(spans).map(span => {
+    const sr = span.getBoundingClientRect()
+    const lx = sr.left - wr.left
+    const ly = sr.top  - wr.top
+    const lw = sr.width
+    const lh = sr.height
+    return {
+      orig: span.dataset.orig,
+      cor:  span.dataset.cor,
+      // letter rect (canvas-relative)
+      lx, ly, lw, lh,
+      // full detection rect
+      x: lx - PX,
+      y: ly - PY_TOP,
+      w: lw + PX * 2,
+      h: lh + PY_TOP + PY_BOT,
+      ptsInside: 0,
+      bestPct:   0,
+      hit: false
+    }
+  })
+}
+
+// ── Draw ─────────────────────────────────────────────────────
+function inZone(p, z) {
+  return p.x >= z.x && p.x <= z.x + z.w && p.y >= z.y && p.y <= z.y + z.h
+}
+
+function drawZonesOverlay() {
+  zones.forEach(z => {
+    // PY_TOP area (orange — where the accent stroke goes)
+    ctx.fillStyle = 'rgba(255,152,0,0.18)'
+    ctx.fillRect(z.x, z.y, z.w, PY_TOP)
+    // PX left padding
+    ctx.fillStyle = 'rgba(74,144,226,0.18)'
+    ctx.fillRect(z.x, z.ly, PX, z.lh)
+    // PX right padding
+    ctx.fillRect(z.lx + z.lw, z.ly, PX, z.lh)
+    // PY_BOT area (green)
+    ctx.fillStyle = 'rgba(76,175,80,0.18)'
+    ctx.fillRect(z.x, z.ly + z.lh, z.w, PY_BOT)
+    // Letter core (subtle tint)
+    ctx.fillStyle = 'rgba(74,144,226,0.08)'
+    ctx.fillRect(z.lx, z.ly, z.lw, z.lh)
+
+    // Full zone dashed border
+    ctx.save()
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)'
+    ctx.lineWidth = 1
+    ctx.setLineDash([4, 3])
+    ctx.strokeRect(z.x + 0.5, z.y + 0.5, z.w - 1, z.h - 1)
+    ctx.restore()
+
+    // Letter solid border
+    ctx.strokeStyle = 'rgba(74,144,226,0.7)'
+    ctx.lineWidth = 1.5
+    ctx.setLineDash([])
+    ctx.strokeRect(z.lx + 0.5, z.ly + 0.5, z.lw - 1, z.lh - 1)
+
+    // Zone label
+    ctx.fillStyle = 'rgba(255,255,255,0.35)'
+    ctx.font = '10px Segoe UI'
+    ctx.textAlign = 'center'
+    ctx.fillText(z.cor, z.x + z.w / 2, z.y + 10)
+  })
+}
+
+function drawStrokes(strokeList) {
+  strokeList.forEach(stroke => {
+    if (!stroke.length) return
+
+    // Draw line path
+    ctx.beginPath()
+    ctx.moveTo(stroke[0].x, stroke[0].y)
+    for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y)
+    ctx.strokeStyle = 'rgba(74,144,226,0.4)'
+    ctx.lineWidth   = 2.5
+    ctx.lineCap     = 'round'
+    ctx.lineJoin    = 'round'
+    ctx.setLineDash([])
+    ctx.stroke()
+
+    // Per-point colored dots
+    stroke.forEach(p => {
+      const inside = zones.some(z => inZone(p, z))
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2)
+      ctx.fillStyle = inside ? 'rgba(76,175,80,0.9)' : 'rgba(244,67,54,0.55)'
+      ctx.fill()
+    })
+  })
+}
+
+function redraw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  drawZonesOverlay()
+  const all = current ? [...strokes, current] : strokes
+  drawStrokes(all)
+}
+
+// ── Pointer events ───────────────────────────────────────────
+function pos(e) {
+  const r  = canvas.getBoundingClientRect()
+  const sx = canvas.width  / r.width
+  const sy = canvas.height / r.height
+  return { x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy }
+}
+
+canvas.addEventListener('pointerdown', e => {
+  e.preventDefault()
+  canvas.setPointerCapture(e.pointerId)
+  drawing = true
+  current = [pos(e)]
+  redraw()
+})
+
+canvas.addEventListener('pointermove', e => {
+  if (!drawing) return
+  e.preventDefault()
+  current.push(pos(e))
+  // Use thicker line for actual stylus pressure
+  ctx.lineWidth = e.pointerType === 'pen' ? Math.max(1.5, e.pressure * 5) : 2.5
+  redraw()
+})
+
+canvas.addEventListener('pointerup', e => {
+  if (!drawing) return
+  drawing = false
+  if (current?.length >= 1) { strokes.push(current); current = null }
+  redraw()
+  liveStats()
+})
+canvas.addEventListener('pointercancel', () => { drawing = false; current = null })
+
+// ── Detection ────────────────────────────────────────────────
+function detect() {
+  recalcZones()
+
+  zones.forEach(z => {
+    z.ptsInside = 0
+    z.bestPct   = 0
+    z.hit       = false
+  })
+
+  strokes.forEach(stroke => {
+    const len = stroke.length
+    zones.forEach(z => {
+      let inside = 0
+      stroke.forEach(p => { if (inZone(p, z)) inside++ })
+      z.ptsInside += inside
+      const pct = len > 0 ? inside / len * 100 : 0
+      if (pct > z.bestPct) z.bestPct = pct
+    })
+  })
+
+  zones.forEach(z => {
+    if (METHOD === 1) {
+      z.hit = z.ptsInside >= 1
+
+    } else if (METHOD === 2) {
+      z.hit = z.ptsInside >= MIN_PTS
+
+    } else {
+      // M3: al menos un trazo tiene >= MIN_PCT% de sus puntos en la zona
+      // AND al menos MIN_PTS puntos absolutos (evita trazos de 1 punto)
+      z.hit = z.ptsInside >= 3 && z.bestPct >= MIN_PCT
+    }
+  })
+}
+
+function liveStats() {
+  detect()
+  renderStats(false)
+}
+
+function renderStats(final) {
+  const el = document.getElementById('stats')
+  if (!zones.length || strokes.length === 0) { el.innerHTML = ''; return }
+
+  el.innerHTML = zones.map(z => {
+    const cls = final ? (z.hit ? 'hit' : 'miss') : ''
+    const m2ok = z.ptsInside >= MIN_PTS
+    const m3ok = z.ptsInside >= 3 && z.bestPct >= MIN_PCT
+    return `
+      <div class="zone-card ${cls}">
+        <div class="zc-char ${cls}">${z.cor}</div>
+        <div class="zc-line">Pts dentro: <b>${z.ptsInside}</b></div>
+        <div class="zc-line">Mejor trazo: <b>${z.bestPct.toFixed(0)}%</b></div>
+        <div class="zc-line">M1 (≥1 pt): <b>${z.ptsInside>=1?'✓':'✗'}</b></div>
+        <div class="zc-line">M2 (≥${MIN_PTS} pts): <b>${m2ok?'✓':'✗'}</b></div>
+        <div class="zc-line">M3 (≥${MIN_PCT}%): <b>${m3ok?'✓':'✗'}</b></div>
+        ${final ? `<div class="zc-result ${z.hit?'hit':'miss'}">${z.hit ? '✓ DETECTADA' : '✗ FALLA'}</div>` : ''}
+      </div>`
+  }).join('')
+}
+
+// ── Comprobar ────────────────────────────────────────────────
+document.getElementById('btn-check').addEventListener('click', () => {
+  detect()
+  redraw()
+  // Draw result circles in zone's top-padding center
+  zones.forEach(z => {
+    const cx = z.lx + z.lw / 2
+    const cy = z.y + PY_TOP / 2
+    ctx.beginPath()
+    ctx.arc(cx, cy, 16, 0, Math.PI * 2)
+    ctx.fillStyle   = z.hit ? 'rgba(76,175,80,0.45)' : 'rgba(244,67,54,0.45)'
+    ctx.fill()
+    ctx.strokeStyle = z.hit ? '#4caf50' : '#f44336'
+    ctx.lineWidth   = 2
+    ctx.stroke()
+    ctx.fillStyle = '#fff'
+    ctx.font = 'bold 13px Segoe UI'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(z.hit ? '✓' : '✗', cx, cy)
+  })
+  renderStats(true)
+})
+
+// ── Limpiar ──────────────────────────────────────────────────
+document.getElementById('btn-clear').addEventListener('click', () => {
+  strokes = []; current = null
+  document.getElementById('stats').innerHTML = ''
+  sizeCanvas(); recalcZones(); redraw()
+})
+
+// ── Sliders ──────────────────────────────────────────────────
+;[
+  ['sl-px',     'lbl-px',     v => { PX     = v }],
+  ['sl-py-top', 'lbl-py-top', v => { PY_TOP = v }],
+  ['sl-py-bot', 'lbl-py-bot', v => { PY_BOT = v }],
+  ['sl-min',    'lbl-min',    v => { MIN_PTS = v }],
+  ['sl-pct',    'lbl-pct',    v => { MIN_PCT = v }],
+].forEach(([id, lbl, fn]) => {
+  document.getElementById(id).addEventListener('input', e => {
+    document.getElementById(lbl).textContent = e.target.value
+    fn(+e.target.value)
+    recalcZones(); redraw(); liveStats()
+  })
+})
+
+// ── Method tabs ──────────────────────────────────────────────
+document.getElementById('method-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.tab')
+  if (!btn) return
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  METHOD = +btn.dataset.m
+  liveStats()
+})
+
+// ── Init ─────────────────────────────────────────────────────
+window.addEventListener('resize', () => { sizeCanvas(); recalcZones(); redraw() })
+// Wait for text to render before measuring
+requestAnimationFrame(() => { sizeCanvas(); recalcZones(); redraw() })
+</script>
+</body>
+</html>
