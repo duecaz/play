@@ -1,17 +1,18 @@
-import { BaseTemplate } from './base.js'
-import Events           from '../core/events.js'
-
-const PX = 16    // horizontal padding around zone
-const PY_TOP = 42  // upward padding (tilde stroke goes above letter)
-const PY_BOT = 8   // downward padding
+import { BaseTemplate }                        from './base.js'
+import Events                                   from '../core/events.js'
+import { esc }                                  from '../core/html.js'
+import { TC_PX, TC_PY_TOP, TC_PY_BOT }         from '../core/constants.js'
 
 export class TextCorrectionTemplate extends BaseTemplate {
-  static requiresTools = ['pen']
+  static requiresTools  = ['pen']
+  static reviewStrategy = 'frozenCanvas'
+  static optionsSchema  = []
+  static reviewOptions  = []
 
   constructor() {
     super()
-    this._zones   = []   // { x, y, w, h, hit }
-    this._strokes = []   // array of [{x,y}] arrays
+    this._zones   = []   // { x, y, w, h, hit, expected }
+    this._strokes = []
     this._current = null
     this._canvas  = null
     this._ctx     = null
@@ -42,7 +43,34 @@ export class TextCorrectionTemplate extends BaseTemplate {
   }
 
   onResize() {
-    if (this._canvas && !this._done) this._recalcZones()
+    if (!this._canvas) return
+    if (this._done) {
+      this._sizeCanvas()
+      this._recalcZones(true)   // preserve hits after check
+    } else {
+      this._recalcZones()
+    }
+  }
+
+  /* ── Review API ────────────────────────────────────────────── */
+  freeze() {
+    this._done = true
+    const btn = document.getElementById('btn-check')
+    if (btn) btn.disabled = true
+  }
+
+  getReviewData() {
+    const items = this._zones.map((z, i) => ({
+      id:           `zone-${i}`,
+      label:        z.expected || `Zona ${i + 1}`,
+      correct:      z.hit,
+      earnedPoints: z.hit ? 10 : 0,
+      maxPoints:    10,
+      zoneIndex:    i
+    }))
+    const score    = items.reduce((s, item) => s + item.earnedPoints, 0)
+    const maxScore = this._zones.length * 10
+    return { strategy: 'frozenCanvas', items, score, maxScore }
   }
 
   /* ── Render ───────────────────────────────────────────────── */
@@ -52,12 +80,12 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
     this.container.innerHTML = `
       <div class="corr-screen fade-in">
-        <p class="corr-instruction">${_esc(instruction || 'Pon las tildes que faltan')}</p>
+        <p class="corr-instruction">${esc(instruction || 'Pon las tildes que faltan')}</p>
         <div class="corr-wrapper" id="corr-wrapper">
           <div class="corr-text" id="corr-text">${textHTML}</div>
           <canvas class="corr-canvas" id="corr-canvas"></canvas>
         </div>
-        <button class="btn-corr-check" id="btn-check">Comprobar ✓</button>
+        <button class="btn btn-primary btn-lg btn-corr-check" id="btn-check">Comprobar ✓</button>
       </div>
     `
 
@@ -80,24 +108,26 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._canvas.height = Math.round(r.height)
   }
 
-  _recalcZones() {
+  _recalcZones(preserveHits = false) {
     const wrapper = document.getElementById('corr-wrapper')
     if (!wrapper) return
-    const wr = wrapper.getBoundingClientRect()
-    this._zones = []
-    wrapper.querySelectorAll('.acc-zone').forEach(span => {
+    const wr       = wrapper.getBoundingClientRect()
+    const prevHits = preserveHits ? this._zones.map(z => z.hit) : []
+    this._zones    = []
+    wrapper.querySelectorAll('.acc-zone').forEach((span, i) => {
       const sr = span.getBoundingClientRect()
       this._zones.push({
-        x:   sr.left - wr.left - PX,
-        y:   sr.top  - wr.top  - PY_TOP,
-        w:   sr.width  + PX * 2,
-        h:   sr.height + PY_TOP + PY_BOT,
-        hit: false
+        x:        sr.left - wr.left - TC_PX,
+        y:        sr.top  - wr.top  - TC_PY_TOP,
+        w:        sr.width  + TC_PX * 2,
+        h:        sr.height + TC_PY_TOP + TC_PY_BOT,
+        hit:      prevHits[i] ?? false,
+        expected: span.dataset.correct || ''
       })
     })
   }
 
-  /* ── Pointer drawing ──────────────────────────────────────── */
+  /* ── Pointer drawing ─────────────────────────────────────── */
   _bind() {
     const c = this._canvas
     this._onDown = e => this._pDown(e)
@@ -118,7 +148,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
   }
 
   _pos(e) {
-    const r = this._canvas.getBoundingClientRect()
+    const r     = this._canvas.getBoundingClientRect()
     const scaleX = this._canvas.width  / r.width
     const scaleY = this._canvas.height / r.height
     return { x: (e.clientX - r.left) * scaleX, y: (e.clientY - r.top) * scaleY }
@@ -129,7 +159,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
     e.preventDefault()
     this._canvas.setPointerCapture(e.pointerId)
     this._drawing = true
-    const p = this._pos(e)
+    const p   = this._pos(e)
     this._current = [p]
     const ctx = this._ctx
     ctx.beginPath()
@@ -160,10 +190,10 @@ export class TextCorrectionTemplate extends BaseTemplate {
     }
   }
 
-  /* ── Check ────────────────────────────────────────────────── */
+  /* ── Check ───────────────────────────────────────────────── */
   _check() {
     this._done = true
-    this._recalcZones()
+    this._recalcZones()   // fresh positions, hits reset to false
 
     this._strokes.forEach(stroke => {
       stroke.forEach(pt => {
@@ -178,15 +208,13 @@ export class TextCorrectionTemplate extends BaseTemplate {
     const correct = this._zones.filter(z => z.hit).length
     const total   = this._zones.length
 
-    /* Reveal correct accent and color zones */
     document.getElementById('corr-wrapper')
       ?.querySelectorAll('.acc-zone')
       .forEach((span, i) => {
-        span.textContent = span.dataset.correct   // show accented char
+        span.textContent = span.dataset.correct
         span.classList.add(this._zones[i]?.hit ? 'zone-ok' : 'zone-miss')
       })
 
-    /* Draw result circles */
     const ctx = this._ctx
     this._zones.forEach(z => {
       const cx = z.x + z.w / 2
@@ -208,7 +236,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
     if (correct > 0) this._onScore?.(correct * 10)
     Events.emit('answer:correct', { correct, total })
-    setTimeout(() => this._onComplete?.(), 2500)
+    /* Short delay so the canvas repaint is visible before review panel appears */
+    setTimeout(() => this._onComplete?.(), 150)
   }
 }
 
@@ -217,19 +246,10 @@ function _buildHTML(orig, correct) {
   let html = ''
   for (let i = 0; i < orig.length; i++) {
     if (orig[i] !== correct[i]) {
-      // Show unaccented char; data-correct stores the accented version for reveal
-      html += `<span class="acc-zone" data-correct="${_esc(correct[i])}">${_esc(orig[i])}</span>`
+      html += `<span class="acc-zone" data-correct="${esc(correct[i])}">${esc(orig[i])}</span>`
     } else {
-      html += _esc(orig[i])
+      html += esc(orig[i])
     }
   }
   return html
-}
-
-function _esc(s) {
-  return String(s)
-    .replace(/&/g,  '&amp;')
-    .replace(/</g,  '&lt;')
-    .replace(/>/g,  '&gt;')
-    .replace(/"/g,  '&quot;')
 }

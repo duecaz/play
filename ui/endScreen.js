@@ -1,45 +1,47 @@
-export function renderEndScreen(container, { score, total, maxScore, pct, timeUsed, onRestart, onHome } = {}) {
+export function renderEndScreen(container, { score, scoreAuto, total, maxScore, pct, timeUsed, overrides = [] } = {}) {
   const emoji = pct >= 80 ? '🎉' : pct >= 50 ? '👍' : '💪'
   const msg   = pct >= 80 ? '¡Excelente trabajo!'
               : pct >= 50 ? '¡Bien hecho!'
               : '¡Sigue practicando!'
 
+  const hasOverrides   = overrides.length > 0
+  const scoreDiff      = score - (scoreAuto ?? score)
+  const overrideBadge  = hasOverrides
+    ? `<p class="end-override-note">Puntuación ajustada por el docente
+         ${scoreDiff !== 0 ? `<span class="end-override-diff">${scoreDiff > 0 ? '+' : ''}${scoreDiff} pts</span>` : ''}
+       </p>`
+    : ''
+
   container.innerHTML = `
     <div class="end-screen fade-in">
-      <div class="end-content">
-        <div class="end-emoji">${emoji}</div>
-        <h1 class="end-title">${msg}</h1>
+      <div class="text-center" style="max-width:720px; padding:4rem;">
+        <div class="end-emoji mb-3">${emoji}</div>
+        <h1 class="end-title mb-4">${msg}</h1>
 
-        <div class="end-score-ring">
+        <div class="end-score-ring mb-4">
           <span class="end-score-pct">${pct}%</span>
           <span class="end-score-label">Puntuación</span>
         </div>
 
-        <div class="end-stats">
-          <div class="end-stat">
+        ${overrideBadge}
+
+        <div class="d-flex gap-5 justify-content-center">
+          <div class="d-flex flex-column align-items-center gap-1">
             <span class="stat-value">${score}</span>
             <span class="stat-label">Puntos</span>
           </div>
           ${total > 0 ? `
-          <div class="end-stat">
+          <div class="d-flex flex-column align-items-center gap-1">
             <span class="stat-value">${total}</span>
             <span class="stat-label">Preguntas</span>
           </div>` : ''}
           ${timeUsed > 0 ? `
-          <div class="end-stat">
+          <div class="d-flex flex-column align-items-center gap-1">
             <span class="stat-value">${timeUsed}s</span>
             <span class="stat-label">Tiempo</span>
           </div>` : ''}
         </div>
-
-        <div class="end-actions">
-          <button class="btn-restart" id="btn-restart">↺ Jugar de nuevo</button>
-          ${onHome ? `<button class="btn-home" id="btn-home">🏠 Inicio</button>` : ''}
-        </div>
       </div>
     </div>
   `
-
-  document.getElementById('btn-restart')?.addEventListener('click', onRestart)
-  document.getElementById('btn-home')?.addEventListener('click', onHome)
 }

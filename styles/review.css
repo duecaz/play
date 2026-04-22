@@ -1,0 +1,157 @@
+/* ── Shared review tokens ───────────────────────────────────── */
+.rv-score {
+  display: flex; align-items: baseline; gap: 0.3rem;
+}
+.rv-score-val  { font-size: var(--ep-xl); font-weight: 700; color: var(--bs-primary); }
+.rv-score-max  { font-size: var(--ep-sm); color: rgba(255,255,255,0.5); }
+
+.rv-summary    { font-size: var(--ep-sm); color: rgba(255,255,255,0.6); }
+
+.rv-finalize {
+  background: var(--bs-primary); color: #fff;
+  border: none; border-radius: 24px;
+  padding: 0.55rem 1.5rem; font-size: var(--ep-base); font-weight: 600;
+  cursor: pointer; transition: filter 150ms;
+}
+.rv-finalize:hover  { filter: brightness(0.88); }
+.rv-finalize:active { filter: brightness(0.76); }
+
+.rv-override {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.7);
+  border-radius: 8px; padding: 0.2rem 0.55rem;
+  font-size: 0.8rem; cursor: pointer; white-space: nowrap;
+  transition: background 150ms;
+}
+.rv-override:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+/* changed-by-override indicator */
+.rv-item--changed,
+.rv-row--changed { outline: 1px solid rgba(255,200,0,0.45); border-radius: 8px; }
+
+/* ── frozenCanvas: lateral right panel ─────────────────────── */
+.rv-panel {
+  display: flex; flex-direction: column;
+  width: 100%; height: 100%;
+  padding: 1.2rem 1rem; gap: 1rem;
+}
+
+.rv-header {
+  display: flex; flex-direction: column; gap: 0.4rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  padding-bottom: 0.8rem;
+}
+.rv-badge-label {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: rgba(255,255,255,0.4);
+}
+
+.rv-items {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 0.45rem;
+}
+
+.rv-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.45rem 0.6rem; border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+}
+.rv-item--ok   { background: var(--ep-correct-bg); }
+.rv-item--miss { background: var(--ep-wrong-bg); }
+
+.rv-item-icon {
+  font-size: 1rem; font-weight: 700; width: 1.2rem; text-align: center;
+}
+.rv-item--ok   .rv-item-icon { color: var(--ep-correct); }
+.rv-item--miss .rv-item-icon { color: var(--ep-wrong); }
+
+.rv-item-label {
+  flex: 1; font-size: var(--ep-base); font-weight: 600;
+}
+
+.rv-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--bs-border-color); padding-top: 0.8rem;
+}
+
+/* ── itemList: full-width review list ───────────────────────── */
+.rv-list {
+  width: 100%; max-width: 860px; margin: 0 auto;
+  display: flex; flex-direction: column; gap: 0;
+  padding: 0 1rem 1rem;
+}
+
+.rv-list-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.2rem 0 1rem; position: sticky; top: 0;
+  background: var(--bs-body-bg); z-index: 2;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+.rv-list-title { font-size: var(--ep-lg); font-weight: 700; margin: 0; }
+
+.rv-list-items {
+  overflow-y: auto; max-height: calc(100vh - 260px);
+  display: flex; flex-direction: column; gap: 0.6rem;
+  padding: 0.8rem 0;
+}
+
+.rv-row {
+  display: flex; align-items: flex-start; gap: 0.8rem;
+  padding: 0.75rem 1rem; border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.rv-row--ok   { border-color: rgba(76,175,80,0.3);  background: var(--ep-correct-bg); }
+.rv-row--miss { border-color: rgba(244,67,54,0.3);  background: var(--ep-wrong-bg); }
+
+.rv-row-num {
+  min-width: 2rem; height: 2rem; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.1); font-size: var(--ep-sm);
+  font-weight: 700; flex-shrink: 0; margin-top: 0.1rem;
+}
+
+.rv-row-body   { flex: 1; min-width: 0; }
+.rv-row-q      { margin: 0 0 0.3rem; font-size: var(--ep-base); font-weight: 500; }
+.rv-row-answers { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+
+.rv-given        { font-size: var(--ep-sm); padding: 0.15rem 0.5rem; border-radius: 6px; }
+.rv-given--ok    { background: rgba(76,175,80,0.2); color: var(--ep-correct); }
+.rv-given--wrong { background: rgba(244,67,54,0.2); color: var(--ep-wrong); }
+.rv-expected     { font-size: var(--ep-sm); color: var(--ep-correct); }
+
+.rv-row-actions {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 0.35rem;
+  flex-shrink: 0;
+}
+.rv-row-icon {
+  font-size: 1.1rem; font-weight: 700;
+}
+.rv-row--ok   .rv-row-icon { color: var(--ep-correct); }
+.rv-row--miss .rv-row-icon { color: var(--ep-wrong); }
+
+.rv-list-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 0 0; border-top: 1px solid var(--bs-border-color);
+  position: sticky; bottom: 0;
+  background: var(--bs-body-bg);
+}
+
+/* ── aggregate fallback ─────────────────────────────────────── */
+.rv-aggregate {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 2rem; padding: 4rem;
+}
+
+/* ── End screen override note ───────────────────────────────── */
+.end-override-note {
+  font-size: var(--ep-sm); color: rgba(255,255,255,0.5);
+  margin-bottom: 1.2rem;
+  display: flex; align-items: center; gap: 0.5rem; justify-content: center;
+}
+.end-override-diff {
+  background: rgba(255,200,0,0.15); color: #ffd700;
+  border-radius: 6px; padding: 0.1rem 0.4rem;
+  font-weight: 700; font-size: 0.9em;
+}
