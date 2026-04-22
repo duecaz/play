@@ -150,16 +150,27 @@ function _autoOriginal(correct) {
 }
 
 function _buildPreviewHTML(original, correct) {
-  let html = ''
+  const parts = []
   for (let i = 0; i < original.length; i++) {
     if (original[i] !== correct[i]) {
       const blank = original[i] === '_'
-      html += blank
+      const span  = blank
         ? `<span class="prev-zone prev-zone--blank">_</span>`
         : `<span class="prev-zone">${esc(correct[i])}</span>`
+      if (blank && parts.length > 0 && parts[parts.length - 1].type === 'text') {
+        const prev = parts.pop()
+        parts.push({ type: 'nowrap', html: prev.html + span })
+      } else {
+        parts.push({ type: 'span', html: span })
+      }
     } else {
-      html += esc(original[i])
+      const ch   = esc(original[i])
+      const last = parts[parts.length - 1]
+      if (last?.type === 'text') last.html += ch
+      else parts.push({ type: 'text', html: ch })
     }
   }
-  return html
+  return parts.map(p =>
+    p.type === 'nowrap' ? `<span class="tc-nb">${p.html}</span>` : p.html
+  ).join('')
 }

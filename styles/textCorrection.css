@@ -8,9 +8,11 @@
 .corr-wrapper {
   position: relative;
   background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px; padding: 2rem 2rem;
+  border-radius: 16px; padding: 2rem 8%;
   width: 100%; max-width: 1080px;
 }
+/* Prevent comma/punctuation zones from orphaning to a new line */
+.tc-nb { white-space: nowrap; }
 .corr-text {
   font-size: clamp(1.15rem, 2.2vw, 1.9rem); font-weight: 600; line-height: 2.2;
   text-align: center; position: relative; z-index: 1;

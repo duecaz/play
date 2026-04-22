@@ -314,17 +314,37 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
 /* ── Helpers ─────────────────────────────────────────────────── */
 function _buildHTML(orig, correct) {
-  let html = ''
+  /*
+   * Build token list so blank zones (commas) attach to the preceding
+   * word in a white-space:nowrap span, preventing orphaned comma zones
+   * at the start of a wrapped line.
+   */
+  const parts = []   // { type: 'text'|'span'|'nowrap', html }
+
   for (let i = 0; i < orig.length; i++) {
     if (orig[i] !== correct[i]) {
       const blank = orig[i] === '_'
       const cls   = blank ? 'acc-zone acc-zone--blank' : 'acc-zone'
-      html += `<span class="${cls}" data-correct="${esc(correct[i])}" data-index="${i}">${blank ? '_' : esc(orig[i])}</span>`
+      const span  = `<span class="${cls}" data-correct="${esc(correct[i])}" data-index="${i}">${blank ? '_' : esc(orig[i])}</span>`
+
+      if (blank && parts.length > 0 && parts[parts.length - 1].type === 'text') {
+        // Attach blank zone to preceding text token — no line break allowed
+        const prev = parts.pop()
+        parts.push({ type: 'nowrap', html: prev.html + span })
+      } else {
+        parts.push({ type: 'span', html: span })
+      }
     } else {
-      html += esc(orig[i])
+      const ch = esc(orig[i])
+      const last = parts[parts.length - 1]
+      if (last?.type === 'text') last.html += ch
+      else parts.push({ type: 'text', html: ch })
     }
   }
-  return html
+
+  return parts.map(p =>
+    p.type === 'nowrap' ? `<span class="tc-nb">${p.html}</span>` : p.html
+  ).join('')
 }
 
 function _wordAt(text, idx) {
