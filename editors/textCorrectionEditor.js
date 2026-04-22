@@ -4,7 +4,7 @@ import { esc }        from '../core/html.js'
 
 export class TextCorrectionEditor extends BaseEditor {
   get title()    { return 'Corrección de textos' }
-  get subtitle() { return 'Escribe el texto con y sin tildes' }
+  get subtitle() { return 'Escribe el texto con y sin las marcas correctas' }
 
   renderBody() {
     return `
@@ -22,24 +22,41 @@ export class TextCorrectionEditor extends BaseEditor {
 
       <section class="editor-section">
         <h2 class="section-label">Configuración</h2>
-        <div class="d-flex align-items-center gap-3">
-          <label class="form-label mb-0">⏱ Tiempo (segundos)</label>
-          <input class="form-control field-input--sm" id="f-timer" type="number" value="120" min="30" max="600">
+        <div class="config-row">
+          <div class="d-flex align-items-center gap-3">
+            <label class="form-label mb-0">⏱ Tiempo (segundos)</label>
+            <input class="form-control field-input--sm" id="f-timer" type="number" value="120" min="30" max="600">
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <label class="form-label mb-0">✗ Penalización por error</label>
+            <select class="form-select field-input--sm" id="f-penalty">
+              <option value="0">Ninguna</option>
+              <option value="0.25">−¼ punto</option>
+              <option value="0.5">−½ punto</option>
+              <option value="1">−1 punto</option>
+            </select>
+          </div>
         </div>
       </section>
 
       <section class="editor-section">
         <h2 class="section-label">Textos</h2>
-        <p class="section-hint">Los dos textos deben tener exactamente el mismo número de caracteres. Solo cambian las letras con tilde.</p>
+        <p class="section-hint">
+          Los dos textos deben tener el mismo número de caracteres.
+          Usa <strong>_</strong> (guion bajo) en el texto original para marcar donde falta una coma u otro signo.
+        </p>
         <div class="mb-3">
-          <label class="form-label">Texto SIN tildes <span class="required">*</span></label>
-          <textarea class="form-control" id="f-original" rows="3"
-            placeholder="El cafe esta abierto. Jose corre rapido al salon."></textarea>
+          <label class="form-label">Texto SIN tildes/comas <span class="required">*</span></label>
+          <div class="d-flex gap-2">
+            <textarea class="form-control" id="f-original" rows="3"
+              placeholder="El cafe esta abierto_ Jose corre rapido al salon."></textarea>
+            <button class="btn-insert-blank" id="btn-blank" title="Insertar posición vacía para coma u otro signo">◌</button>
+          </div>
         </div>
         <div class="mb-3">
-          <label class="form-label">Texto CON tildes <span class="required">*</span></label>
+          <label class="form-label">Texto CON tildes/comas <span class="required">*</span></label>
           <textarea class="form-control" id="f-correct" rows="3"
-            placeholder="El café está abierto. José corre rápido al salón."></textarea>
+            placeholder="El café está abierto, José corre rápido al salón."></textarea>
         </div>
         <div class="mb-3">
           <label class="form-label">Instrucción para el alumno</label>
@@ -54,6 +71,15 @@ export class TextCorrectionEditor extends BaseEditor {
   _bindBody() {
     document.getElementById('f-original').addEventListener('input', () => this._updatePreview())
     document.getElementById('f-correct').addEventListener('input',  () => this._updatePreview())
+
+    document.getElementById('btn-blank').addEventListener('click', () => {
+      const ta  = document.getElementById('f-original')
+      const pos = ta.selectionStart
+      ta.value  = ta.value.slice(0, pos) + '_' + ta.value.slice(ta.selectionEnd)
+      ta.selectionStart = ta.selectionEnd = pos + 1
+      ta.focus()
+      this._updatePreview()
+    })
   }
 
   _updatePreview() {
@@ -106,6 +132,7 @@ export class TextCorrectionEditor extends BaseEditor {
     const title       = document.getElementById('f-title').value.trim()
     const subtitle    = document.getElementById('f-subtitle').value.trim()
     const timer       = parseInt(document.getElementById('f-timer').value, 10) || 120
+    const penalty     = parseFloat(document.getElementById('f-penalty').value) || 0
     const orig        = document.getElementById('f-original').value
     const correct     = document.getElementById('f-correct').value
     const instruction = document.getElementById('f-instruction').value.trim()
@@ -125,7 +152,7 @@ export class TextCorrectionEditor extends BaseEditor {
         maxScore:     zoneCount * 10
       },
       rules:        { timer, randomize: false, shuffleOptions: false, templateOptions: {} },
-      scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, maxScore: null },
+      scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, penaltyRatio: penalty, maxScore: null },
       review:       { allowOverride: true, showCorrectAnswer: true, autoAdvanceToSummary: false },
       presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }
     }
@@ -135,9 +162,14 @@ export class TextCorrectionEditor extends BaseEditor {
 function _buildPreviewHTML(orig, correct) {
   let html = ''
   for (let i = 0; i < orig.length; i++) {
-    html += orig[i] !== correct[i]
-      ? `<span class="prev-zone">${esc(correct[i])}</span>`
-      : esc(orig[i])
+    if (orig[i] !== correct[i]) {
+      const blank = orig[i] === '_'
+      html += blank
+        ? `<span class="prev-zone prev-zone--blank">_</span>`
+        : `<span class="prev-zone">${esc(correct[i])}</span>`
+    } else {
+      html += esc(orig[i])
+    }
   }
   return html
 }

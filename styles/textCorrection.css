@@ -29,6 +29,17 @@
 .acc-zone.zone-ok   { color: var(--ep-correct); background: var(--ep-correct-bg); }
 .acc-zone.zone-miss { color: var(--ep-wrong);   background: var(--ep-wrong-bg); }
 
+/* Blank placeholder zone — used for missing punctuation (commas, etc.) */
+.acc-zone--blank {
+  display: inline-block; min-width: 0.55em;
+  color: transparent;                            /* hide the _ char */
+  border-bottom: 2px dashed rgba(74,144,226,0.7);
+  background: rgba(74,144,226,0.08);
+  border-radius: 2px; padding: 0;
+}
+.acc-zone--blank.zone-ok   { border-bottom-color: var(--ep-correct); background: var(--ep-correct-bg); }
+.acc-zone--blank.zone-miss { border-bottom-color: var(--ep-wrong);   background: var(--ep-wrong-bg); }
+
 .btn-corr-check { min-width: 280px; font-size: var(--ep-lg); font-weight: 700; }
 
 /* ── Editor preview ─────────────────────────────────────── */
@@ -41,6 +52,11 @@
 .prev-zone {
   color: var(--bs-primary); background: rgba(74,144,226,0.14);
   border-radius: 4px; padding: 0 3px; border-bottom: 2px solid var(--bs-primary);
+}
+.prev-zone--blank {
+  display: inline-block; min-width: 0.55em; color: transparent;
+  border-bottom: 2px dashed var(--bs-primary); background: rgba(74,144,226,0.08);
+  border-radius: 2px;
 }
 .char-count     { font-size: var(--ep-sm); margin-top: 0.5rem; }
 .char-count--ok  { color: var(--ep-correct); }

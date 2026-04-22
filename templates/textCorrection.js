@@ -324,7 +324,9 @@ function _buildHTML(orig, correct) {
   let html = ''
   for (let i = 0; i < orig.length; i++) {
     if (orig[i] !== correct[i]) {
-      html += `<span class="acc-zone" data-correct="${esc(correct[i])}" data-index="${i}">${esc(orig[i])}</span>`
+      const blank = orig[i] === '_'
+      const cls   = blank ? 'acc-zone acc-zone--blank' : 'acc-zone'
+      html += `<span class="${cls}" data-correct="${esc(correct[i])}" data-index="${i}">${blank ? '_' : esc(orig[i])}</span>`
     } else {
       html += esc(orig[i])
     }
