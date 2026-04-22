@@ -158,8 +158,14 @@ function _buildPreviewHTML(original, correct) {
         ? `<span class="prev-zone prev-zone--blank">_</span>`
         : `<span class="prev-zone">${esc(correct[i])}</span>`
       if (blank && parts.length > 0 && parts[parts.length - 1].type === 'text') {
-        const prev = parts.pop()
-        parts.push({ type: 'nowrap', html: prev.html + span })
+        const prev      = parts.pop()
+        const lastSpace = prev.html.lastIndexOf(' ')
+        if (lastSpace >= 0) {
+          if (lastSpace + 1 > 0) parts.push({ type: 'text', html: prev.html.slice(0, lastSpace + 1) })
+          parts.push({ type: 'nowrap', html: prev.html.slice(lastSpace + 1) + span })
+        } else {
+          parts.push({ type: 'nowrap', html: prev.html + span })
+        }
       } else {
         parts.push({ type: 'span', html: span })
       }

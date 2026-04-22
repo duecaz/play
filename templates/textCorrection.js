@@ -328,9 +328,15 @@ function _buildHTML(orig, correct) {
       const span  = `<span class="${cls}" data-correct="${esc(correct[i])}" data-index="${i}">${blank ? '_' : esc(orig[i])}</span>`
 
       if (blank && parts.length > 0 && parts[parts.length - 1].type === 'text') {
-        // Attach blank zone to preceding text token — no line break allowed
-        const prev = parts.pop()
-        parts.push({ type: 'nowrap', html: prev.html + span })
+        // Only wrap the last word + blank zone so the comma can't start a new line alone
+        const prev      = parts.pop()
+        const lastSpace = prev.html.lastIndexOf(' ')
+        if (lastSpace >= 0) {
+          if (lastSpace + 1 > 0) parts.push({ type: 'text', html: prev.html.slice(0, lastSpace + 1) })
+          parts.push({ type: 'nowrap', html: prev.html.slice(lastSpace + 1) + span })
+        } else {
+          parts.push({ type: 'nowrap', html: prev.html + span })
+        }
       } else {
         parts.push({ type: 'span', html: span })
       }
