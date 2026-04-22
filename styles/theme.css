@@ -1,0 +1,51 @@
+/* ── Bootstrap dark-theme overrides ─────────────────────── */
+[data-bs-theme="dark"] {
+  --bs-primary:          #4a90e2;
+  --bs-primary-rgb:      74, 144, 226;
+  --bs-body-bg:          #0f0f23;
+  --bs-body-color:       #ffffff;
+  --bs-secondary-bg:     #1a1a35;
+  --bs-tertiary-bg:      rgba(255,255,255,0.07);
+  --bs-border-color:     rgba(255,255,255,0.1);
+  --bs-card-bg:          rgba(255,255,255,0.07);
+  --bs-card-border-color: rgba(255,255,255,0.1);
+  --bs-border-radius:    20px;
+  --bs-border-radius-lg: 24px;
+  --bs-btn-border-radius: 16px;
+}
+
+/* ── App-specific tokens ────────────────────────────────── */
+:root {
+  --ep-correct:    #4caf50;
+  --ep-correct-bg: rgba(76,175,80,0.15);
+  --ep-wrong:      #f44336;
+  --ep-wrong-bg:   rgba(244,67,54,0.15);
+
+  /* Fluid scale — primary target 1280×800 TV */
+  --ep-sm:   clamp(0.85rem, 1.3vw,  1.05rem);
+  --ep-base: clamp(1rem,    1.8vw,  1.4rem);
+  --ep-lg:   clamp(1.3rem,  2.4vw,  2rem);
+  --ep-xl:   clamp(1.7rem,  3.2vw,  2.8rem);
+  --ep-xxl:  clamp(2.2rem,  4.8vw,  4.2rem);
+}
+
+body {
+  font-size: var(--ep-base);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  touch-action: manipulation;
+}
+
+/* ── Global utilities ───────────────────────────────────── */
+.hidden  { display: none !important; }
+
+.fade-in { animation: fadeIn 300ms ease forwards; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#version-badge {
+  position: fixed; bottom: 6px; right: 10px;
+  font-size: 0.7rem; color: rgba(255,255,255,0.25);
+  pointer-events: none; z-index: 9999;
+}

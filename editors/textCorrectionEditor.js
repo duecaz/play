@@ -7,56 +7,53 @@ export function renderTextCorrectionEditor(container) {
 
   container.innerHTML = `
     <div class="editor-header">
-      <button class="btn-back" id="btn-back">← Volver</button>
+      <button class="btn btn-outline-secondary rounded-pill" id="btn-back">← Volver</button>
       <div>
-        <h1>Corrección de textos</h1>
-        <p class="view-subtitle">Escribe el texto con y sin tildes</p>
+        <h1 class="fs-4 fw-bold mb-0">Corrección de textos</h1>
+        <p class="section-hint mt-1">Escribe el texto con y sin tildes</p>
       </div>
-      <button class="btn-primary" id="btn-save">Crear actividad ▶</button>
+      <button class="btn btn-primary" id="btn-save">Crear actividad ▶</button>
     </div>
 
     <div class="editor-body">
 
       <section class="editor-section">
         <h2 class="section-label">Información</h2>
-        <div class="field-group">
-          <label class="field-label">Título <span class="required">*</span></label>
-          <input class="field-input" id="f-title" placeholder="ej. Tildes: verbos en pasado" maxlength="80">
+        <div class="mb-3">
+          <label class="form-label">Título <span class="required">*</span></label>
+          <input class="form-control" id="f-title" placeholder="ej. Tildes: verbos en pasado" maxlength="80">
         </div>
-        <div class="field-group">
-          <label class="field-label">Subtítulo</label>
-          <input class="field-input" id="f-subtitle" placeholder="ej. 3.º Primaria · Lengua">
+        <div class="mb-3">
+          <label class="form-label">Subtítulo</label>
+          <input class="form-control" id="f-subtitle" placeholder="ej. 3.º Primaria · Lengua">
         </div>
       </section>
 
       <section class="editor-section">
         <h2 class="section-label">Configuración</h2>
-        <div class="config-row">
-          <div class="field-group field-group--inline">
-            <label class="field-label">⏱ Tiempo (segundos)</label>
-            <input class="field-input field-input--sm" id="f-timer" type="number" value="120" min="30" max="600">
-          </div>
+        <div class="d-flex align-items-center gap-3">
+          <label class="form-label mb-0">⏱ Tiempo (segundos)</label>
+          <input class="form-control field-input--sm" id="f-timer" type="number" value="120" min="30" max="600">
         </div>
       </section>
 
       <section class="editor-section">
         <h2 class="section-label">Textos</h2>
         <p class="section-hint">Los dos textos deben tener exactamente el mismo número de caracteres. Solo cambian las letras con tilde.</p>
-        <div class="field-group">
-          <label class="field-label">Texto SIN tildes <span class="required">*</span></label>
-          <textarea class="field-input field-textarea" id="f-original" rows="3"
+        <div class="mb-3">
+          <label class="form-label">Texto SIN tildes <span class="required">*</span></label>
+          <textarea class="form-control" id="f-original" rows="3"
             placeholder="El cafe esta abierto. Jose corre rapido al salon."></textarea>
         </div>
-        <div class="field-group">
-          <label class="field-label">Texto CON tildes <span class="required">*</span></label>
-          <textarea class="field-input field-textarea" id="f-correct" rows="3"
+        <div class="mb-3">
+          <label class="form-label">Texto CON tildes <span class="required">*</span></label>
+          <textarea class="form-control" id="f-correct" rows="3"
             placeholder="El café está abierto. José corre rápido al salón."></textarea>
         </div>
-        <div class="field-group">
-          <label class="field-label">Instrucción para el alumno</label>
-          <input class="field-input" id="f-instruction" value="Pon las tildes que faltan" maxlength="120">
+        <div class="mb-3">
+          <label class="form-label">Instrucción para el alumno</label>
+          <input class="form-control" id="f-instruction" value="Pon las tildes que faltan" maxlength="120">
         </div>
-
         <p id="char-count" class="char-count"></p>
         <div id="corr-preview" class="corr-preview-box hidden"></div>
       </section>
@@ -147,7 +144,7 @@ function _save() {
     title,
     subtitle,
     template: 'textCorrection',
-    config: { timer, showTimer: true, showScore: true, sound: false, skin: 'default' },
+    config:   { timer, showTimer: true, showScore: true, sound: false, skin: 'default' },
     content: {
       textOriginal: orig,
       textCorrect:  correct,
@@ -159,4 +156,3 @@ function _save() {
   Store.save(activity)
   Router.navigate(`/play/${activity.id}`)
 }
-

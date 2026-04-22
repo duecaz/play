@@ -55,7 +55,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
           <div class="corr-text" id="corr-text">${textHTML}</div>
           <canvas class="corr-canvas" id="corr-canvas"></canvas>
         </div>
-        <button class="btn-corr-check" id="btn-check">Comprobar ✓</button>
+        <button class="btn btn-primary btn-lg btn-corr-check" id="btn-check">Comprobar ✓</button>
       </div>
     `
 

@@ -1,0 +1,73 @@
+/* ── Player shell ───────────────────────────────────────── */
+#app.view-player { height: 100vh; overflow: hidden; }
+
+#player-container {
+  width: 100%; height: 100vh;
+  display: grid; grid-template-rows: auto 1fr auto;
+}
+
+#hud {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 2.5rem;
+  background: rgba(0,0,0,0.35); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--bs-border-color);
+  min-height: 72px; z-index: 10;
+}
+
+#controls {
+  display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+  padding: 1rem 2.5rem;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(12px);
+  border-top: 1px solid var(--bs-border-color);
+  min-height: 72px; z-index: 10;
+}
+
+#main-area {
+  display: flex; align-items: center; justify-content: center;
+  padding: 2.5rem; overflow: hidden; position: relative;
+}
+
+/* ── HUD internals ──────────────────────────────────────── */
+.hud-left   { flex: 1; overflow: hidden; }
+.hud-center { flex: 1; display: flex; justify-content: center; }
+.hud-right  { flex: 1; display: flex; justify-content: flex-end; }
+
+.hud-title {
+  font-size: var(--ep-base); font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.hud-timer {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: var(--ep-xl); font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.hud-timer.timer-warning { color: var(--ep-wrong); animation: timerPulse 1s infinite; }
+@keyframes timerPulse { 0%,100% { opacity:1 } 50% { opacity:0.45 } }
+
+.hud-score { display: flex; flex-direction: column; align-items: flex-end; }
+.score-label { font-size: var(--ep-sm); color: rgba(255,255,255,0.55); }
+.score-value { font-size: var(--ep-xl); font-weight: 700; font-variant-numeric: tabular-nums; }
+.score-value.score-bump { animation: scoreBump 300ms ease; }
+@keyframes scoreBump {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.35); color: var(--ep-correct); }
+  100% { transform: scale(1); }
+}
+
+/* ── Teacher control buttons ────────────────────────────── */
+.ctrl-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 54px; height: 54px; border-radius: 50%;
+  font-size: 1.4rem; background: rgba(255,255,255,0.07);
+  color: #fff; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+}
+.ctrl-btn:hover  { background: rgba(255,255,255,0.14); transform: scale(1.06); }
+.ctrl-btn:active { transform: scale(0.94); }
+
+.ctrl-btn.ctrl-primary {
+  background: var(--bs-primary); border-color: transparent;
+  width: 66px; height: 66px; font-size: 1.8rem;
+}
+.ctrl-btn.ctrl-primary:hover { filter: brightness(0.9); }

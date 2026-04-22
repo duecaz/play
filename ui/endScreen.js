@@ -6,35 +6,35 @@ export function renderEndScreen(container, { score, total, maxScore, pct, timeUs
 
   container.innerHTML = `
     <div class="end-screen fade-in">
-      <div class="end-content">
-        <div class="end-emoji">${emoji}</div>
-        <h1 class="end-title">${msg}</h1>
+      <div class="text-center" style="max-width:720px; padding:4rem;">
+        <div class="end-emoji mb-3">${emoji}</div>
+        <h1 class="end-title mb-4">${msg}</h1>
 
-        <div class="end-score-ring">
+        <div class="end-score-ring mb-4">
           <span class="end-score-pct">${pct}%</span>
           <span class="end-score-label">Puntuación</span>
         </div>
 
-        <div class="end-stats">
-          <div class="end-stat">
+        <div class="d-flex gap-5 justify-content-center mb-5">
+          <div class="d-flex flex-column align-items-center gap-1">
             <span class="stat-value">${score}</span>
             <span class="stat-label">Puntos</span>
           </div>
           ${total > 0 ? `
-          <div class="end-stat">
+          <div class="d-flex flex-column align-items-center gap-1">
             <span class="stat-value">${total}</span>
             <span class="stat-label">Preguntas</span>
           </div>` : ''}
           ${timeUsed > 0 ? `
-          <div class="end-stat">
+          <div class="d-flex flex-column align-items-center gap-1">
             <span class="stat-value">${timeUsed}s</span>
             <span class="stat-label">Tiempo</span>
           </div>` : ''}
         </div>
 
-        <div class="end-actions">
-          <button class="btn-restart" id="btn-restart">↺ Jugar de nuevo</button>
-          ${onHome ? `<button class="btn-home" id="btn-home">🏠 Inicio</button>` : ''}
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+          <button class="btn btn-outline-light btn-lg" id="btn-restart">↺ Jugar de nuevo</button>
+          ${onHome ? `<button class="btn btn-outline-secondary btn-lg" id="btn-home">🏠 Inicio</button>` : ''}
         </div>
       </div>
     </div>
