@@ -37,8 +37,8 @@
   background: rgba(74,144,226,0.08);
   border-radius: 2px; padding: 0;
 }
-.acc-zone--blank.zone-ok   { border-bottom-color: var(--ep-correct); background: var(--ep-correct-bg); }
-.acc-zone--blank.zone-miss { border-bottom-color: var(--ep-wrong);   background: var(--ep-wrong-bg); }
+.acc-zone--blank.zone-ok   { color: var(--ep-correct); border-bottom-color: var(--ep-correct); background: var(--ep-correct-bg); }
+.acc-zone--blank.zone-miss { color: var(--ep-wrong);   border-bottom-color: var(--ep-wrong);   background: var(--ep-wrong-bg); }
 
 .btn-corr-check { min-width: 280px; font-size: var(--ep-lg); font-weight: 700; }
 

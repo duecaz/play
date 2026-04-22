@@ -4,7 +4,7 @@ import { esc }        from '../core/html.js'
 
 export class TextCorrectionEditor extends BaseEditor {
   get title()    { return 'Corrección de textos' }
-  get subtitle() { return 'Escribe el texto con y sin las marcas correctas' }
+  get subtitle() { return 'Escribe el texto correcto — el sistema genera automáticamente el ejercicio' }
 
   renderBody() {
     return `
@@ -40,90 +40,58 @@ export class TextCorrectionEditor extends BaseEditor {
       </section>
 
       <section class="editor-section">
-        <h2 class="section-label">Textos</h2>
+        <h2 class="section-label">Texto</h2>
         <p class="section-hint">
-          Los dos textos deben tener el mismo número de caracteres.
-          Usa <strong>_</strong> (guion bajo) en el texto original para marcar donde falta una coma u otro signo.
+          Escribe el texto <strong>con todas las tildes y comas</strong>.
+          El sistema quitará las tildes y marcará las comas como huecos en blanco para el alumno.
         </p>
         <div class="mb-3">
-          <label class="form-label">Texto SIN tildes/comas <span class="required">*</span></label>
-          <div class="d-flex gap-2">
-            <textarea class="form-control" id="f-original" rows="3"
-              placeholder="El cafe esta abierto_ Jose corre rapido al salon."></textarea>
-            <button class="btn-insert-blank" id="btn-blank" title="Insertar posición vacía para coma u otro signo">◌</button>
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Texto CON tildes/comas <span class="required">*</span></label>
-          <textarea class="form-control" id="f-correct" rows="3"
-            placeholder="El café está abierto, José corre rápido al salón."></textarea>
+          <label class="form-label">Texto correcto <span class="required">*</span></label>
+          <textarea class="form-control" id="f-correct" rows="4"
+            placeholder="Jamás, señor ministro de salud, fue la salud más mortal."></textarea>
         </div>
         <div class="mb-3">
           <label class="form-label">Instrucción para el alumno</label>
-          <input class="form-control" id="f-instruction" value="Pon las tildes que faltan" maxlength="120">
+          <input class="form-control" id="f-instruction" value="Pon las tildes y las comas que faltan" maxlength="120">
         </div>
-        <p id="char-count" class="char-count"></p>
         <div id="corr-preview" class="corr-preview-box hidden"></div>
       </section>
     `
   }
 
   _bindBody() {
-    document.getElementById('f-original').addEventListener('input', () => this._updatePreview())
-    document.getElementById('f-correct').addEventListener('input',  () => this._updatePreview())
-
-    document.getElementById('btn-blank').addEventListener('click', () => {
-      const ta  = document.getElementById('f-original')
-      const pos = ta.selectionStart
-      ta.value  = ta.value.slice(0, pos) + '_' + ta.value.slice(ta.selectionEnd)
-      ta.selectionStart = ta.selectionEnd = pos + 1
-      ta.focus()
-      this._updatePreview()
-    })
+    document.getElementById('f-correct').addEventListener('input', () => this._updatePreview())
   }
 
   _updatePreview() {
-    const orig    = document.getElementById('f-original').value
-    const correct = document.getElementById('f-correct').value
-    const countEl = document.getElementById('char-count')
-    const preview = document.getElementById('corr-preview')
+    const correct  = document.getElementById('f-correct').value
+    const preview  = document.getElementById('corr-preview')
 
-    if (!orig && !correct) { countEl.textContent = ''; preview.classList.add('hidden'); return }
+    if (!correct) { preview.classList.add('hidden'); return }
 
-    const diff = orig.length - correct.length
-    if (orig.length === correct.length) {
-      countEl.textContent = `✓ ${orig.length} caracteres en ambos textos`
-      countEl.className   = 'char-count char-count--ok'
-    } else {
-      countEl.textContent = `⚠ Diferencia de ${Math.abs(diff)} caracteres (sin tildes: ${orig.length}, con tildes: ${correct.length})`
-      countEl.className   = 'char-count char-count--err'
-    }
+    const original = _autoOriginal(correct)
+    let zones = 0
+    for (let i = 0; i < correct.length; i++) if (original[i] !== correct[i]) zones++
 
-    if (orig && correct && orig.length === correct.length) {
-      preview.classList.remove('hidden')
-      preview.innerHTML = '<p class="preview-label">Vista previa — zonas marcadas en azul:</p>' +
-        '<p class="preview-text">' + _buildPreviewHTML(orig, correct) + '</p>'
-    } else {
-      preview.classList.add('hidden')
-    }
+    preview.classList.remove('hidden')
+    preview.innerHTML =
+      `<p class="preview-label">Vista previa — lo que verá el alumno (${zones} zona${zones !== 1 ? 's' : ''}):</p>` +
+      `<p class="preview-text">${_buildPreviewHTML(original, correct)}</p>`
   }
 
   validate() {
-    const orig    = document.getElementById('f-original').value
     const correct = document.getElementById('f-correct').value
     const errors  = []
-
     if (!document.getElementById('f-title').value.trim())
       errors.push('El título es obligatorio.')
-    if (!orig)    errors.push('El texto sin tildes es obligatorio.')
-    if (!correct) errors.push('El texto con tildes es obligatorio.')
-    if (orig && correct && orig.length !== correct.length)
-      errors.push(`Los textos deben tener el mismo número de caracteres (sin tildes: ${orig.length}, con tildes: ${correct.length}).`)
-
-    if (orig && correct && orig.length === correct.length) {
+    if (!correct)
+      errors.push('El texto es obligatorio.')
+    else {
+      const original = _autoOriginal(correct)
       let zones = 0
-      for (let i = 0; i < orig.length; i++) if (orig[i] !== correct[i]) zones++
-      if (zones === 0) errors.push('Los textos son idénticos. Comprueba que el segundo texto tenga las tildes.')
+      for (let i = 0; i < correct.length; i++) if (original[i] !== correct[i]) zones++
+      if (zones === 0)
+        errors.push('El texto no tiene tildes ni comas — no hay nada que corregir.')
     }
     return errors
   }
@@ -133,12 +101,12 @@ export class TextCorrectionEditor extends BaseEditor {
     const subtitle    = document.getElementById('f-subtitle').value.trim()
     const timer       = parseInt(document.getElementById('f-timer').value, 10) || 120
     const penalty     = parseFloat(document.getElementById('f-penalty').value) || 0
-    const orig        = document.getElementById('f-original').value
     const correct     = document.getElementById('f-correct').value
     const instruction = document.getElementById('f-instruction').value.trim()
+    const original    = _autoOriginal(correct)
 
     let zoneCount = 0
-    for (let i = 0; i < orig.length; i++) if (orig[i] !== correct[i]) zoneCount++
+    for (let i = 0; i < correct.length; i++) if (original[i] !== correct[i]) zoneCount++
 
     return {
       id:       Store.uid(),
@@ -146,9 +114,9 @@ export class TextCorrectionEditor extends BaseEditor {
       subtitle,
       template: 'textCorrection',
       content: {
-        textOriginal: orig,
+        textOriginal: original,
         textCorrect:  correct,
-        instruction:  instruction || 'Pon las tildes que faltan',
+        instruction:  instruction || 'Pon las tildes y las comas que faltan',
         maxScore:     zoneCount * 10
       },
       rules:        { timer, randomize: false, shuffleOptions: false, templateOptions: {} },
@@ -159,16 +127,28 @@ export class TextCorrectionEditor extends BaseEditor {
   }
 }
 
-function _buildPreviewHTML(orig, correct) {
+/* ── Helpers ─────────────────────────────────────────────────── */
+
+const ACCENT_MAP = {
+  á:'a', é:'e', í:'i', ó:'o', ú:'u', ü:'u',
+  Á:'A', É:'E', Í:'I', Ó:'O', Ú:'U', Ü:'U'
+}
+
+// Derive student-facing text: strip accents, replace commas with blank placeholder
+function _autoOriginal(correct) {
+  return [...correct].map(ch => ACCENT_MAP[ch] ?? (ch === ',' ? '_' : ch)).join('')
+}
+
+function _buildPreviewHTML(original, correct) {
   let html = ''
-  for (let i = 0; i < orig.length; i++) {
-    if (orig[i] !== correct[i]) {
-      const blank = orig[i] === '_'
+  for (let i = 0; i < original.length; i++) {
+    if (original[i] !== correct[i]) {
+      const blank = original[i] === '_'
       html += blank
         ? `<span class="prev-zone prev-zone--blank">_</span>`
         : `<span class="prev-zone">${esc(correct[i])}</span>`
     } else {
-      html += esc(orig[i])
+      html += esc(original[i])
     }
   }
   return html
