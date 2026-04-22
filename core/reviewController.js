@@ -15,8 +15,9 @@ export const ReviewController = {
   _data:      null,
   _mainEl:    null,
   _reviewEl:  null,
-  _overrides: {},   // itemId → { correct: bool }
-  _onEnd:     null,
+  _overrides:      {},   // itemId → { correct: bool }
+  _onEnd:          null,
+  _onScoreChange:  null,
 
   /* ── Public API ─────────────────────────────────────────────── */
 
@@ -25,8 +26,9 @@ export const ReviewController = {
     this._activity  = activity
     this._mainEl    = mainEl
     this._reviewEl  = reviewEl
-    this._overrides = {}
-    this._onEnd     = options.onEnd || null
+    this._overrides     = {}
+    this._onEnd         = options.onEnd         || null
+    this._onScoreChange = options.onScoreChange || null
 
     template.freeze()
     this._data = template.getReviewData()
@@ -57,10 +59,11 @@ export const ReviewController = {
     }
     const stage = this._mainEl?.parentElement
     stage?.classList.remove('review-mode--list')
-    this._template  = null
-    this._data      = null
-    this._overrides = {}
-    this._onEnd     = null
+    this._template      = null
+    this._data          = null
+    this._overrides     = {}
+    this._onEnd         = null
+    this._onScoreChange = null
   },
 
   /* ── Score computation ───────────────────────────────────────── */
@@ -244,5 +247,6 @@ export const ReviewController = {
     if (strategy === 'frozenCanvas') this._renderFrozenPanel()
     else if (strategy === 'itemList') this._renderItemListPanel()
     else this._startAggregate()
+    this._onScoreChange?.(this._computeScore())
   }
 }

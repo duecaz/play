@@ -5,6 +5,7 @@ export class HUD {
     this._container  = container
     this._timerEl    = null
     this._scoreEl    = null
+    this._pctEl      = null
     this._fsBtn      = null
     this._onFsChange = null
   }
@@ -13,6 +14,9 @@ export class HUD {
     const { title, presentation } = activity
     this._container.innerHTML = `
       <div class="hud-left">
+        <button class="ctrl-btn hud-fs-btn" id="hud-fs" title="Pantalla completa">
+          <i class="bi bi-fullscreen"></i>
+        </button>
         <span class="hud-title">${esc(title)}</span>
       </div>
       <div class="hud-center">
@@ -28,15 +32,14 @@ export class HUD {
           <div class="hud-score">
             <span class="score-label">Puntos</span>
             <span class="score-value" id="score-value">0</span>
+            <span class="score-pct" id="score-pct"></span>
           </div>
         ` : ''}
-        <button class="ctrl-btn hud-fs-btn" id="hud-fs" title="Pantalla completa">
-          <i class="bi bi-fullscreen"></i>
-        </button>
       </div>
     `
     this._timerEl = document.getElementById('timer-value')
     this._scoreEl = document.getElementById('score-value')
+    this._pctEl   = document.getElementById('score-pct')
     this._fsBtn   = document.getElementById('hud-fs')
     this._fsBtn.addEventListener('click', () => this._toggleFs())
 
@@ -61,9 +64,14 @@ export class HUD {
       ?.classList.toggle('timer-warning', seconds <= 10 && seconds > 0)
   }
 
-  setScore(score) {
+  setScore(score, maxScore) {
     if (!this._scoreEl) return
     this._scoreEl.textContent = score
+    if (this._pctEl) {
+      this._pctEl.textContent = maxScore > 0
+        ? Math.round(score / maxScore * 100) + '%'
+        : ''
+    }
     this._scoreEl.classList.remove('score-bump')
     void this._scoreEl.offsetWidth
     this._scoreEl.classList.add('score-bump')

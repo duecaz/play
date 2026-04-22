@@ -89,7 +89,7 @@ export const Player = {
     this.timeLeft = this.activity.rules?.timer ?? this.activity.config?.timer ?? 0
     this.timeUsed = 0
 
-    this._hud.setScore(0)
+    this._hud.setScore(0, this.maxScore)
     this._hud.setTimer(this.timeLeft)
 
     this.template.init(this.activity, this._mainEl, {
@@ -125,7 +125,8 @@ export const Player = {
     this._controls.showReview()
 
     ReviewController.start(this.template, this.activity, this._mainEl, this._reviewEl, {
-      onEnd: result => this._finalize(result)
+      onEnd:         result => this._finalize(result),
+      onScoreChange: score  => this._hud.setScore(score, this.maxScore)
     })
   },
 
@@ -177,7 +178,7 @@ export const Player = {
   /* ── Helpers ────────────────────────────────────────────────── */
   _addScore(pts) {
     this.score += pts
-    this._hud.setScore(this.score)
+    this._hud.setScore(this.score, this.maxScore)
     Events.emit('score:update', { score: this.score })
   },
 

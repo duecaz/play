@@ -42,6 +42,15 @@ export class QuizEditor extends BaseEditor {
             <input class="form-check-input" type="checkbox" id="f-shuffle" checked>
             <label class="form-check-label" for="f-shuffle">Barajar opciones</label>
           </div>
+          <div class="d-flex align-items-center gap-3">
+            <label class="form-label mb-0">✗ Penalización por error</label>
+            <select class="form-select field-input--sm" id="f-penalty">
+              <option value="0">Ninguna</option>
+              <option value="0.25">−¼ punto</option>
+              <option value="0.5">−½ punto</option>
+              <option value="1">−1 punto</option>
+            </select>
+          </div>
         </div>
       </section>
 
@@ -139,6 +148,7 @@ export class QuizEditor extends BaseEditor {
     const timer     = parseInt(document.getElementById('f-timer').value, 10) || 60
     const randomize = document.getElementById('f-randomize').checked
     const shuffle   = document.getElementById('f-shuffle').checked
+    const penalty   = parseFloat(document.getElementById('f-penalty').value) || 0
 
     return {
       id:       Store.uid(),
@@ -155,7 +165,7 @@ export class QuizEditor extends BaseEditor {
         }))
       },
       rules:        { timer, randomize, shuffleOptions: shuffle, templateOptions: {} },
-      scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, maxScore: null },
+      scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, penaltyRatio: penalty, maxScore: null },
       review:       { allowOverride: true, showCorrectAnswer: true, autoAdvanceToSummary: false },
       presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }
     }

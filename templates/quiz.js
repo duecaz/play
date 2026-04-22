@@ -127,7 +127,9 @@ export class QuizTemplate extends BaseTemplate {
     this._answered = true
 
     const correct      = selected === item.answer
-    const earnedPoints = correct ? (item.points ?? 10) : 0
+    const maxPts       = item.points ?? 10
+    const penaltyRatio = this.activity.scoring?.penaltyRatio ?? 0
+    const earnedPoints = correct ? maxPts : -(maxPts * penaltyRatio)
 
     this._results.push({
       id:           item.id,
@@ -137,7 +139,7 @@ export class QuizTemplate extends BaseTemplate {
       expected:     item.answer,
       correct,
       earnedPoints,
-      maxPoints:    item.points ?? 10
+      maxPoints: maxPts
     })
 
     this.container.querySelectorAll('.quiz-option').forEach(btn => {
@@ -148,10 +150,10 @@ export class QuizTemplate extends BaseTemplate {
 
     if (correct) {
       Events.emit('answer:correct', { item, points: earnedPoints })
-      this._onScore?.(earnedPoints)
     } else {
       Events.emit('answer:wrong', { item, selected })
     }
+    if (earnedPoints !== 0) this._onScore?.(earnedPoints)
 
     this._feedbackTimeout = setTimeout(() => {
       this._currentIndex++

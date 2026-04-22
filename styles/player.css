@@ -55,7 +55,7 @@
 }
 
 /* ── HUD internals ──────────────────────────────────────── */
-.hud-left   { flex: 1; overflow: hidden; }
+.hud-left   { flex: 1; display: flex; align-items: center; gap: 0.75rem; overflow: hidden; }
 .hud-center { flex: 1; display: flex; justify-content: center; }
 .hud-right  { flex: 1; display: flex; justify-content: flex-end; align-items: center; }
 
@@ -75,6 +75,7 @@
 .hud-score { display: flex; flex-direction: column; align-items: flex-end; }
 .score-label { font-size: var(--ep-sm); color: rgba(255,255,255,0.55); }
 .score-value { font-size: var(--ep-xl); font-weight: 700; font-variant-numeric: tabular-nums; }
+.score-pct   { font-size: var(--ep-sm); color: rgba(255,255,255,0.45); font-variant-numeric: tabular-nums; }
 .score-value.score-bump { animation: scoreBump 300ms ease; }
 @keyframes scoreBump {
   0%   { transform: scale(1); }
@@ -110,4 +111,4 @@
 #player-container.fs-mode #controls { display: none; }
 
 /* HUD fullscreen button — slightly smaller than standard ctrl-btn */
-.hud-fs-btn { width: 38px; height: 38px; font-size: 1.1rem; margin-left: 1rem; }
+.hud-fs-btn { width: 38px; height: 38px; font-size: 1.1rem; flex-shrink: 0; }
