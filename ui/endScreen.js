@@ -1,8 +1,16 @@
-export function renderEndScreen(container, { score, total, maxScore, pct, timeUsed } = {}) {
+export function renderEndScreen(container, { score, scoreAuto, total, maxScore, pct, timeUsed, overrides = [] } = {}) {
   const emoji = pct >= 80 ? '🎉' : pct >= 50 ? '👍' : '💪'
   const msg   = pct >= 80 ? '¡Excelente trabajo!'
               : pct >= 50 ? '¡Bien hecho!'
               : '¡Sigue practicando!'
+
+  const hasOverrides   = overrides.length > 0
+  const scoreDiff      = score - (scoreAuto ?? score)
+  const overrideBadge  = hasOverrides
+    ? `<p class="end-override-note">Puntuación ajustada por el docente
+         ${scoreDiff !== 0 ? `<span class="end-override-diff">${scoreDiff > 0 ? '+' : ''}${scoreDiff} pts</span>` : ''}
+       </p>`
+    : ''
 
   container.innerHTML = `
     <div class="end-screen fade-in">
@@ -14,6 +22,8 @@ export function renderEndScreen(container, { score, total, maxScore, pct, timeUs
           <span class="end-score-pct">${pct}%</span>
           <span class="end-score-label">Puntuación</span>
         </div>
+
+        ${overrideBadge}
 
         <div class="d-flex gap-5 justify-content-center">
           <div class="d-flex flex-column align-items-center gap-1">

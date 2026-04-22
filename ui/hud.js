@@ -8,13 +8,13 @@ export class HUD {
   }
 
   render(activity) {
-    const { title, config } = activity
+    const { title, presentation } = activity
     this._container.innerHTML = `
       <div class="hud-left">
         <span class="hud-title">${esc(title)}</span>
       </div>
       <div class="hud-center">
-        ${config.showTimer ? `
+        ${presentation.showTimer ? `
           <div class="hud-timer" id="hud-timer">
             <span>⏱</span>
             <span id="timer-value">--</span>
@@ -22,7 +22,7 @@ export class HUD {
         ` : ''}
       </div>
       <div class="hud-right">
-        ${config.showScore ? `
+        ${presentation.showScore ? `
           <div class="hud-score">
             <span class="score-label">Puntos</span>
             <span class="score-value" id="score-value">0</span>

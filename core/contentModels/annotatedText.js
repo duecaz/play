@@ -1,6 +1,6 @@
 export const annotatedTextModel = {
   id: 'annotatedText',
-  version: 1,
+  version: 2,
 
   validate(content) {
     if (!content?.textOriginal?.trim())

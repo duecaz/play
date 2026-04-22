@@ -4,67 +4,20 @@ export const activities = [
     title: 'Vocabulario: Los Animales',
     subtitle: 'Nivel A1 · Español',
     template: 'quiz',
-    schemaVersion: 1,
-    config: {
-      timer: 60,
-      showTimer: true,
-      randomize: true,
-      shuffleOptions: true,
-      showScore: true,
-      sound: false,
-      teams: false,
-      layout: 'center',
-      skin: 'default'
-    },
+    schemaVersion: 2,
     content: {
       items: [
-        {
-          id: 'q1',
-          question: '¿Cómo se dice "dog" en español?',
-          answer: 'perro',
-          options: ['gato', 'perro', 'pez', 'pájaro'],
-          points: 10,
-          image: null,
-          audio: null
-        },
-        {
-          id: 'q2',
-          question: '¿Cómo se dice "cat" en español?',
-          answer: 'gato',
-          options: ['perro', 'gato', 'ratón', 'caballo'],
-          points: 10,
-          image: null,
-          audio: null
-        },
-        {
-          id: 'q3',
-          question: '¿Qué animal hace "mu"?',
-          answer: 'vaca',
-          options: ['oveja', 'cerdo', 'vaca', 'gallina'],
-          points: 10,
-          image: null,
-          audio: null
-        },
-        {
-          id: 'q4',
-          question: '¿Qué animal vive en el mar y tiene aletas?',
-          answer: 'pez',
-          options: ['pez', 'perro', 'gato', 'pájaro'],
-          points: 10,
-          image: null,
-          audio: null
-        },
-        {
-          id: 'q5',
-          question: '¿Cuál de estos animales puede volar?',
-          answer: 'pájaro',
-          options: ['perro', 'pájaro', 'vaca', 'pez'],
-          points: 10,
-          image: null,
-          audio: null
-        }
+        { id: 'q1', question: '¿Cómo se dice "dog" en español?',      answer: 'perro',  options: ['gato', 'perro', 'pez', 'pájaro'],     points: 10, image: null, audio: null },
+        { id: 'q2', question: '¿Cómo se dice "cat" en español?',      answer: 'gato',   options: ['perro', 'gato', 'ratón', 'caballo'],   points: 10, image: null, audio: null },
+        { id: 'q3', question: '¿Qué animal hace "mu"?',               answer: 'vaca',   options: ['oveja', 'cerdo', 'vaca', 'gallina'],   points: 10, image: null, audio: null },
+        { id: 'q4', question: '¿Qué animal vive en el mar y tiene aletas?', answer: 'pez', options: ['pez', 'perro', 'gato', 'pájaro'],  points: 10, image: null, audio: null },
+        { id: 'q5', question: '¿Cuál de estos animales puede volar?', answer: 'pájaro', options: ['perro', 'pájaro', 'vaca', 'pez'],      points: 10, image: null, audio: null }
       ]
-    }
+    },
+    rules:        { timer: 60,  randomize: true,  shuffleOptions: true,  templateOptions: {} },
+    scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, maxScore: null },
+    review:       { allowOverride: true, showCorrectAnswer: true, autoAdvanceToSummary: false },
+    presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }
   },
 
   {
@@ -72,58 +25,19 @@ export const activities = [
     title: 'Matemáticas: Sumas Básicas',
     subtitle: '1.º Primaria',
     template: 'quiz',
-    schemaVersion: 1,
-    config: {
-      timer: 90,
-      showTimer: true,
-      randomize: false,
-      shuffleOptions: true,
-      showScore: true,
-      sound: false,
-      teams: false,
-      layout: 'center',
-      skin: 'default'
-    },
+    schemaVersion: 2,
     content: {
       items: [
-        {
-          id: 'q1',
-          question: '¿Cuánto es 5 + 3?',
-          answer: '8',
-          options: ['6', '7', '8', '9'],
-          points: 10,
-          image: null,
-          audio: null
-        },
-        {
-          id: 'q2',
-          question: '¿Cuánto es 4 + 6?',
-          answer: '10',
-          options: ['8', '9', '10', '11'],
-          points: 10,
-          image: null,
-          audio: null
-        },
-        {
-          id: 'q3',
-          question: '¿Cuánto es 7 + 2?',
-          answer: '9',
-          options: ['8', '9', '10', '11'],
-          points: 10,
-          image: null,
-          audio: null
-        },
-        {
-          id: 'q4',
-          question: '¿Cuánto es 3 + 3?',
-          answer: '6',
-          options: ['5', '6', '7', '8'],
-          points: 10,
-          image: null,
-          audio: null
-        }
+        { id: 'q1', question: '¿Cuánto es 5 + 3?', answer: '8',  options: ['6', '7', '8', '9'],    points: 10, image: null, audio: null },
+        { id: 'q2', question: '¿Cuánto es 4 + 6?', answer: '10', options: ['8', '9', '10', '11'],  points: 10, image: null, audio: null },
+        { id: 'q3', question: '¿Cuánto es 7 + 2?', answer: '9',  options: ['8', '9', '10', '11'],  points: 10, image: null, audio: null },
+        { id: 'q4', question: '¿Cuánto es 3 + 3?', answer: '6',  options: ['5', '6', '7', '8'],    points: 10, image: null, audio: null }
       ]
-    }
+    },
+    rules:        { timer: 90,  randomize: false, shuffleOptions: true,  templateOptions: {} },
+    scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, maxScore: null },
+    review:       { allowOverride: true, showCorrectAnswer: true, autoAdvanceToSummary: false },
+    presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }
   },
 
   {
@@ -131,67 +45,20 @@ export const activities = [
     title: 'Geografía: Capitales de Europa',
     subtitle: 'Nivel Intermedio',
     template: 'quiz',
-    schemaVersion: 1,
-    config: {
-      timer: 120,
-      showTimer: true,
-      randomize: true,
-      shuffleOptions: true,
-      showScore: true,
-      sound: false,
-      teams: false,
-      layout: 'center',
-      skin: 'default'
-    },
+    schemaVersion: 2,
     content: {
       items: [
-        {
-          id: 'q1',
-          question: '¿Cuál es la capital de Francia?',
-          answer: 'París',
-          options: ['Londres', 'París', 'Berlín', 'Roma'],
-          points: 10,
-          image: null,
-          audio: null
-        },
-        {
-          id: 'q2',
-          question: '¿Cuál es la capital de Alemania?',
-          answer: 'Berlín',
-          options: ['Múnich', 'Hamburgo', 'Berlín', 'Viena'],
-          points: 10,
-          image: null,
-          audio: null
-        },
-        {
-          id: 'q3',
-          question: '¿Cuál es la capital de Italia?',
-          answer: 'Roma',
-          options: ['Milán', 'Nápoles', 'Florencia', 'Roma'],
-          points: 10,
-          image: null,
-          audio: null
-        },
-        {
-          id: 'q4',
-          question: '¿Cuál es la capital de Portugal?',
-          answer: 'Lisboa',
-          options: ['Porto', 'Lisboa', 'Braga', 'Faro'],
-          points: 10,
-          image: null,
-          audio: null
-        },
-        {
-          id: 'q5',
-          question: '¿Cuál es la capital de España?',
-          answer: 'Madrid',
-          options: ['Barcelona', 'Valencia', 'Madrid', 'Sevilla'],
-          points: 10,
-          image: null,
-          audio: null
-        }
+        { id: 'q1', question: '¿Cuál es la capital de Francia?',   answer: 'París',  options: ['Londres', 'París', 'Berlín', 'Roma'],              points: 10, image: null, audio: null },
+        { id: 'q2', question: '¿Cuál es la capital de Alemania?',  answer: 'Berlín', options: ['Múnich', 'Hamburgo', 'Berlín', 'Viena'],            points: 10, image: null, audio: null },
+        { id: 'q3', question: '¿Cuál es la capital de Italia?',    answer: 'Roma',   options: ['Milán', 'Nápoles', 'Florencia', 'Roma'],            points: 10, image: null, audio: null },
+        { id: 'q4', question: '¿Cuál es la capital de Portugal?',  answer: 'Lisboa', options: ['Porto', 'Lisboa', 'Braga', 'Faro'],                 points: 10, image: null, audio: null },
+        { id: 'q5', question: '¿Cuál es la capital de España?',    answer: 'Madrid', options: ['Barcelona', 'Valencia', 'Madrid', 'Sevilla'],       points: 10, image: null, audio: null }
       ]
-    }
+    },
+    rules:        { timer: 120, randomize: true,  shuffleOptions: true,  templateOptions: {} },
+    scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, maxScore: null },
+    review:       { allowOverride: true, showCorrectAnswer: true, autoAdvanceToSummary: false },
+    presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }
   },
 
   {
@@ -199,19 +66,16 @@ export const activities = [
     title: 'Tildes: El café de José',
     subtitle: 'Lengua · 3.º Primaria',
     template: 'textCorrection',
-    schemaVersion: 1,
-    config: {
-      timer:     120,
-      showTimer: true,
-      showScore: true,
-      sound:     false,
-      skin:      'default'
-    },
+    schemaVersion: 2,
     content: {
       textOriginal: 'El cafe esta abierto. Jose corre rapido al salon.',
       textCorrect:  'El café está abierto. José corre rápido al salón.',
       instruction:  'Pon las tildes que faltan con el stylus',
       maxScore:     50
-    }
+    },
+    rules:        { timer: 120, randomize: false, shuffleOptions: false, templateOptions: {} },
+    scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, maxScore: null },
+    review:       { allowOverride: true, showCorrectAnswer: true, autoAdvanceToSummary: false },
+    presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }
   }
 ]

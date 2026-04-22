@@ -69,7 +69,7 @@ function activityCard(a) {
         ${a.subtitle ? `<p class="card-subtitle">${esc(a.subtitle)}</p>` : ''}
         <div class="card-meta d-flex gap-3 mt-auto pt-2 border-top">
           <span>📝 ${count} pregunta${count !== 1 ? 's' : ''}</span>
-          ${a.config?.timer ? `<span>⏱ ${a.config.timer}s</span>` : ''}
+          ${(a.rules?.timer ?? a.config?.timer) ? `<span>⏱ ${a.rules?.timer ?? a.config?.timer}s</span>` : ''}
         </div>
         <button class="btn-play-card btn btn-primary w-100" data-id="${a.id}">▶ Jugar</button>
       </div>

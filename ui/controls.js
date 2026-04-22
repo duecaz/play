@@ -7,7 +7,6 @@ export class Controls {
     this._callbacks    = {}
   }
 
-  /* Render game controls; call once per load() */
   render(callbacks = {}) {
     this._callbacks = callbacks
     this._renderGame()
@@ -17,7 +16,24 @@ export class Controls {
     }
   }
 
-  /* Switch controls bar to end-of-game actions */
+  /* Review state: minimal controls — teacher uses the review panel to finalize */
+  showReview() {
+    const { onRestart, onHome } = this._callbacks
+    this._container.innerHTML = `
+      <div class="controls-bar d-flex align-items-center gap-4">
+        <button class="ctrl-btn ctrl-btn--wide" id="ctrl-restart">↺ Reiniciar</button>
+        ${onHome ? `<button class="ctrl-btn ctrl-btn--wide" id="ctrl-home">🏠 Inicio</button>` : ''}
+        <button class="ctrl-btn" id="ctrl-fs" title="Pantalla completa (F)">⛶</button>
+      </div>
+    `
+    this._playPauseBtn = null
+    this._fsBtn = document.getElementById('ctrl-fs')
+    this._fsBtn?.addEventListener('click', () => this._toggleFs())
+    document.getElementById('ctrl-restart')?.addEventListener('click', onRestart)
+    document.getElementById('ctrl-home')?.addEventListener('click', onHome)
+    this._syncFs()
+  }
+
   showEnd() {
     const { onRestart, onHome } = this._callbacks
     this._container.innerHTML = `
@@ -29,7 +45,7 @@ export class Controls {
     `
     this._playPauseBtn = null
     this._fsBtn = document.getElementById('ctrl-fs')
-    this._fsBtn.addEventListener('click', () => this._toggleFs())
+    this._fsBtn?.addEventListener('click', () => this._toggleFs())
     document.getElementById('ctrl-restart')?.addEventListener('click', onRestart)
     document.getElementById('ctrl-home')?.addEventListener('click', onHome)
     this._syncFs()

@@ -1,4 +1,5 @@
 import { Player } from '../core/player.js'
+import { ReviewController } from '../core/reviewController.js'
 import Store       from '../core/storage.js'
 import Router      from '../core/router.js'
 import { State }   from '../core/state.js'
@@ -27,14 +28,17 @@ export function renderPlayerView(container, activityId) {
   container.innerHTML = `
     <div id="player-container">
       <div id="hud"></div>
-      <div id="main-area"></div>
+      <div id="player-stage">
+        <div id="main-area"></div>
+        <div id="review-panel"></div>
+      </div>
       <div id="controls"></div>
     </div>
   `
 
-  /* Stop player when navigating away */
   Router.onLeave(() => {
     clearInterval(Player._interval)
+    ReviewController.cleanup()
     Player.template?.destroy()
     State.reset()
     container.className = ''
@@ -43,6 +47,7 @@ export function renderPlayerView(container, activityId) {
   Player.init(
     container.querySelector('#hud'),
     container.querySelector('#main-area'),
+    container.querySelector('#review-panel'),
     container.querySelector('#controls')
   )
 

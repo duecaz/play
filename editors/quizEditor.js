@@ -145,11 +145,6 @@ export class QuizEditor extends BaseEditor {
       title,
       subtitle,
       template: 'quiz',
-      config: {
-        timer, showTimer: true, randomize,
-        shuffleOptions: shuffle, showScore: true,
-        sound: false, teams: false, layout: 'center', skin: 'default'
-      },
       content: {
         items: this._validQuestions().map((q, i) => ({
           id:       `q${i + 1}`,
@@ -158,7 +153,11 @@ export class QuizEditor extends BaseEditor {
           options:  q.options.filter(o => o.trim() !== ''),
           points:   10, image: null, audio: null
         }))
-      }
+      },
+      rules:        { timer, randomize, shuffleOptions: shuffle, templateOptions: {} },
+      scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, maxScore: null },
+      review:       { allowOverride: true, showCorrectAnswer: true, autoAdvanceToSummary: false },
+      presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }
     }
   }
 

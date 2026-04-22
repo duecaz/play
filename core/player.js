@@ -1,10 +1,12 @@
-import Events                    from './events.js'
-import { State, STATES }         from './state.js'
-import Registry                  from './registry.js'
-import { renderStartScreen }     from '../ui/startScreen.js'
-import { renderEndScreen }       from '../ui/endScreen.js'
-import { HUD }                   from '../ui/hud.js'
-import { Controls }              from '../ui/controls.js'
+import Events                      from './events.js'
+import { State, STATES }           from './state.js'
+import Registry                    from './registry.js'
+import { ReviewController }        from './reviewController.js'
+import { Results }                 from './results.js'
+import { renderStartScreen }       from '../ui/startScreen.js'
+import { renderEndScreen }         from '../ui/endScreen.js'
+import { HUD }                     from '../ui/hud.js'
+import { Controls }                from '../ui/controls.js'
 
 export const Player = {
   activity:  null,
@@ -18,24 +20,27 @@ export const Player = {
   _hud:      null,
   _controls: null,
   _mainEl:   null,
+  _reviewEl: null,
 
-  /* ── Bootstrap ─────────────────────────────────────────── */
-  init(hudEl, mainEl, controlsEl) {
+  /* ── Bootstrap ──────────────────────────────────────────────── */
+  init(hudEl, mainEl, reviewEl, controlsEl) {
     this._hud      = new HUD(hudEl)
     this._controls = new Controls(controlsEl)
     this._mainEl   = mainEl
+    this._reviewEl = reviewEl
     document.addEventListener('keydown', e => this.template?.onKey?.(e))
     window.addEventListener('resize',   () => this.template?.onResize?.())
   },
 
-  /* ── Load activity ─────────────────────────────────────── */
+  /* ── Load activity ───────────────────────────────────────────── */
   load(activity, { onHome } = {}) {
     this._onHome  = onHome || null
     this.activity = activity
     this.score    = 0
-    this.maxScore = activity.content.maxScore
+    this.maxScore = activity.scoring?.maxScore
+      ?? activity.content.maxScore
       ?? (activity.content.items || []).reduce((s, i) => s + (i.points || 10), 0)
-    this.timeLeft = activity.config.timer || 0
+    this.timeLeft = activity.rules?.timer ?? activity.config?.timer ?? 0
     this.timeUsed = 0
 
     const TemplateClass = Registry.get(activity.template)
@@ -54,31 +59,34 @@ export const Player = {
     this._showStart()
   },
 
-  /* ── Screens ───────────────────────────────────────────── */
+  /* ── Screens ────────────────────────────────────────────────── */
   _showStart() {
     renderStartScreen(this._mainEl, this.activity, {
       onStart: () => this._start()
     })
   },
 
-  _showEnd() {
-    const pct = this.maxScore > 0
-      ? Math.round((this.score / this.maxScore) * 100) : 0
+  _showEnd(result = {}) {
+    const scoreFinal = result.scoreFinal ?? this.score
+    const pct        = this.maxScore > 0
+      ? Math.round((scoreFinal / this.maxScore) * 100) : 0
     renderEndScreen(this._mainEl, {
-      score:    this.score,
-      total:    this.activity.content.items?.length ?? 0,
-      maxScore: this.maxScore,
+      score:     scoreFinal,
+      scoreAuto: result.scoreAuto ?? scoreFinal,
+      total:     this.activity.content.items?.length ?? 0,
+      maxScore:  this.maxScore,
       pct,
-      timeUsed: this.timeUsed
+      timeUsed:  this.timeUsed,
+      overrides: result.overrides ?? []
     })
     this._controls.showEnd()
   },
 
-  /* ── Lifecycle ─────────────────────────────────────────── */
+  /* ── Lifecycle ──────────────────────────────────────────────── */
   _start() {
     if (!State.go(STATES.PLAYING)) return
     this.score    = 0
-    this.timeLeft = this.activity.config.timer || 0
+    this.timeLeft = this.activity.rules?.timer ?? this.activity.config?.timer ?? 0
     this.timeUsed = 0
 
     this._hud.setScore(0)
@@ -90,7 +98,8 @@ export const Player = {
     })
     this.template.start()
 
-    if (this.activity.config.timer) this._startTimer()
+    const timer = this.activity.rules?.timer ?? this.activity.config?.timer ?? 0
+    if (timer) this._startTimer()
     this._controls.setPlayPause('playing')
   },
 
@@ -104,23 +113,49 @@ export const Player = {
   _resume() {
     if (!State.go(STATES.PLAYING)) return
     this.template.resume()
-    if (this.activity.config.timer) this._startTimer()
+    const timer = this.activity.rules?.timer ?? this.activity.config?.timer ?? 0
+    if (timer) this._startTimer()
     this._controls.setPlayPause('playing')
   },
 
   _end() {
     clearInterval(this._interval)
+    if (!State.go(STATES.REVIEW)) return
+
+    this._controls.showReview()
+
+    ReviewController.start(this.template, this.activity, this._mainEl, this._reviewEl, {
+      onEnd: result => this._finalize(result)
+    })
+  },
+
+  _finalize(result) {
     if (!State.go(STATES.END)) return
     this.template.destroy()
-    this._showEnd()
-    Events.emit('activity:complete', { score: this.score, maxScore: this.maxScore })
+
+    /* Persist result */
+    Results.save({
+      id:         Results.uid(),
+      activityId: this.activity.id,
+      title:      this.activity.title,
+      date:       new Date().toISOString(),
+      scoreAuto:  result.scoreAuto,
+      scoreFinal: result.scoreFinal,
+      maxScore:   this.maxScore,
+      timeUsed:   this.timeUsed,
+      overrides:  result.overrides
+    })
+
+    this._showEnd(result)
+    Events.emit('activity:complete', { score: result.scoreFinal, maxScore: this.maxScore })
   },
 
   _reset() {
     clearInterval(this._interval)
+    ReviewController.cleanup()
     this.template?.destroy()
     this.score    = 0
-    this.timeLeft = this.activity.config.timer || 0
+    this.timeLeft = this.activity.rules?.timer ?? this.activity.config?.timer ?? 0
     this.timeUsed = 0
     State.reset()
     this._hud.render(this.activity)
@@ -139,7 +174,7 @@ export const Player = {
     if (State.is(STATES.PLAYING) || State.is(STATES.PAUSED)) this._end()
   },
 
-  /* ── Helpers ───────────────────────────────────────────── */
+  /* ── Helpers ────────────────────────────────────────────────── */
   _addScore(pts) {
     this.score += pts
     this._hud.setScore(this.score)

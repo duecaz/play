@@ -4,13 +4,15 @@ export const STATES = {
   IDLE:    'idle',
   PLAYING: 'playing',
   PAUSED:  'paused',
+  REVIEW:  'review',
   END:     'end'
 }
 
 const TRANSITIONS = {
   idle:    ['playing'],
-  playing: ['paused', 'end'],
-  paused:  ['playing', 'end'],
+  playing: ['paused', 'review'],
+  paused:  ['playing', 'review'],
+  review:  ['end'],
   end:     ['idle']
 }
 

@@ -1,6 +1,6 @@
 export const qaModel = {
   id: 'qa',
-  version: 1,
+  version: 2,
 
   validate(content) {
     if (!Array.isArray(content?.items) || content.items.length === 0)

@@ -118,13 +118,16 @@ export class TextCorrectionEditor extends BaseEditor {
       title,
       subtitle,
       template: 'textCorrection',
-      config:   { timer, showTimer: true, showScore: true, sound: false, skin: 'default' },
       content: {
         textOriginal: orig,
         textCorrect:  correct,
         instruction:  instruction || 'Pon las tildes que faltan',
         maxScore:     zoneCount * 10
-      }
+      },
+      rules:        { timer, randomize: false, shuffleOptions: false, templateOptions: {} },
+      scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, maxScore: null },
+      review:       { allowOverride: true, showCorrectAnswer: true, autoAdvanceToSummary: false },
+      presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }
     }
   }
 }

@@ -1,8 +1,9 @@
 import { esc } from '../core/html.js'
 
 export function renderStartScreen(container, activity, { onStart } = {}) {
-  const { title, subtitle, content, config } = activity
+  const { title, subtitle, content, rules } = activity
   const total = content.items?.length ?? null
+  const timer = rules?.timer ?? 0
 
   container.innerHTML = `
     <div class="start-screen fade-in">
@@ -12,7 +13,7 @@ export function renderStartScreen(container, activity, { onStart } = {}) {
         ${subtitle ? `<p class="start-subtitle mb-4">${esc(subtitle)}</p>` : ''}
         <div class="start-meta d-flex gap-4 justify-content-center mb-5">
           ${total !== null ? `<span>${total} pregunta${total !== 1 ? 's' : ''}</span>` : ''}
-          ${config.timer ? `<span>${config.timer} segundos</span>` : ''}
+          ${timer ? `<span>${timer} segundos</span>` : ''}
         </div>
         <button class="btn btn-primary btn-start" id="btn-start">▶ Comenzar</button>
       </div>
