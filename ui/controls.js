@@ -3,7 +3,7 @@ let _fsBtn        = null
 
 export function renderControls(container, { onPlay, onPause, onReset, onNext } = {}) {
   container.innerHTML = `
-    <div class="controls-bar">
+    <div class="controls-bar d-flex align-items-center gap-4">
       <button class="ctrl-btn" id="ctrl-reset" title="Reiniciar (R)">↺</button>
       <button class="ctrl-btn ctrl-primary" id="ctrl-play-pause" data-state="playing" title="Pausar (Espacio)">⏸</button>
       <button class="ctrl-btn" id="ctrl-next" title="Finalizar actividad">⏭</button>
