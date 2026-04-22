@@ -1,5 +1,6 @@
-import Store  from '../core/storage.js'
-import Router from '../core/router.js'
+import Store    from '../core/storage.js'
+import Router   from '../core/router.js'
+import Registry from '../core/registry.js'
 
 export class BaseEditor {
   constructor(container) {
@@ -47,6 +48,8 @@ export class BaseEditor {
     if (errors.length) { this._showErrors(errors); return }
     this._errorEl.classList.add('hidden')
     const activity = this.buildActivity()
+    const model = Registry.getModel(activity.template)
+    if (model) activity.schemaVersion = model.version
     Store.save(activity)
     Router.navigate(`/play/${activity.id}`)
   }

@@ -4,6 +4,7 @@ export const activities = [
     title: 'Vocabulario: Los Animales',
     subtitle: 'Nivel A1 · Español',
     template: 'quiz',
+    schemaVersion: 1,
     config: {
       timer: 60,
       showTimer: true,
@@ -71,6 +72,7 @@ export const activities = [
     title: 'Matemáticas: Sumas Básicas',
     subtitle: '1.º Primaria',
     template: 'quiz',
+    schemaVersion: 1,
     config: {
       timer: 90,
       showTimer: true,
@@ -129,6 +131,7 @@ export const activities = [
     title: 'Geografía: Capitales de Europa',
     subtitle: 'Nivel Intermedio',
     template: 'quiz',
+    schemaVersion: 1,
     config: {
       timer: 120,
       showTimer: true,
@@ -196,6 +199,7 @@ export const activities = [
     title: 'Tildes: El café de José',
     subtitle: 'Lengua · 3.º Primaria',
     template: 'textCorrection',
+    schemaVersion: 1,
     config: {
       timer:     120,
       showTimer: true,

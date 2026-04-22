@@ -1,9 +1,9 @@
-/* Template registry — maps name → class + metadata */
+/* Template registry — maps name → class + metadata + content model */
 const Registry = {
   _map: new Map(),
 
-  register(name, TemplateClass, meta = {}) {
-    this._map.set(name, { TemplateClass, meta })
+  register(name, TemplateClass, meta = {}, model = null) {
+    this._map.set(name, { TemplateClass, meta, model })
   },
 
   get(name) {
@@ -14,6 +14,10 @@ const Registry = {
 
   getMeta(name) {
     return this._map.get(name)?.meta ?? {}
+  },
+
+  getModel(name) {
+    return this._map.get(name)?.model ?? null
   },
 
   list() {
