@@ -1,7 +1,6 @@
-import { BaseTemplate }                        from './base.js'
-import Events                                   from '../core/events.js'
-import { esc }                                  from '../core/html.js'
-import { TC_PX, TC_PY_TOP, TC_PY_BOT }         from '../core/constants.js'
+import { BaseTemplate }     from './base.js'
+import Events               from '../core/events.js'
+import { esc }              from '../core/html.js'
 
 export class TextCorrectionTemplate extends BaseTemplate {
   static requiresTools  = ['pen']
@@ -12,12 +11,14 @@ export class TextCorrectionTemplate extends BaseTemplate {
   constructor() {
     super()
     this._zones   = []   // { x, y, w, h, hit, expected }
-    this._strokes = []
+    this._strokes = []   // array of [{x,y}] in canvas pixel coords at capture time
     this._current = null
     this._canvas  = null
     this._ctx     = null
     this._drawing = false
     this._done    = false
+    this._checkW  = 0    // canvas.width at the moment _check() ran
+    this._checkH  = 0
     this._onDown  = null
     this._onMove  = null
     this._onUp    = null
@@ -31,6 +32,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._done    = false
     this._strokes = []
     this._zones   = []
+    this._checkW  = 0
+    this._checkH  = 0
     this._render()
   }
 
@@ -70,9 +73,12 @@ export class TextCorrectionTemplate extends BaseTemplate {
       maxPoints:    10,
       zoneIndex:    i
     }))
-    const score    = items.reduce((s, item) => s + item.earnedPoints, 0)
-    const maxScore = this._zones.length * 10
-    return { strategy: 'frozenCanvas', items, score, maxScore }
+    return {
+      strategy: 'frozenCanvas',
+      items,
+      score:    items.reduce((s, i) => s + i.earnedPoints, 0),
+      maxScore: this._zones.length * 10
+    }
   }
 
   /* ── Render ───────────────────────────────────────────────── */
@@ -99,18 +105,18 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._drawZoneBorders()
     this._bind()
 
-    document.getElementById('btn-check')
-      .addEventListener('click', () => this._check())
+    document.getElementById('btn-check').addEventListener('click', () => this._check())
   }
 
   _sizeCanvas() {
-    const w = document.getElementById('corr-wrapper')
-    if (!w || !this._canvas) return
-    const r = w.getBoundingClientRect()
+    const wrapper = document.getElementById('corr-wrapper')
+    if (!wrapper || !this._canvas) return
+    const r = wrapper.getBoundingClientRect()
     this._canvas.width  = Math.round(r.width)
     this._canvas.height = Math.round(r.height)
   }
 
+  /* Percentage-based padding: left/right 25% of char width, top 50% char height, bottom 0 */
   _recalcZones(preserveHits = false) {
     const wrapper = document.getElementById('corr-wrapper')
     if (!wrapper) return
@@ -118,19 +124,21 @@ export class TextCorrectionTemplate extends BaseTemplate {
     const prevHits = preserveHits ? this._zones.map(z => z.hit) : []
     this._zones    = []
     wrapper.querySelectorAll('.acc-zone').forEach((span, i) => {
-      const sr = span.getBoundingClientRect()
+      const sr     = span.getBoundingClientRect()
+      const padX   = sr.width  * 0.25
+      const padTop = sr.height * 0.50
       this._zones.push({
-        x:        sr.left - wr.left - TC_PX,
-        y:        sr.top  - wr.top  - TC_PY_TOP,
-        w:        sr.width  + TC_PX * 2,
-        h:        sr.height + TC_PY_TOP + TC_PY_BOT,
+        x:        sr.left - wr.left - padX,
+        y:        sr.top  - wr.top  - padTop,
+        w:        sr.width  + padX * 2,
+        h:        sr.height + padTop,          // bottom: +0 (no extension)
         hit:      prevHits[i] ?? false,
         expected: span.dataset.correct || ''
       })
     })
   }
 
-  /* Draw dashed detection-zone borders on canvas (debug aid) */
+  /* Dashed blue rectangles — show detection zone for each letter */
   _drawZoneBorders() {
     if (!this._ctx || !this._zones.length) return
     const ctx = this._ctx
@@ -143,11 +151,31 @@ export class TextCorrectionTemplate extends BaseTemplate {
     ctx.restore()
   }
 
-  /* Redraw result circles using current zone positions (called after resize) */
+  /* Redraw strokes (scaled) + result circles — called after canvas resize */
   _redrawResults() {
     if (!this._ctx || !this._done) return
-    const ctx = this._ctx
+    const ctx    = this._ctx
+    const scaleX = this._checkW > 0 ? this._canvas.width  / this._checkW : 1
+    const scaleY = this._checkH > 0 ? this._canvas.height / this._checkH : 1
+
     ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
+
+    /* Redraw student strokes at new scale so teacher can review them */
+    this._strokes.forEach(stroke => {
+      if (stroke.length < 2) return
+      ctx.beginPath()
+      ctx.moveTo(stroke[0].x * scaleX, stroke[0].y * scaleY)
+      for (let i = 1; i < stroke.length; i++) {
+        ctx.lineTo(stroke[i].x * scaleX, stroke[i].y * scaleY)
+      }
+      ctx.strokeStyle = 'rgba(74,144,226,0.65)'
+      ctx.lineWidth   = 2
+      ctx.lineCap     = 'round'
+      ctx.lineJoin    = 'round'
+      ctx.stroke()
+    })
+
+    /* Result circles at current zone positions */
     this._zones.forEach(z => {
       const cx = z.x + z.w / 2
       const cy = z.y + z.h / 2 + 20
@@ -193,7 +221,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
     e.preventDefault()
     this._canvas.setPointerCapture(e.pointerId)
     this._drawing = true
-    const p   = this._pos(e)
+    const p = this._pos(e)
     this._current = [p]
     const ctx = this._ctx
     ctx.beginPath()
@@ -226,10 +254,12 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
   /* ── Check ───────────────────────────────────────────────── */
   _check() {
-    this._done = true
+    this._done   = true
+    this._checkW = this._canvas.width    // snapshot for rescaling on redraw
+    this._checkH = this._canvas.height
     this._recalcZones()   // fresh positions, hits reset to false
 
-    /* Only the START POINT of each stroke determines a hit */
+    /* Only the START POINT of each stroke triggers a hit */
     this._strokes.forEach(stroke => {
       if (!stroke.length) return
       const pt = stroke[0]
@@ -271,7 +301,6 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
     if (correct > 0) this._onScore?.(correct * 10)
     Events.emit('answer:correct', { correct, total })
-    /* Short delay so the canvas repaint is visible before review panel appears */
     setTimeout(() => this._onComplete?.(), 150)
   }
 }
