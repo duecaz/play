@@ -59,6 +59,16 @@ export class TextCorrectionEditor extends BaseEditor {
     `
   }
 
+  _load(activity) {
+    document.getElementById('f-title').value       = activity.title    || ''
+    document.getElementById('f-subtitle').value    = activity.subtitle || ''
+    document.getElementById('f-timer').value       = activity.rules?.timer ?? 120
+    document.getElementById('f-penalty').value     = String(activity.scoring?.penaltyRatio ?? 0)
+    document.getElementById('f-instruction').value = activity.content.instruction || ''
+    document.getElementById('f-correct').value     = activity.content.textCorrect || ''
+    this._updatePreview()
+  }
+
   _bindBody() {
     document.getElementById('f-correct').addEventListener('input', () => this._updatePreview())
   }

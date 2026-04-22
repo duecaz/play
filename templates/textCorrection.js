@@ -72,11 +72,12 @@ export class TextCorrectionTemplate extends BaseTemplate {
   }
 
   getReviewData() {
+    const penaltyRatio = this.activity.scoring?.penaltyRatio ?? 0
     const items = this._zones.map((z, i) => ({
       id:           `zone-${i}`,
       label:        z.word || z.expected || `Zona ${i + 1}`,
       correct:      z.hit,
-      earnedPoints: z.hit ? 10 : 0,
+      earnedPoints: z.hit ? 10 : -(10 * penaltyRatio),
       maxPoints:    10,
       zoneIndex:    i
     }))

@@ -71,9 +71,13 @@ export const ReviewController = {
   _computeScore() {
     if (!this._data) return 0
     return this._data.items.reduce((sum, item) => {
-      const ov      = this._overrides[item.id]
-      const correct = ov !== undefined ? ov.correct : item.correct
-      return sum + (correct ? item.maxPoints : 0)
+      const ov = this._overrides[item.id]
+      if (ov !== undefined) {
+        // Teacher override: correct → full credit, wrong → 0 (no extra penalty)
+        return sum + (ov.correct ? item.maxPoints : 0)
+      }
+      // Use actual earned points which may include penalty
+      return sum + (item.earnedPoints ?? (item.correct ? item.maxPoints : 0))
     }, 0)
   },
 

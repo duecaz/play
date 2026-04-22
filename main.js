@@ -24,6 +24,12 @@ Router.on('/editor/:template', ({ template }) => {
   if (template === 'textCorrection') new TextCorrectionEditor(app).render()
   else new QuizEditor(app).render()
 })
+Router.on('/editor/:template/:id', ({ template, id }) => {
+  const activity = Store.get(id)
+  if (!activity) { Router.navigate('/home'); return }
+  if (template === 'textCorrection') new TextCorrectionEditor(app).render(activity)
+  else new QuizEditor(app).render(activity)
+})
 Router.on('/play/:id',         ({ id })       => renderPlayerView(app, id))
 
 Router.init()

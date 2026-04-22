@@ -42,6 +42,12 @@ export function renderHome(container) {
   container.querySelectorAll('.btn-play-card').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); Router.navigate(`/play/${btn.dataset.id}`) })
   })
+  container.querySelectorAll('.btn-edit-card').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation()
+      Router.navigate(`/editor/${btn.dataset.template}/${btn.dataset.id}`)
+    })
+  })
   container.querySelectorAll('.btn-delete-card').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation()
@@ -62,8 +68,12 @@ function activityCard(a) {
       <div class="card-body d-flex flex-column gap-2">
         <div class="d-flex align-items-center justify-content-between">
           <span class="card-template-badge">${label}</span>
-          <button class="btn-delete-card btn btn-sm btn-link text-danger p-0"
-            data-id="${a.id}" title="Eliminar">✕</button>
+          <div class="d-flex gap-2">
+            <button class="btn-edit-card btn btn-sm btn-link p-0"
+              data-id="${a.id}" data-template="${a.template}" title="Editar">✏️</button>
+            <button class="btn-delete-card btn btn-sm btn-link text-danger p-0"
+              data-id="${a.id}" title="Eliminar">✕</button>
+          </div>
         </div>
         <h3 class="card-title">${esc(a.title)}</h3>
         ${a.subtitle ? `<p class="card-subtitle">${esc(a.subtitle)}</p>` : ''}

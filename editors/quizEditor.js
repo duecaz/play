@@ -62,6 +62,22 @@ export class QuizEditor extends BaseEditor {
     `
   }
 
+  _load(activity) {
+    document.getElementById('f-title').value       = activity.title    || ''
+    document.getElementById('f-subtitle').value    = activity.subtitle || ''
+    document.getElementById('f-timer').value       = activity.rules?.timer ?? 60
+    document.getElementById('f-randomize').checked = activity.rules?.randomize ?? true
+    document.getElementById('f-shuffle').checked   = activity.rules?.shuffleOptions ?? true
+    document.getElementById('f-penalty').value     = String(activity.scoring?.penaltyRatio ?? 0)
+
+    this._questions = activity.content.items.map(item => {
+      const opts = [...item.options]
+      while (opts.length < 4) opts.push('')
+      return { question: item.question, options: opts, correctIndex: opts.indexOf(item.answer) }
+    })
+    this._renderQuestions()
+  }
+
   _bindBody() {
     this._renderQuestions()
 
