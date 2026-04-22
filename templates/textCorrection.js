@@ -149,10 +149,15 @@ export class TextCorrectionTemplate extends BaseTemplate {
     const prevWords = preserveHits ? this._zones.map(z => z.word) : []
     this._zones    = []
     const { textCorrect } = this.activity.content
+    const lineH = wrapper.querySelector('.corr-text')?.getBoundingClientRect().height / 3 || 48
     wrapper.querySelectorAll('.acc-zone').forEach((span, i) => {
-      const sr     = span.getBoundingClientRect()
-      const padX   = sr.width  * 0.25
-      const padTop = sr.height * 0.50
+      const sr      = span.getBoundingClientRect()
+      const isBlank = span.classList.contains('acc-zone--blank')
+      // Blank zones have font-size:0 so sr is 0×0 — use a fixed hit area
+      const effW    = isBlank ? 0   : sr.width
+      const effH    = isBlank ? lineH : sr.height
+      const padX    = isBlank ? 18  : sr.width * 0.25
+      const padTop  = effH * 0.50
       const charIdx = span.dataset.index !== undefined ? parseInt(span.dataset.index, 10) : -1
       const word    = preserveHits && prevWords[i]
         ? prevWords[i]
@@ -160,8 +165,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
       this._zones.push({
         x:        sr.left - wr.left - padX,
         y:        sr.top  - wr.top  - padTop,
-        w:        sr.width  + padX * 2,
-        h:        sr.height + padTop,          // bottom: +0 (no extension)
+        w:        effW + padX * 2,
+        h:        effH + padTop,
         hit:      prevHits[i] ?? false,
         expected: span.dataset.correct || '',
         word
@@ -307,7 +312,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
     document.getElementById('corr-wrapper')
       ?.querySelectorAll('.acc-zone')
       .forEach((span, i) => {
-        span.textContent = span.dataset.correct + (span.dataset.sp ? ' ' : '')
+        span.textContent = span.dataset.correct
         span.classList.add(this._zones[i]?.hit ? 'zone-ok' : 'zone-miss')
       })
 
@@ -339,12 +344,9 @@ function _buildHTML(orig, correct) {
 
   for (let i = 0; i < orig.length; i++) {
     if (orig[i] !== correct[i]) {
-      const blank     = orig[i] === '_'
-      // Absorb the space that follows a blank zone — prevents double-space gap
-      const absorbSp  = blank && i + 1 < orig.length && orig[i+1] === ' ' && correct[i+1] === ' '
-      const cls       = blank ? 'acc-zone acc-zone--blank' : 'acc-zone'
-      const span      = `<span class="${cls}" data-correct="${esc(correct[i])}" data-index="${i}"${absorbSp ? ' data-sp="1"' : ''}>${blank ? '_' : esc(orig[i])}</span>`
-      if (absorbSp) i++
+      const blank = orig[i] === '_'
+      const cls   = blank ? 'acc-zone acc-zone--blank' : 'acc-zone'
+      const span  = `<span class="${cls}" data-correct="${esc(correct[i])}" data-index="${i}">${blank ? '_' : esc(orig[i])}</span>`
 
       if (blank && parts.length > 0 && parts[parts.length - 1].type === 'text') {
         // Only wrap the last word + blank zone so the comma can't start a new line alone

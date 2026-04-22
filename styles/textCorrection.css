@@ -32,14 +32,13 @@
 .acc-zone.zone-ok   { color: var(--ep-correct); background: var(--ep-correct-bg); border-radius: 4px; padding: 0 2px; }
 .acc-zone.zone-miss { color: var(--ep-wrong);   background: var(--ep-wrong-bg);   border-radius: 4px; padding: 0 2px; }
 
-/* Blank placeholder zone — used for missing punctuation (commas, etc.) */
+/* Blank placeholder zone — completely invisible before check; the natural
+   word space provides separation. font-size:0 makes the span occupy no width. */
 .acc-zone--blank {
-  display: inline-block; min-width: 0.55em;
-  color: transparent;   /* hide the _ char — no other visual hint */
-  border-radius: 2px; padding: 0;
+  display: inline; font-size: 0; color: transparent;
 }
-.acc-zone--blank.zone-ok   { color: var(--ep-correct); border-bottom: 2px solid var(--ep-correct); background: var(--ep-correct-bg); }
-.acc-zone--blank.zone-miss { color: var(--ep-wrong);   border-bottom: 2px solid var(--ep-wrong);   background: var(--ep-wrong-bg); }
+.acc-zone--blank.zone-ok   { font-size: inherit; color: var(--ep-correct); background: var(--ep-correct-bg); border-radius: 2px; padding: 0 1px; }
+.acc-zone--blank.zone-miss { font-size: inherit; color: var(--ep-wrong);   background: var(--ep-wrong-bg);   border-radius: 2px; padding: 0 1px; }
 
 .btn-corr-check { min-width: 200px; font-size: var(--ep-base); font-weight: 700; }
 
