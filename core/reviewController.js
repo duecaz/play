@@ -56,7 +56,7 @@ export const ReviewController = {
       this._reviewEl.classList.remove('active')
     }
     const stage = this._mainEl?.parentElement
-    stage?.classList.remove('review-mode--canvas', 'review-mode--list')
+    stage?.classList.remove('review-mode--list')
     this._template  = null
     this._data      = null
     this._overrides = {}
@@ -85,13 +85,9 @@ export const ReviewController = {
   /* ── frozenCanvas strategy ───────────────────────────────────── */
 
   _startFrozenCanvas() {
-    const stage = this._mainEl.parentElement
-    stage.classList.add('review-mode--canvas')
+    /* Panel floats (position:absolute) so main-area/canvas never change size */
     this._reviewEl.classList.add('active')
     this._renderFrozenPanel()
-    /* After layout reflows (panel takes width), tell template to resize canvas
-       and redraw result circles at the new correct positions */
-    requestAnimationFrame(() => this._template?.onResize?.())
   },
 
   _renderFrozenPanel() {
