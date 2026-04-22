@@ -57,7 +57,7 @@
 /* ── HUD internals ──────────────────────────────────────── */
 .hud-left   { flex: 1; overflow: hidden; }
 .hud-center { flex: 1; display: flex; justify-content: center; }
-.hud-right  { flex: 1; display: flex; justify-content: flex-end; }
+.hud-right  { flex: 1; display: flex; justify-content: flex-end; align-items: center; }
 
 .hud-title {
   font-size: var(--ep-base); font-weight: 600;
@@ -106,5 +106,8 @@
 }
 .ctrl-btn--wide.ctrl-primary { width: auto; height: 48px; font-size: 1rem; }
 
-/* Fullscreen: hide all controls except the exit-fs button */
-#controls.fs-mode .ctrl-btn:not(#ctrl-fs) { display: none; }
+/* Fullscreen: hide the entire controls bar */
+#player-container.fs-mode #controls { display: none; }
+
+/* HUD fullscreen button — slightly smaller than standard ctrl-btn */
+.hud-fs-btn { width: 38px; height: 38px; font-size: 1.1rem; margin-left: 1rem; }
