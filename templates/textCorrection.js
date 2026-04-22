@@ -62,12 +62,19 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._done = true
     const btn = document.getElementById('btn-check')
     if (btn) btn.disabled = true
+    // Lock wrapper dimensions so the canvas never shifts when the review panel appears
+    const wrapper = document.getElementById('corr-wrapper')
+    if (wrapper) {
+      const r = wrapper.getBoundingClientRect()
+      wrapper.style.width  = r.width  + 'px'
+      wrapper.style.height = r.height + 'px'
+    }
   }
 
   getReviewData() {
     const items = this._zones.map((z, i) => ({
       id:           `zone-${i}`,
-      label:        z.expected || `Zona ${i + 1}`,
+      label:        z.word || z.expected || `Zona ${i + 1}`,
       correct:      z.hit,
       earnedPoints: z.hit ? 10 : 0,
       maxPoints:    10,
@@ -122,18 +129,25 @@ export class TextCorrectionTemplate extends BaseTemplate {
     if (!wrapper) return
     const wr       = wrapper.getBoundingClientRect()
     const prevHits = preserveHits ? this._zones.map(z => z.hit) : []
+    const prevWords = preserveHits ? this._zones.map(z => z.word) : []
     this._zones    = []
+    const { textCorrect } = this.activity.content
     wrapper.querySelectorAll('.acc-zone').forEach((span, i) => {
       const sr     = span.getBoundingClientRect()
       const padX   = sr.width  * 0.25
       const padTop = sr.height * 0.50
+      const charIdx = span.dataset.index !== undefined ? parseInt(span.dataset.index, 10) : -1
+      const word    = preserveHits && prevWords[i]
+        ? prevWords[i]
+        : (charIdx >= 0 && textCorrect ? _wordAt(textCorrect, charIdx) : '')
       this._zones.push({
         x:        sr.left - wr.left - padX,
         y:        sr.top  - wr.top  - padTop,
         w:        sr.width  + padX * 2,
         h:        sr.height + padTop,          // bottom: +0 (no extension)
         hit:      prevHits[i] ?? false,
-        expected: span.dataset.correct || ''
+        expected: span.dataset.correct || '',
+        word
       })
     })
   }
@@ -310,10 +324,18 @@ function _buildHTML(orig, correct) {
   let html = ''
   for (let i = 0; i < orig.length; i++) {
     if (orig[i] !== correct[i]) {
-      html += `<span class="acc-zone" data-correct="${esc(correct[i])}">${esc(orig[i])}</span>`
+      html += `<span class="acc-zone" data-correct="${esc(correct[i])}" data-index="${i}">${esc(orig[i])}</span>`
     } else {
       html += esc(orig[i])
     }
   }
   return html
+}
+
+function _wordAt(text, idx) {
+  let start = idx
+  let end   = idx
+  while (start > 0 && /\S/.test(text[start - 1])) start--
+  while (end < text.length - 1 && /\S/.test(text[end + 1])) end++
+  return text.slice(start, end + 1)
 }

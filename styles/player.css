@@ -44,18 +44,14 @@
   padding: 0;
 }
 
-/* Review panel — floats over stage so it never affects main-area width */
+/* Review panel — shares flex row with main-area (frozenCanvas: side by side) */
 #review-panel { display: none; }
 #review-panel.active {
   display: flex;
-  position: absolute;
-  top: 0; bottom: 0; right: 0;
   width: 280px; min-width: 240px;
   overflow-y: auto;
-  border-left: 1px solid rgba(255,255,255,0.12);
-  background: rgba(10,10,30,0.92);
-  backdrop-filter: blur(14px);
-  z-index: 20;
+  border-left: 1px solid var(--bs-border-color);
+  background: rgba(0,0,0,0.28);
 }
 
 /* ── HUD internals ──────────────────────────────────────── */

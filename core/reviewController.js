@@ -85,7 +85,7 @@ export const ReviewController = {
   /* ── frozenCanvas strategy ───────────────────────────────────── */
 
   _startFrozenCanvas() {
-    /* Panel floats (position:absolute) so main-area/canvas never change size */
+    /* corr-wrapper is size-locked in freeze(), so panel can share flex space safely */
     this._reviewEl.classList.add('active')
     this._renderFrozenPanel()
   },
