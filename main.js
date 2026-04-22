@@ -27,3 +27,9 @@ Router.on('/editor/:template', ({ template }) => {
 Router.on('/play/:id',         ({ id })       => renderPlayerView(app, id))
 
 Router.init()
+
+// Pull from Supabase on startup; re-render home if it's the active view
+Store.sync().then(() => {
+  const hash = window.location.hash.replace('#', '') || '/home'
+  if (hash === '/home' || hash === '/') renderHome(app)
+})
