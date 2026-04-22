@@ -153,10 +153,12 @@ function _buildPreviewHTML(original, correct) {
   const parts = []
   for (let i = 0; i < original.length; i++) {
     if (original[i] !== correct[i]) {
-      const blank = original[i] === '_'
-      const span  = blank
+      const blank    = original[i] === '_'
+      const absorbSp = blank && i + 1 < original.length && original[i+1] === ' ' && correct[i+1] === ' '
+      const span     = blank
         ? `<span class="prev-zone prev-zone--blank">_</span>`
         : `<span class="prev-zone">${esc(correct[i])}</span>`
+      if (absorbSp) i++
       if (blank && parts.length > 0 && parts[parts.length - 1].type === 'text') {
         const prev      = parts.pop()
         const lastSpace = prev.html.lastIndexOf(' ')
