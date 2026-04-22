@@ -10,8 +10,8 @@ import { renderPlayerView }              from './views/playerView.js'
 import { renderQuizEditor }              from './editors/quizEditor.js'
 import { renderTextCorrectionEditor }    from './editors/textCorrectionEditor.js'
 
-Registry.register('quiz',           QuizTemplate)
-Registry.register('textCorrection', TextCorrectionTemplate)
+Registry.register('quiz',           QuizTemplate,           { label: 'Quiz',                  icon: '❓' })
+Registry.register('textCorrection', TextCorrectionTemplate, { label: 'Corrección de textos',   icon: '✍️' })
 Store.seed(activities)
 
 const app = document.getElementById('app')

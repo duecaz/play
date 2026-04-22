@@ -1,3 +1,5 @@
+import { esc } from '../core/html.js'
+
 export function renderStartScreen(container, activity, { onStart } = {}) {
   const { title, subtitle, content, config } = activity
   const total = content.items?.length ?? null
@@ -6,8 +8,8 @@ export function renderStartScreen(container, activity, { onStart } = {}) {
     <div class="start-screen fade-in">
       <div class="start-content">
         <div class="start-badge">Actividad</div>
-        <h1 class="start-title">${_esc(title)}</h1>
-        ${subtitle ? `<p class="start-subtitle">${_esc(subtitle)}</p>` : ''}
+        <h1 class="start-title">${esc(title)}</h1>
+        ${subtitle ? `<p class="start-subtitle">${esc(subtitle)}</p>` : ''}
         <div class="start-meta">
           ${total !== null ? `<span>${total} pregunta${total !== 1 ? 's' : ''}</span>` : ''}
           ${config.timer ? `<span>${config.timer} segundos</span>` : ''}
@@ -20,9 +22,3 @@ export function renderStartScreen(container, activity, { onStart } = {}) {
   document.getElementById('btn-start').addEventListener('click', onStart)
 }
 
-function _esc(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-}

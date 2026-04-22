@@ -1,7 +1,7 @@
-import Store  from '../core/storage.js'
-import Router from '../core/router.js'
-
-const LETTERS = ['A', 'B', 'C', 'D']
+import Store           from '../core/storage.js'
+import Router          from '../core/router.js'
+import { esc }         from '../core/html.js'
+import { LETTERS }     from '../core/constants.js'
 
 let _questions = []
 
@@ -90,7 +90,7 @@ function _renderQuestions() {
         <label class="field-label">Pregunta <span class="required">*</span></label>
         <textarea class="field-input field-textarea q-text" data-qi="${qi}"
           placeholder="Escribe la pregunta aquí..."
-          rows="2">${_esc(q.question)}</textarea>
+          rows="2">${esc(q.question)}</textarea>
       </div>
 
       <div class="options-grid">
@@ -112,7 +112,7 @@ function _renderQuestions() {
               data-qi="${qi}"
               data-oi="${oi}"
               placeholder="Opción ${LETTERS[oi]}"
-              value="${_esc(opt)}"
+              value="${esc(opt)}"
               maxlength="120"
             >
           </div>
@@ -220,8 +220,4 @@ function _save(container) {
 /* ── Helpers ─────────────────────────────────────────────── */
 function newQuestion() {
   return { question: '', options: ['', '', '', ''], correctIndex: 0 }
-}
-
-function _esc(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }

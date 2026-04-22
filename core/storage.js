@@ -11,16 +11,24 @@ const Store = {
   },
 
   save(activity) {
-    const all = this.list()
-    const idx = all.findIndex(a => a.id === activity.id)
-    if (idx >= 0) all[idx] = activity
-    else all.push(activity)
-    localStorage.setItem(KEY, JSON.stringify(all))
+    try {
+      const all = this.list()
+      const idx = all.findIndex(a => a.id === activity.id)
+      if (idx >= 0) all[idx] = activity
+      else all.push(activity)
+      localStorage.setItem(KEY, JSON.stringify(all))
+    } catch (e) {
+      console.error('[Store] save failed:', e)
+    }
     return activity
   },
 
   delete(id) {
-    localStorage.setItem(KEY, JSON.stringify(this.list().filter(a => a.id !== id)))
+    try {
+      localStorage.setItem(KEY, JSON.stringify(this.list().filter(a => a.id !== id)))
+    } catch (e) {
+      console.error('[Store] delete failed:', e)
+    }
   },
 
   uid() {

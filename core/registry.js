@@ -1,17 +1,24 @@
-/* Template registry — allows plugins / dynamic registration */
+/* Template registry — maps name → class + metadata */
 const Registry = {
   _map: new Map(),
 
-  register(name, TemplateClass) {
-    this._map.set(name, TemplateClass)
+  register(name, TemplateClass, meta = {}) {
+    this._map.set(name, { TemplateClass, meta })
   },
 
   get(name) {
-    if (!this._map.has(name)) throw new Error(`[Registry] Template "${name}" not found`)
-    return this._map.get(name)
+    const entry = this._map.get(name)
+    if (!entry) throw new Error(`[Registry] Template "${name}" not found`)
+    return entry.TemplateClass
   },
 
-  list() { return [...this._map.keys()] }
+  getMeta(name) {
+    return this._map.get(name)?.meta ?? {}
+  },
+
+  list() {
+    return [...this._map.entries()].map(([id, { meta }]) => ({ id, ...meta }))
+  }
 }
 
 export default Registry

@@ -1,7 +1,7 @@
-import Store  from '../core/storage.js'
-import Router from '../core/router.js'
-
-const TEMPLATE_LABELS = { quiz: 'Quiz', detectErrors: 'Detectar errores', match: 'Relacionar' }
+import Store    from '../core/storage.js'
+import Router   from '../core/router.js'
+import Registry from '../core/registry.js'
+import { esc }  from '../core/html.js'
 
 export function renderHome(container) {
   container.className = 'view-home'
@@ -53,7 +53,8 @@ export function renderHome(container) {
 }
 
 function activityCard(a) {
-  const label = TEMPLATE_LABELS[a.template] || a.template
+  const meta  = Registry.getMeta(a.template)
+  const label = meta.label || a.template
   const count = a.content?.items?.length || 0
   return `
     <div class="activity-card" data-id="${a.id}">
@@ -61,8 +62,8 @@ function activityCard(a) {
         <span class="card-template-badge">${label}</span>
         <button class="btn-delete-card icon-btn" data-id="${a.id}" title="Eliminar">✕</button>
       </div>
-      <h3 class="card-title">${_esc(a.title)}</h3>
-      ${a.subtitle ? `<p class="card-subtitle">${_esc(a.subtitle)}</p>` : ''}
+      <h3 class="card-title">${esc(a.title)}</h3>
+      ${a.subtitle ? `<p class="card-subtitle">${esc(a.subtitle)}</p>` : ''}
       <div class="card-meta">
         <span>📝 ${count} pregunta${count !== 1 ? 's' : ''}</span>
         ${a.config?.timer ? `<span>⏱ ${a.config.timer}s</span>` : ''}
@@ -70,8 +71,4 @@ function activityCard(a) {
       <button class="btn-play-card" data-id="${a.id}">▶ Jugar</button>
     </div>
   `
-}
-
-function _esc(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }

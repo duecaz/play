@@ -1,9 +1,7 @@
-import { BaseTemplate } from './base.js'
-import Events           from '../core/events.js'
-
-const PX = 16    // horizontal padding around zone
-const PY_TOP = 42  // upward padding (tilde stroke goes above letter)
-const PY_BOT = 8   // downward padding
+import { BaseTemplate }                        from './base.js'
+import Events                                   from '../core/events.js'
+import { esc }                                  from '../core/html.js'
+import { TC_PX, TC_PY_TOP, TC_PY_BOT }         from '../core/constants.js'
 
 export class TextCorrectionTemplate extends BaseTemplate {
   static requiresTools = ['pen']
@@ -52,7 +50,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
     this.container.innerHTML = `
       <div class="corr-screen fade-in">
-        <p class="corr-instruction">${_esc(instruction || 'Pon las tildes que faltan')}</p>
+        <p class="corr-instruction">${esc(instruction || 'Pon las tildes que faltan')}</p>
         <div class="corr-wrapper" id="corr-wrapper">
           <div class="corr-text" id="corr-text">${textHTML}</div>
           <canvas class="corr-canvas" id="corr-canvas"></canvas>
@@ -88,10 +86,10 @@ export class TextCorrectionTemplate extends BaseTemplate {
     wrapper.querySelectorAll('.acc-zone').forEach(span => {
       const sr = span.getBoundingClientRect()
       this._zones.push({
-        x:   sr.left - wr.left - PX,
-        y:   sr.top  - wr.top  - PY_TOP,
-        w:   sr.width  + PX * 2,
-        h:   sr.height + PY_TOP + PY_BOT,
+        x:   sr.left - wr.left - TC_PX,
+        y:   sr.top  - wr.top  - TC_PY_TOP,
+        w:   sr.width  + TC_PX * 2,
+        h:   sr.height + TC_PY_TOP + TC_PY_BOT,
         hit: false
       })
     })
@@ -217,19 +215,10 @@ function _buildHTML(orig, correct) {
   let html = ''
   for (let i = 0; i < orig.length; i++) {
     if (orig[i] !== correct[i]) {
-      // Show unaccented char; data-correct stores the accented version for reveal
-      html += `<span class="acc-zone" data-correct="${_esc(correct[i])}">${_esc(orig[i])}</span>`
+      html += `<span class="acc-zone" data-correct="${esc(correct[i])}">${esc(orig[i])}</span>`
     } else {
-      html += _esc(orig[i])
+      html += esc(orig[i])
     }
   }
   return html
-}
-
-function _esc(s) {
-  return String(s)
-    .replace(/&/g,  '&amp;')
-    .replace(/</g,  '&lt;')
-    .replace(/>/g,  '&gt;')
-    .replace(/"/g,  '&quot;')
 }

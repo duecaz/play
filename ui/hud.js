@@ -1,3 +1,5 @@
+import { esc } from '../core/html.js'
+
 let _timerEl = null
 let _scoreEl = null
 
@@ -6,7 +8,7 @@ export function renderHUD(container, activity) {
 
   container.innerHTML = `
     <div class="hud-left">
-      <span class="hud-title">${_esc(title)}</span>
+      <span class="hud-title">${esc(title)}</span>
     </div>
     <div class="hud-center">
       ${config.showTimer ? `
@@ -44,8 +46,4 @@ export function updateScore(score) {
   /* force reflow so animation restarts */
   void _scoreEl.offsetWidth
   _scoreEl.classList.add('score-bump')
-}
-
-function _esc(str) {
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }

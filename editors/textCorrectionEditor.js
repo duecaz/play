@@ -1,5 +1,6 @@
-import Store  from '../core/storage.js'
-import Router from '../core/router.js'
+import Store    from '../core/storage.js'
+import Router   from '../core/router.js'
+import { esc }  from '../core/html.js'
 
 export function renderTextCorrectionEditor(container) {
   container.className = 'view-editor'
@@ -103,8 +104,8 @@ export function renderTextCorrectionEditor(container) {
 function _buildPreviewHTML(orig, correct) {
   let html = ''
   for (let i = 0; i < orig.length; i++) {
-    if (orig[i] !== correct[i]) html += `<span class="prev-zone">${_esc(correct[i])}</span>`
-    else html += _esc(orig[i])
+    if (orig[i] !== correct[i]) html += `<span class="prev-zone">${esc(correct[i])}</span>`
+    else html += esc(orig[i])
   }
   return html
 }
@@ -159,6 +160,3 @@ function _save() {
   Router.navigate(`/play/${activity.id}`)
 }
 
-function _esc(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}

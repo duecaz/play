@@ -1,7 +1,7 @@
-import { BaseTemplate } from './base.js'
-import Events           from '../core/events.js'
-
-const LETTERS = ['A', 'B', 'C', 'D']
+import { BaseTemplate }            from './base.js'
+import Events                       from '../core/events.js'
+import { esc }                      from '../core/html.js'
+import { LETTERS, FEEDBACK_DELAY }  from '../core/constants.js'
 
 export class QuizTemplate extends BaseTemplate {
   static requiresTools = []
@@ -59,14 +59,14 @@ export class QuizTemplate extends BaseTemplate {
 
         <div class="quiz-question">
           ${item.image ? `<img class="quiz-image" src="${item.image}" alt="">` : ''}
-          <p>${_esc(item.question)}</p>
+          <p>${esc(item.question)}</p>
         </div>
 
         <div class="quiz-options">
           ${options.map((opt, i) => `
-            <button class="quiz-option" data-value="${_esc(opt)}">
+            <button class="quiz-option" data-value="${esc(opt)}">
               <span class="option-letter">${LETTERS[i]}</span>
-              <span class="option-text">${_esc(opt)}</span>
+              <span class="option-text">${esc(opt)}</span>
             </button>
           `).join('')}
         </div>
@@ -108,7 +108,7 @@ export class QuizTemplate extends BaseTemplate {
     this._feedbackTimeout = setTimeout(() => {
       this._currentIndex++
       this._render()
-    }, 1600)
+    }, FEEDBACK_DELAY)
   }
 
   _complete() {
@@ -135,12 +135,4 @@ function _shuffle(arr) {
     [arr[i], arr[j]] = [arr[j], arr[i]]
   }
   return arr
-}
-
-function _esc(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
 }
