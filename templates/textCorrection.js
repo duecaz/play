@@ -44,11 +44,13 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
   onResize() {
     if (!this._canvas) return
+    this._sizeCanvas()
     if (this._done) {
-      this._sizeCanvas()
-      this._recalcZones(true)   // preserve hits after check
+      this._recalcZones(true)
+      this._redrawResults()
     } else {
       this._recalcZones()
+      this._drawZoneBorders()
     }
   }
 
@@ -94,6 +96,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
     this._sizeCanvas()
     this._recalcZones()
+    this._drawZoneBorders()
     this._bind()
 
     document.getElementById('btn-check')
@@ -127,6 +130,37 @@ export class TextCorrectionTemplate extends BaseTemplate {
     })
   }
 
+  /* Draw dashed detection-zone borders on canvas (debug aid) */
+  _drawZoneBorders() {
+    if (!this._ctx || !this._zones.length) return
+    const ctx = this._ctx
+    ctx.save()
+    ctx.strokeStyle = 'rgba(74,144,226,0.55)'
+    ctx.lineWidth   = 1.5
+    ctx.setLineDash([4, 3])
+    this._zones.forEach(z => ctx.strokeRect(z.x, z.y, z.w, z.h))
+    ctx.setLineDash([])
+    ctx.restore()
+  }
+
+  /* Redraw result circles using current zone positions (called after resize) */
+  _redrawResults() {
+    if (!this._ctx || !this._done) return
+    const ctx = this._ctx
+    ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
+    this._zones.forEach(z => {
+      const cx = z.x + z.w / 2
+      const cy = z.y + z.h / 2 + 20
+      ctx.beginPath()
+      ctx.arc(cx, cy, 20, 0, Math.PI * 2)
+      ctx.fillStyle   = z.hit ? 'rgba(76,175,80,0.3)' : 'rgba(244,67,54,0.3)'
+      ctx.fill()
+      ctx.strokeStyle = z.hit ? '#4caf50' : '#f44336'
+      ctx.lineWidth   = 2.5
+      ctx.stroke()
+    })
+  }
+
   /* ── Pointer drawing ─────────────────────────────────────── */
   _bind() {
     const c = this._canvas
@@ -148,7 +182,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
   }
 
   _pos(e) {
-    const r     = this._canvas.getBoundingClientRect()
+    const r      = this._canvas.getBoundingClientRect()
     const scaleX = this._canvas.width  / r.width
     const scaleY = this._canvas.height / r.height
     return { x: (e.clientX - r.left) * scaleX, y: (e.clientY - r.top) * scaleY }
@@ -195,13 +229,14 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._done = true
     this._recalcZones()   // fresh positions, hits reset to false
 
+    /* Only the START POINT of each stroke determines a hit */
     this._strokes.forEach(stroke => {
-      stroke.forEach(pt => {
-        this._zones.forEach(z => {
-          if (!z.hit && pt.x >= z.x && pt.x <= z.x + z.w && pt.y >= z.y && pt.y <= z.y + z.h) {
-            z.hit = true
-          }
-        })
+      if (!stroke.length) return
+      const pt = stroke[0]
+      this._zones.forEach(z => {
+        if (!z.hit && pt.x >= z.x && pt.x <= z.x + z.w && pt.y >= z.y && pt.y <= z.y + z.h) {
+          z.hit = true
+        }
       })
     })
 

@@ -89,6 +89,9 @@ export const ReviewController = {
     stage.classList.add('review-mode--canvas')
     this._reviewEl.classList.add('active')
     this._renderFrozenPanel()
+    /* After layout reflows (panel takes width), tell template to resize canvas
+       and redraw result circles at the new correct positions */
+    requestAnimationFrame(() => this._template?.onResize?.())
   },
 
   _renderFrozenPanel() {
