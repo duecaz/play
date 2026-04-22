@@ -71,3 +71,13 @@
   width: 66px; height: 66px; font-size: 1.8rem;
 }
 .ctrl-btn.ctrl-primary:hover { filter: brightness(0.9); }
+
+/* Wide text buttons shown in end-of-game controls */
+.ctrl-btn--wide {
+  width: auto; height: 48px; border-radius: 24px;
+  padding: 0 1.5rem; font-size: 1rem;
+}
+.ctrl-btn--wide.ctrl-primary { width: auto; height: 48px; font-size: 1rem; }
+
+/* Fullscreen: hide all controls except the exit-fs button */
+#controls.fs-mode .ctrl-btn:not(#ctrl-fs) { display: none; }

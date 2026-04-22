@@ -1,22 +1,13 @@
-import Store    from '../core/storage.js'
-import Router   from '../core/router.js'
-import { esc }  from '../core/html.js'
+import { BaseEditor } from './base.js'
+import Store          from '../core/storage.js'
+import { esc }        from '../core/html.js'
 
-export function renderTextCorrectionEditor(container) {
-  container.className = 'view-editor'
+export class TextCorrectionEditor extends BaseEditor {
+  get title()    { return 'Corrección de textos' }
+  get subtitle() { return 'Escribe el texto con y sin tildes' }
 
-  container.innerHTML = `
-    <div class="editor-header">
-      <button class="btn btn-outline-secondary rounded-pill" id="btn-back">← Volver</button>
-      <div>
-        <h1 class="fs-4 fw-bold mb-0">Corrección de textos</h1>
-        <p class="section-hint mt-1">Escribe el texto con y sin tildes</p>
-      </div>
-      <button class="btn btn-primary" id="btn-save">Crear actividad ▶</button>
-    </div>
-
-    <div class="editor-body">
-
+  renderBody() {
+    return `
       <section class="editor-section">
         <h2 class="section-label">Información</h2>
         <div class="mb-3">
@@ -57,23 +48,20 @@ export function renderTextCorrectionEditor(container) {
         <p id="char-count" class="char-count"></p>
         <div id="corr-preview" class="corr-preview-box hidden"></div>
       </section>
+    `
+  }
 
-      <div id="editor-error" class="editor-error hidden"></div>
+  _bindBody() {
+    document.getElementById('f-original').addEventListener('input', () => this._updatePreview())
+    document.getElementById('f-correct').addEventListener('input',  () => this._updatePreview())
+  }
 
-    </div>
-  `
+  _updatePreview() {
+    const orig    = document.getElementById('f-original').value
+    const correct = document.getElementById('f-correct').value
+    const countEl = document.getElementById('char-count')
+    const preview = document.getElementById('corr-preview')
 
-  document.getElementById('btn-back').addEventListener('click', () => Router.navigate('/create'))
-  document.getElementById('btn-save').addEventListener('click', () => _save())
-
-  const origEl    = document.getElementById('f-original')
-  const correctEl = document.getElementById('f-correct')
-  const countEl   = document.getElementById('char-count')
-  const preview   = document.getElementById('corr-preview')
-
-  function updatePreview() {
-    const orig    = origEl.value
-    const correct = correctEl.value
     if (!orig && !correct) { countEl.textContent = ''; preview.classList.add('hidden'); return }
 
     const diff = orig.length - correct.length
@@ -94,65 +82,59 @@ export function renderTextCorrectionEditor(container) {
     }
   }
 
-  origEl.addEventListener('input', updatePreview)
-  correctEl.addEventListener('input', updatePreview)
+  validate() {
+    const orig    = document.getElementById('f-original').value
+    const correct = document.getElementById('f-correct').value
+    const errors  = []
+
+    if (!document.getElementById('f-title').value.trim())
+      errors.push('El título es obligatorio.')
+    if (!orig)    errors.push('El texto sin tildes es obligatorio.')
+    if (!correct) errors.push('El texto con tildes es obligatorio.')
+    if (orig && correct && orig.length !== correct.length)
+      errors.push(`Los textos deben tener el mismo número de caracteres (sin tildes: ${orig.length}, con tildes: ${correct.length}).`)
+
+    if (orig && correct && orig.length === correct.length) {
+      let zones = 0
+      for (let i = 0; i < orig.length; i++) if (orig[i] !== correct[i]) zones++
+      if (zones === 0) errors.push('Los textos son idénticos. Comprueba que el segundo texto tenga las tildes.')
+    }
+    return errors
+  }
+
+  buildActivity() {
+    const title       = document.getElementById('f-title').value.trim()
+    const subtitle    = document.getElementById('f-subtitle').value.trim()
+    const timer       = parseInt(document.getElementById('f-timer').value, 10) || 120
+    const orig        = document.getElementById('f-original').value
+    const correct     = document.getElementById('f-correct').value
+    const instruction = document.getElementById('f-instruction').value.trim()
+
+    let zoneCount = 0
+    for (let i = 0; i < orig.length; i++) if (orig[i] !== correct[i]) zoneCount++
+
+    return {
+      id:       Store.uid(),
+      title,
+      subtitle,
+      template: 'textCorrection',
+      config:   { timer, showTimer: true, showScore: true, sound: false, skin: 'default' },
+      content: {
+        textOriginal: orig,
+        textCorrect:  correct,
+        instruction:  instruction || 'Pon las tildes que faltan',
+        maxScore:     zoneCount * 10
+      }
+    }
+  }
 }
 
 function _buildPreviewHTML(orig, correct) {
   let html = ''
   for (let i = 0; i < orig.length; i++) {
-    if (orig[i] !== correct[i]) html += `<span class="prev-zone">${esc(correct[i])}</span>`
-    else html += esc(orig[i])
+    html += orig[i] !== correct[i]
+      ? `<span class="prev-zone">${esc(correct[i])}</span>`
+      : esc(orig[i])
   }
   return html
-}
-
-function _save() {
-  const title       = document.getElementById('f-title').value.trim()
-  const subtitle    = document.getElementById('f-subtitle').value.trim()
-  const timer       = parseInt(document.getElementById('f-timer').value, 10) || 120
-  const orig        = document.getElementById('f-original').value
-  const correct     = document.getElementById('f-correct').value
-  const instruction = document.getElementById('f-instruction').value.trim()
-
-  const errorEl = document.getElementById('editor-error')
-  const errors  = []
-
-  if (!title)   errors.push('El título es obligatorio.')
-  if (!orig)    errors.push('El texto sin tildes es obligatorio.')
-  if (!correct) errors.push('El texto con tildes es obligatorio.')
-  if (orig && correct && orig.length !== correct.length)
-    errors.push(`Los textos deben tener el mismo número de caracteres (sin tildes: ${orig.length}, con tildes: ${correct.length}).`)
-
-  let zoneCount = 0
-  if (orig && correct && orig.length === correct.length) {
-    for (let i = 0; i < orig.length; i++) if (orig[i] !== correct[i]) zoneCount++
-    if (zoneCount === 0) errors.push('Los textos son idénticos. Comprueba que el segundo texto tenga las tildes.')
-  }
-
-  if (errors.length) {
-    errorEl.innerHTML = errors.map(e => `<p>⚠ ${e}</p>`).join('')
-    errorEl.classList.remove('hidden')
-    errorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    return
-  }
-
-  errorEl.classList.add('hidden')
-
-  const activity = {
-    id:       Store.uid(),
-    title,
-    subtitle,
-    template: 'textCorrection',
-    config:   { timer, showTimer: true, showScore: true, sound: false, skin: 'default' },
-    content: {
-      textOriginal: orig,
-      textCorrect:  correct,
-      instruction:  instruction || 'Pon las tildes que faltan',
-      maxScore:     zoneCount * 10
-    }
-  }
-
-  Store.save(activity)
-  Router.navigate(`/play/${activity.id}`)
 }

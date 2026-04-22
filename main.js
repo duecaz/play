@@ -7,8 +7,8 @@ import { activities }                    from './data/activities.js'
 import { renderHome }                    from './views/home.js'
 import { renderTemplateSelector }        from './views/templateSelector.js'
 import { renderPlayerView }              from './views/playerView.js'
-import { renderQuizEditor }              from './editors/quizEditor.js'
-import { renderTextCorrectionEditor }    from './editors/textCorrectionEditor.js'
+import { QuizEditor }                    from './editors/quizEditor.js'
+import { TextCorrectionEditor }          from './editors/textCorrectionEditor.js'
 
 Registry.register('quiz',           QuizTemplate,           { label: 'Quiz',                  icon: '❓' })
 Registry.register('textCorrection', TextCorrectionTemplate, { label: 'Corrección de textos',   icon: '✍️' })
@@ -19,8 +19,8 @@ const app = document.getElementById('app')
 Router.on('/home',             ()             => renderHome(app))
 Router.on('/create',           ()             => renderTemplateSelector(app))
 Router.on('/editor/:template', ({ template }) => {
-  if (template === 'textCorrection') renderTextCorrectionEditor(app)
-  else renderQuizEditor(app, template)
+  if (template === 'textCorrection') new TextCorrectionEditor(app).render()
+  else new QuizEditor(app).render()
 })
 Router.on('/play/:id',         ({ id })       => renderPlayerView(app, id))
 
