@@ -42,6 +42,17 @@ export class HUD {
     this._fsBtn   = document.getElementById('hud-fs')
     this._fsBtn.addEventListener('click', () => this._toggleFs())
 
+    const timerDiv = document.getElementById('hud-timer')
+    if (timerDiv) {
+      let clicks = 0, tId = null
+      timerDiv.addEventListener('click', () => {
+        clicks++
+        clearTimeout(tId)
+        tId = setTimeout(() => { clicks = 0 }, 400)
+        if (clicks >= 3) { clicks = 0; document.dispatchEvent(new CustomEvent('debug:zones')) }
+      })
+    }
+
     if (!this._onFsChange) {
       this._onFsChange = () => this._syncFs()
       document.addEventListener('fullscreenchange', this._onFsChange)

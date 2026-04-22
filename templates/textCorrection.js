@@ -22,6 +22,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._onDown  = null
     this._onMove  = null
     this._onUp    = null
+    this._debugZones = false
+    this._onDebug    = null
   }
 
   init(activity, container, callbacks) {
@@ -29,11 +31,22 @@ export class TextCorrectionTemplate extends BaseTemplate {
   }
 
   start() {
-    this._done    = false
-    this._strokes = []
-    this._zones   = []
-    this._checkW  = 0
-    this._checkH  = 0
+    this._done       = false
+    this._debugZones = false
+    this._strokes    = []
+    this._zones      = []
+    this._checkW     = 0
+    this._checkH     = 0
+
+    this._onDebug = () => {
+      this._debugZones = !this._debugZones
+      if (!this._done) {
+        this._ctx?.clearRect(0, 0, this._canvas?.width, this._canvas?.height)
+        if (this._debugZones) this._drawZoneBorders()
+      }
+    }
+    document.addEventListener('debug:zones', this._onDebug)
+
     this._render()
   }
 
@@ -42,6 +55,10 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
   destroy() {
     this._unbind()
+    if (this._onDebug) {
+      document.removeEventListener('debug:zones', this._onDebug)
+      this._onDebug = null
+    }
     super.destroy()
   }
 
@@ -53,7 +70,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
       this._redrawResults()
     } else {
       this._recalcZones()
-      this._drawZoneBorders()
+      if (this._debugZones) this._drawZoneBorders()
     }
   }
 
@@ -110,7 +127,6 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
     this._sizeCanvas()
     this._recalcZones()
-    this._drawZoneBorders()
     this._bind()
 
     document.getElementById('btn-check').addEventListener('click', () => this._check())
