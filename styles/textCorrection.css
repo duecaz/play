@@ -1,18 +1,18 @@
 /* ── Correction template ────────────────────────────────── */
 .corr-screen {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  width: 100%; height: 100%; gap: 2.5rem; padding: 2.5rem;
+  width: 100%; height: 100%; gap: 1.25rem; padding: 1.25rem 2rem;
 }
-.corr-instruction { font-size: var(--ep-lg); color: rgba(255,255,255,0.55); text-align: center; }
+.corr-instruction { font-size: var(--ep-base); color: rgba(255,255,255,0.55); text-align: center; }
 
 .corr-wrapper {
   position: relative;
   background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 20px; padding: 4rem 2.5rem;
+  border-radius: 16px; padding: 2rem 2rem;
   width: 100%; max-width: 1080px;
 }
 .corr-text {
-  font-size: var(--ep-xl); font-weight: 600; line-height: 2.4;
+  font-size: clamp(1.15rem, 2.2vw, 1.9rem); font-weight: 600; line-height: 2.2;
   text-align: center; position: relative; z-index: 1;
   pointer-events: none; user-select: none;
 }
@@ -40,7 +40,7 @@
 .acc-zone--blank.zone-ok   { color: var(--ep-correct); border-bottom-color: var(--ep-correct); background: var(--ep-correct-bg); }
 .acc-zone--blank.zone-miss { color: var(--ep-wrong);   border-bottom-color: var(--ep-wrong);   background: var(--ep-wrong-bg); }
 
-.btn-corr-check { min-width: 280px; font-size: var(--ep-lg); font-weight: 700; }
+.btn-corr-check { min-width: 200px; font-size: var(--ep-base); font-weight: 700; }
 
 /* ── Editor preview ─────────────────────────────────────── */
 .corr-preview-box {

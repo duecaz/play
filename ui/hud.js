@@ -30,7 +30,6 @@ export class HUD {
       <div class="hud-right">
         ${presentation.showScore ? `
           <div class="hud-score">
-            <span class="score-label">Puntos</span>
             <span class="score-value" id="score-value">0</span>
             <span class="score-pct" id="score-pct"></span>
           </div>
@@ -66,7 +65,7 @@ export class HUD {
 
   setScore(score, maxScore) {
     if (!this._scoreEl) return
-    this._scoreEl.textContent = score
+    this._scoreEl.textContent = maxScore > 0 ? `${score} / ${maxScore}` : score
     if (this._pctEl) {
       this._pctEl.textContent = maxScore > 0
         ? Math.round(score / maxScore * 100) + '%'

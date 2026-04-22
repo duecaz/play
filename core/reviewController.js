@@ -94,17 +94,12 @@ export const ReviewController = {
   },
 
   _renderFrozenPanel() {
-    const data  = this._data
-    const score = this._computeScore()
+    const data = this._data
 
     this._reviewEl.innerHTML = `
       <div class="rv-panel">
         <div class="rv-header">
           <span class="rv-badge-label">Revisión</span>
-          <div class="rv-score">
-            <span class="rv-score-val">${score}</span>
-            <span class="rv-score-max">/ ${data.maxScore} pts</span>
-          </div>
         </div>
 
         <div class="rv-items">
@@ -147,17 +142,12 @@ export const ReviewController = {
 
   _renderItemListPanel() {
     const data      = this._data
-    const score     = this._computeScore()
     const scrollTop = this._mainEl.querySelector('.rv-list-items')?.scrollTop ?? 0
 
     this._mainEl.innerHTML = `
       <div class="rv-list fade-in">
         <div class="rv-list-header">
           <h2 class="rv-list-title">Revisión de respuestas</h2>
-          <div class="rv-score">
-            <span class="rv-score-val">${score}</span>
-            <span class="rv-score-max">/ ${data.maxScore} pts</span>
-          </div>
         </div>
 
         <div class="rv-list-items">

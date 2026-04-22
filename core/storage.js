@@ -41,8 +41,11 @@ const Store = {
     try {
       const rows = await sbList('activities')
       if (!rows.length) return
-      const migrated = rows.map(r => _migrate(r.data))
-      localStorage.setItem(KEY, JSON.stringify(migrated))
+      // Merge: remote wins for shared IDs, local-only entries survive
+      const localMap  = Object.fromEntries(this.list().map(a => [a.id, a]))
+      const remoteMap = Object.fromEntries(rows.map(r => [r.id, _migrate(r.data)]))
+      const merged    = Object.values({ ...localMap, ...remoteMap })
+      localStorage.setItem(KEY, JSON.stringify(merged))
     } catch (e) {
       console.warn('[Store] sync failed, using local cache:', e)
     }

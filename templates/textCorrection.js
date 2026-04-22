@@ -294,26 +294,18 @@ export class TextCorrectionTemplate extends BaseTemplate {
         span.classList.add(this._zones[i]?.hit ? 'zone-ok' : 'zone-miss')
       })
 
-    const ctx = this._ctx
-    this._zones.forEach(z => {
-      const cx = z.x + z.w / 2
-      const cy = z.y + z.h / 2 + 20
-      ctx.beginPath()
-      ctx.arc(cx, cy, 20, 0, Math.PI * 2)
-      ctx.fillStyle   = z.hit ? 'rgba(76,175,80,0.3)' : 'rgba(244,67,54,0.3)'
-      ctx.fill()
-      ctx.strokeStyle = z.hit ? '#4caf50' : '#f44336'
-      ctx.lineWidth   = 2.5
-      ctx.stroke()
-    })
+    /* Redraw: clear canvas → trazos → círculos (strokes always visible) */
+    this._redrawResults()
 
     const btnCheck = document.getElementById('btn-check')
     if (btnCheck) {
-      btnCheck.textContent = `${correct} / ${total} tildes correctas ✓`
+      btnCheck.textContent = `${correct} / ${total} correctas ✓`
       btnCheck.disabled    = true
     }
 
-    if (correct > 0) this._onScore?.(correct * 10)
+    const penaltyRatio = this.activity.scoring?.penaltyRatio ?? 0
+    const netScore     = correct * 10 - (total - correct) * 10 * penaltyRatio
+    if (netScore !== 0) this._onScore?.(netScore)
     Events.emit('answer:correct', { correct, total })
     setTimeout(() => this._onComplete?.(), 150)
   }
