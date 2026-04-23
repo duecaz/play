@@ -15,8 +15,7 @@
 /* Prevent comma/punctuation zones from orphaning to a new line */
 .tc-nb { white-space: nowrap; }
 .corr-text {
-  --corr-fs: clamp(1.15rem, 2.2vw, 1.9rem);
-  font-size: var(--corr-fs); font-weight: 600; line-height: 2.2;
+  font-size: clamp(1.15rem, 2.2vw, 1.9rem); font-weight: 600; line-height: 2.2;
   text-align: center; position: relative; z-index: 1;
   pointer-events: none; user-select: none;
   overflow-wrap: break-word; word-break: break-word;
@@ -33,23 +32,15 @@
 .acc-zone.zone-ok   { color: var(--ep-correct); background: var(--ep-correct-bg); border-radius: 4px; padding: 0 2px; }
 .acc-zone.zone-miss { color: var(--ep-wrong);   background: var(--ep-wrong-bg);   border-radius: 4px; padding: 0 2px; }
 
-/* Blank comma zone — stays 0-width in ALL states (no layout shift ever).
-   After check, a ::before overlay shows the comma without affecting flow. */
+/* Blank comma zone — visibility:hidden keeps natural comma width always so no
+   reflow occurs when zone-ok/zone-miss make it visible after check.
+   padding pre-included matches zone-ok/zone-miss so it never shifts layout. */
 .acc-zone--blank {
-  display: inline; font-size: 0; color: transparent;
-  position: relative;
+  display: inline; visibility: hidden;
+  padding: 0 2px; border-radius: 4px;
 }
-.acc-zone--blank.zone-ok::before,
-.acc-zone--blank.zone-miss::before {
-  content: attr(data-correct);
-  position: absolute;
-  font-size: var(--corr-fs);
-  top: 0; left: -0.1em;
-  border-radius: 2px; padding: 0 2px;
-  pointer-events: none;
-}
-.acc-zone--blank.zone-ok::before   { color: var(--ep-correct); background: var(--ep-correct-bg); }
-.acc-zone--blank.zone-miss::before { color: var(--ep-wrong);   background: var(--ep-wrong-bg); }
+.acc-zone--blank.zone-ok,
+.acc-zone--blank.zone-miss { visibility: visible; }
 
 .btn-corr-check { min-width: 200px; font-size: var(--ep-base); font-weight: 700; }
 

@@ -168,14 +168,11 @@ export class TextCorrectionTemplate extends BaseTemplate {
     const prevWords = preserveHits ? this._zones.map(z => z.word) : []
     this._zones    = []
     const { textCorrect } = this.activity.content
-    const lineH = wrapper.querySelector('.corr-text')?.getBoundingClientRect().height / 3 || 48
     wrapper.querySelectorAll('.acc-zone').forEach((span, i) => {
       const sr      = span.getBoundingClientRect()
       const isBlank = span.classList.contains('acc-zone--blank')
-      const effW    = isBlank ? 0      : sr.width
-      const effH    = isBlank ? lineH  : sr.height
-      const padX    = isBlank ? 18     : sr.width  * 0.25
-      const padTop  = effH * 0.50
+      const padX    = isBlank ? 18 : sr.width * 0.25
+      const padTop  = sr.height * 0.50
       const charIdx = span.dataset.index !== undefined ? parseInt(span.dataset.index, 10) : -1
       const word    = preserveHits && prevWords[i]
         ? prevWords[i]
@@ -183,8 +180,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
       this._zones.push({
         x:        sr.left - wr.left - padX,
         y:        sr.top  - wr.top  - padTop,
-        w:        effW + padX * 2,
-        h:        effH + padTop,
+        w:        sr.width  + padX * 2,
+        h:        sr.height + padTop,
         hit:      prevHits[i] ?? false,
         expected: span.dataset.correct || '',
         word
@@ -456,6 +453,9 @@ function _buildHTML(orig, correct) {
       } else {
         parts.push({ type: 'span', html: span })
       }
+      // Skip the space after comma: comma has natural width so the following
+      // space would create a double-width gap that hints the comma position.
+      if (blank && i + 1 < orig.length && orig[i + 1] === ' ' && correct[i + 1] === ' ') i++
     } else {
       const ch = esc(orig[i])
       const last = parts[parts.length - 1]
