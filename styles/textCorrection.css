@@ -32,13 +32,13 @@
 .acc-zone.zone-ok   { color: var(--ep-correct); background: var(--ep-correct-bg); border-radius: 4px; padding: 0 2px; }
 .acc-zone.zone-miss { color: var(--ep-wrong);   background: var(--ep-wrong-bg);   border-radius: 4px; padding: 0 2px; }
 
-/* Blank placeholder zone — completely invisible before check; the natural
-   word space provides separation. font-size:0 makes the span occupy no width. */
+/* Blank comma zone — invisible before check via color only, so its width
+   never changes and the text never reflows when check is pressed. */
 .acc-zone--blank {
-  display: inline; font-size: 0; color: transparent;
+  display: inline; color: transparent;
 }
-.acc-zone--blank.zone-ok   { font-size: inherit; color: var(--ep-correct); background: var(--ep-correct-bg); border-radius: 2px; padding: 0 1px; }
-.acc-zone--blank.zone-miss { font-size: inherit; color: var(--ep-wrong);   background: var(--ep-wrong-bg);   border-radius: 2px; padding: 0 1px; }
+.acc-zone--blank.zone-ok   { color: var(--ep-correct); background: var(--ep-correct-bg); border-radius: 2px; padding: 0 1px; }
+.acc-zone--blank.zone-miss { color: var(--ep-wrong);   background: var(--ep-wrong-bg);   border-radius: 2px; padding: 0 1px; }
 
 .btn-corr-check { min-width: 200px; font-size: var(--ep-base); font-weight: 700; }
 

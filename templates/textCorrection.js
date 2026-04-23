@@ -24,7 +24,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._onUp    = null
     this._debugZones = false
     this._onDebug    = null
-    this._spacer     = null
+    this._spacerL    = null
+    this._spacerR    = null
   }
 
   init(activity, container, callbacks) {
@@ -39,12 +40,21 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._checkW     = 0
     this._checkH     = 0
 
-    // Pre-reserve the review panel width so main-area never resizes when the
-    // panel appears. freeze() removes the spacer in the same JS tick as the
-    // panel becomes active → net width of main-area stays constant.
-    this._spacer = document.createElement('div')
-    this._spacer.style.cssText = 'width:280px;min-width:240px;flex-shrink:0'
-    document.getElementById('player-stage')?.appendChild(this._spacer)
+    // Reserve half the review-panel width on each side of main-area so the
+    // wrapper stays centred. freeze() removes both spacers in the same JS
+    // tick the panel appears → main-area width never changes (no reflow).
+    const stage = document.getElementById('player-stage')
+    const mainArea = document.getElementById('main-area')
+    const rvPanel  = document.getElementById('review-panel')
+    if (stage && mainArea) {
+      const half = 'width:140px;min-width:120px;flex-shrink:0'
+      this._spacerL = document.createElement('div')
+      this._spacerL.style.cssText = half
+      stage.insertBefore(this._spacerL, mainArea)
+      this._spacerR = document.createElement('div')
+      this._spacerR.style.cssText = half
+      stage.insertBefore(this._spacerR, rvPanel || null)
+    }
 
     this._onDebug = () => {
       this._debugZones = !this._debugZones
@@ -62,8 +72,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
   resume() {}
 
   destroy() {
-    this._spacer?.remove()
-    this._spacer = null
+    this._spacerL?.remove(); this._spacerL = null
+    this._spacerR?.remove(); this._spacerR = null
     this._unbind()
     if (this._onDebug) {
       document.removeEventListener('debug:zones', this._onDebug)
@@ -89,9 +99,9 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._done = true
     const btn = document.getElementById('btn-check')
     if (btn) btn.disabled = true
-    // Swap spacer → review panel in the same JS tick so main-area never resizes
-    this._spacer?.remove()
-    this._spacer = null
+    // Remove both spacers in the same tick the panel becomes active
+    this._spacerL?.remove(); this._spacerL = null
+    this._spacerR?.remove(); this._spacerR = null
   }
 
   getReviewData() {
@@ -155,15 +165,10 @@ export class TextCorrectionTemplate extends BaseTemplate {
     const prevWords = preserveHits ? this._zones.map(z => z.word) : []
     this._zones    = []
     const { textCorrect } = this.activity.content
-    const lineH = wrapper.querySelector('.corr-text')?.getBoundingClientRect().height / 3 || 48
     wrapper.querySelectorAll('.acc-zone').forEach((span, i) => {
       const sr      = span.getBoundingClientRect()
-      const isBlank = span.classList.contains('acc-zone--blank')
-      // Blank zones have font-size:0 so sr is 0×0 — use a fixed hit area
-      const effW    = isBlank ? 0   : sr.width
-      const effH    = isBlank ? lineH : sr.height
-      const padX    = isBlank ? 18  : sr.width * 0.25
-      const padTop  = effH * 0.50
+      const padX    = sr.width  * 0.25
+      const padTop  = sr.height * 0.50
       const charIdx = span.dataset.index !== undefined ? parseInt(span.dataset.index, 10) : -1
       const word    = preserveHits && prevWords[i]
         ? prevWords[i]
@@ -171,8 +176,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
       this._zones.push({
         x:        sr.left - wr.left - padX,
         y:        sr.top  - wr.top  - padTop,
-        w:        effW + padX * 2,
-        h:        effH + padTop,
+        w:        sr.width  + padX * 2,
+        h:        sr.height + padTop,
         hit:      prevHits[i] ?? false,
         expected: span.dataset.correct || '',
         word
@@ -339,7 +344,7 @@ function _buildHTML(orig, correct) {
     if (orig[i] !== correct[i]) {
       const blank = orig[i] === '_'
       const cls   = blank ? 'acc-zone acc-zone--blank' : 'acc-zone'
-      const span  = `<span class="${cls}" data-correct="${esc(correct[i])}" data-index="${i}">${blank ? '_' : esc(orig[i])}</span>`
+      const span  = `<span class="${cls}" data-correct="${esc(correct[i])}" data-index="${i}">${esc(correct[i])}</span>`
 
       if (blank && parts.length > 0 && parts[parts.length - 1].type === 'text') {
         // Only wrap the last word + blank zone so the comma can't start a new line alone
