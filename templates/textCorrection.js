@@ -455,7 +455,7 @@ function _buildHTML(orig, correct) {
       }
       // Skip the space after comma: comma has natural width so the following
       // space would create a double-width gap that hints the comma position.
-      if (blank && i + 1 < orig.length && orig[i + 1] === ' ' && correct[i + 1] === ' ') i++
+      if (blank && i + 1 < orig.length && /[ \n]/.test(orig[i + 1]) && /[ \n]/.test(correct[i + 1])) i++
     } else {
       const ch = esc(orig[i])
       const last = parts[parts.length - 1]

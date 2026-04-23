@@ -175,7 +175,7 @@ function _buildPreviewHTML(original, correct) {
       } else {
         parts.push({ type: 'span', html: span })
       }
-      if (blank && i + 1 < original.length && original[i + 1] === ' ' && correct[i + 1] === ' ') i++
+      if (blank && i + 1 < original.length && /[ \n]/.test(original[i + 1]) && /[ \n]/.test(correct[i + 1])) i++
     } else {
       const ch   = esc(original[i])
       const last = parts[parts.length - 1]

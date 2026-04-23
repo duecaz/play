@@ -32,15 +32,14 @@
 .acc-zone.zone-ok   { color: var(--ep-correct); background: var(--ep-correct-bg); border-radius: 4px; padding: 0 2px; }
 .acc-zone.zone-miss { color: var(--ep-wrong);   background: var(--ep-wrong-bg);   border-radius: 4px; padding: 0 2px; }
 
-/* Blank comma zone — visibility:hidden keeps natural comma width always so no
-   reflow occurs when zone-ok/zone-miss make it visible after check.
-   padding pre-included matches zone-ok/zone-miss so it never shifts layout. */
+/* Blank comma zone — visibility:hidden keeps natural comma width (≈ word-space)
+   so the gap looks like a normal space while giving nothing away.
+   padding:0 overrides the generic zone-ok/zone-miss rule → zero reflow on check. */
 .acc-zone--blank {
-  display: inline; visibility: hidden;
-  padding: 0 2px; border-radius: 4px;
+  display: inline; visibility: hidden; padding: 0;
 }
 .acc-zone--blank.zone-ok,
-.acc-zone--blank.zone-miss { visibility: visible; }
+.acc-zone--blank.zone-miss { visibility: visible; padding: 0; }
 
 .btn-corr-check { min-width: 200px; font-size: var(--ep-base); font-weight: 700; }
 
