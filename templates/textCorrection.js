@@ -187,7 +187,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
     ctx.restore()
   }
 
-  /* Redraw strokes (scaled) + result circles — called after canvas resize */
+  /* Redraw strokes (scaled) — called after canvas resize */
   _redrawResults() {
     if (!this._ctx || !this._done) return
     const ctx    = this._ctx
@@ -196,7 +196,6 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
     ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
 
-    /* Redraw student strokes at new scale so teacher can review them */
     this._strokes.forEach(stroke => {
       if (stroke.length < 2) return
       ctx.beginPath()
@@ -210,19 +209,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
       ctx.lineJoin    = 'round'
       ctx.stroke()
     })
-
-    /* Result circles at current zone positions */
-    this._zones.forEach(z => {
-      const cx = z.x + z.w / 2
-      const cy = z.y + z.h / 2 + 20
-      ctx.beginPath()
-      ctx.arc(cx, cy, 20, 0, Math.PI * 2)
-      ctx.fillStyle   = z.hit ? 'rgba(76,175,80,0.3)' : 'rgba(244,67,54,0.3)'
-      ctx.fill()
-      ctx.strokeStyle = z.hit ? '#4caf50' : '#f44336'
-      ctx.lineWidth   = 2.5
-      ctx.stroke()
-    })
+    // Circles removed — zone-ok/zone-miss on the text spans give the same feedback
   }
 
   /* ── Pointer drawing ─────────────────────────────────────── */
