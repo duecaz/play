@@ -24,6 +24,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._onUp    = null
     this._debugZones = false
     this._onDebug    = null
+    this._spacer     = null
   }
 
   init(activity, container, callbacks) {
@@ -37,6 +38,13 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._zones      = []
     this._checkW     = 0
     this._checkH     = 0
+
+    // Pre-reserve the review panel width so main-area never resizes when the
+    // panel appears. freeze() removes the spacer in the same JS tick as the
+    // panel becomes active → net width of main-area stays constant.
+    this._spacer = document.createElement('div')
+    this._spacer.style.cssText = 'width:280px;min-width:240px;flex-shrink:0'
+    document.getElementById('player-stage')?.appendChild(this._spacer)
 
     this._onDebug = () => {
       this._debugZones = !this._debugZones
@@ -54,6 +62,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
   resume() {}
 
   destroy() {
+    this._spacer?.remove()
+    this._spacer = null
     this._unbind()
     if (this._onDebug) {
       document.removeEventListener('debug:zones', this._onDebug)
@@ -79,13 +89,9 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._done = true
     const btn = document.getElementById('btn-check')
     if (btn) btn.disabled = true
-    // Lock wrapper dimensions so the canvas never shifts when the review panel appears
-    const wrapper = document.getElementById('corr-wrapper')
-    if (wrapper) {
-      const r = wrapper.getBoundingClientRect()
-      wrapper.style.width  = r.width  + 'px'
-      wrapper.style.height = r.height + 'px'
-    }
+    // Swap spacer → review panel in the same JS tick so main-area never resizes
+    this._spacer?.remove()
+    this._spacer = null
   }
 
   getReviewData() {
