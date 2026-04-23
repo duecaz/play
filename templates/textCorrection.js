@@ -344,7 +344,7 @@ function _buildHTML(orig, correct) {
     if (orig[i] !== correct[i]) {
       const blank = orig[i] === '_'
       const cls   = blank ? 'acc-zone acc-zone--blank' : 'acc-zone'
-      const span  = `<span class="${cls}" data-correct="${esc(correct[i])}" data-index="${i}">${esc(correct[i])}</span>`
+      const span  = `<span class="${cls}" data-correct="${esc(correct[i])}" data-index="${i}">${blank ? esc(correct[i]) : esc(orig[i])}</span>`
 
       if (blank && parts.length > 0 && parts[parts.length - 1].type === 'text') {
         // Only wrap the last word + blank zone so the comma can't start a new line alone
