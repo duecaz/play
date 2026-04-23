@@ -88,7 +88,10 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
   onResize() {
     if (!this._canvas) return
-    if (this._skin === 'notebook') this._applyNotebookSkin()
+    if (this._skin === 'notebook') {
+      this._fitText()
+      this._applyNotebookSkin()
+    }
     this._sizeCanvas()
     if (this._done) {
       this._recalcZones(true)
@@ -148,17 +151,45 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._canvas = document.getElementById('corr-canvas')
     this._ctx    = this._canvas.getContext('2d')
 
+    if (isNotebook) this._fitText()
+    if (isNotebook) this._applyNotebookSkin()
     this._sizeCanvas()
     this._recalcZones()
     this._bind()
 
     if (isNotebook) {
-      this._applyNotebookSkin()
-      // Re-apply once web fonts are loaded to get accurate line height
-      document.fonts.ready.then(() => { if (this._canvas) this._applyNotebookSkin() })
+      // Re-run full sequence once web fonts load — Kalam may change metrics
+      document.fonts.ready.then(() => {
+        if (!this._canvas) return
+        this._fitText()
+        this._applyNotebookSkin()
+        this._sizeCanvas()
+        this._recalcZones()
+      })
     }
 
     document.getElementById('btn-check').addEventListener('click', () => this._check())
+  }
+
+  /* Binary-search the largest font-size (px) at which the text fits the wrapper */
+  _fitText() {
+    const wrapper = document.getElementById('corr-wrapper')
+    const textEl  = document.getElementById('corr-text')
+    if (!wrapper || !textEl) return
+    const cs     = getComputedStyle(wrapper)
+    const availH = wrapper.clientHeight
+                   - parseFloat(cs.paddingTop)
+                   - parseFloat(cs.paddingBottom)
+    if (availH <= 0) return
+    let lo = 12, hi = 80
+    textEl.style.fontSize = hi + 'px'
+    while (hi - lo > 0.5) {
+      const mid = (lo + hi) / 2
+      textEl.style.fontSize = mid + 'px'
+      if (textEl.scrollHeight <= availH) lo = mid
+      else hi = mid
+    }
+    textEl.style.fontSize = Math.floor(lo) + 'px'
   }
 
   /* Measure rendered line height and align repeating-gradient lines with text rows */
