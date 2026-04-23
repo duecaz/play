@@ -36,6 +36,10 @@ export class TextCorrectionEditor extends BaseEditor {
               <option value="1">−1 punto</option>
             </select>
           </div>
+          <div class="d-flex align-items-center gap-3">
+            <label class="form-label mb-0">🖊️ Lápiz IR (pizarra táctil)</label>
+            <input class="form-check-input" type="checkbox" id="f-irpen">
+          </div>
         </div>
       </section>
 
@@ -64,6 +68,7 @@ export class TextCorrectionEditor extends BaseEditor {
     document.getElementById('f-subtitle').value    = activity.subtitle || ''
     document.getElementById('f-timer').value       = activity.rules?.timer ?? 120
     document.getElementById('f-penalty').value     = String(activity.scoring?.penaltyRatio ?? 0)
+    document.getElementById('f-irpen').checked     = activity.rules?.templateOptions?.irPen ?? false
     document.getElementById('f-instruction').value = activity.content.instruction || ''
     document.getElementById('f-correct').value     = activity.content.textCorrect || ''
     this._updatePreview()
@@ -111,6 +116,7 @@ export class TextCorrectionEditor extends BaseEditor {
     const subtitle    = document.getElementById('f-subtitle').value.trim()
     const timer       = parseInt(document.getElementById('f-timer').value, 10) || 120
     const penalty     = parseFloat(document.getElementById('f-penalty').value) || 0
+    const irPen       = document.getElementById('f-irpen').checked
     const correct     = document.getElementById('f-correct').value
     const instruction = document.getElementById('f-instruction').value.trim()
     const original    = _autoOriginal(correct)
@@ -129,7 +135,7 @@ export class TextCorrectionEditor extends BaseEditor {
         instruction:  instruction || 'Pon las tildes y las comas que faltan',
         maxScore:     zoneCount * 10
       },
-      rules:        { timer, randomize: false, shuffleOptions: false, templateOptions: {} },
+      rules:        { timer, randomize: false, shuffleOptions: false, templateOptions: { irPen } },
       scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, penaltyRatio: penalty, maxScore: null },
       review:       { allowOverride: true, showCorrectAnswer: true, autoAdvanceToSummary: false },
       presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }

@@ -1,6 +1,7 @@
 import { BaseTemplate }     from './base.js'
 import Events               from '../core/events.js'
 import { esc }              from '../core/html.js'
+import { PenDetector }      from '../libs/pen-detector.js'
 
 export class TextCorrectionTemplate extends BaseTemplate {
   static requiresTools  = ['pen']
@@ -26,6 +27,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._onDebug    = null
     this._spacerL    = null
     this._spacerR    = null
+    this._pd         = null   // PenDetector instance (IR mode)
+    this._erasing    = false
   }
 
   init(activity, container, callbacks) {
@@ -225,6 +228,15 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
   /* ── Pointer drawing ─────────────────────────────────────── */
   _bind() {
+    const irPen = this.activity.rules?.templateOptions?.irPen ?? false
+    if (irPen) {
+      this._bindIR()
+    } else {
+      this._bindPointer()
+    }
+  }
+
+  _bindPointer() {
     const c = this._canvas
     this._onDown = e => this._pDown(e)
     this._onMove = e => this._pMove(e)
@@ -235,7 +247,88 @@ export class TextCorrectionTemplate extends BaseTemplate {
     c.addEventListener('pointercancel', this._onUp)
   }
 
+  _bindIR() {
+    this._pd = new PenDetector({ element: this._canvas, smooth: { xy: 0.15, pressure: 0.5 } })
+
+    this._pd.on('pendown', evt => {
+      if (this._done || evt.tool === 'none') return
+      const { cx, cy } = this._toCanvas(evt.x, evt.y)
+      if (evt.tool === 'eraser') {
+        this._erasing = true
+        this._erase(cx, cy)
+      } else {
+        this._drawing = true
+        this._current = [{ x: cx, y: cy }]
+        const lw  = evt.tool === 'penThin' ? 2 : 3.5
+        const ctx = this._ctx
+        ctx.beginPath()
+        ctx.moveTo(cx, cy)
+        ctx.strokeStyle = 'rgba(74,144,226,0.85)'
+        ctx.lineWidth   = lw
+        ctx.lineCap     = 'round'
+        ctx.lineJoin    = 'round'
+      }
+    })
+
+    this._pd.on('penmove', evt => {
+      if (this._done || evt.tool === 'none') return
+      const { cx, cy } = this._toCanvas(evt.x, evt.y)
+      if (this._erasing) {
+        this._erase(cx, cy)
+      } else if (this._drawing && this._current) {
+        this._current.push({ x: cx, y: cy })
+        this._ctx.lineTo(cx, cy)
+        this._ctx.stroke()
+        this._ctx.beginPath()
+        this._ctx.moveTo(cx, cy)
+      }
+    })
+
+    this._pd.on('penup', () => {
+      this._erasing = false
+      if (this._drawing && this._current?.length) {
+        this._strokes.push(this._current)
+        this._current = null
+      }
+      this._drawing = false
+    })
+  }
+
+  _toCanvas(ex, ey) {
+    const r = this._canvas.getBoundingClientRect()
+    return {
+      cx: ex * (this._canvas.width  / r.width),
+      cy: ey * (this._canvas.height / r.height)
+    }
+  }
+
+  /* Remove any stroke that passes through the erase circle, then redraw */
+  _erase(cx, cy, radius = 30) {
+    const r2  = radius * radius
+    const prev = this._strokes.length
+    this._strokes = this._strokes.filter(
+      stroke => !stroke.some(pt => (pt.x - cx) ** 2 + (pt.y - cy) ** 2 <= r2)
+    )
+    if (this._strokes.length !== prev) {
+      const ctx = this._ctx
+      ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
+      if (this._debugZones) this._drawZoneBorders()
+      this._strokes.forEach(stroke => {
+        if (stroke.length < 2) return
+        ctx.beginPath()
+        ctx.moveTo(stroke[0].x, stroke[0].y)
+        for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y)
+        ctx.strokeStyle = 'rgba(74,144,226,0.85)'
+        ctx.lineWidth   = 2
+        ctx.lineCap     = 'round'
+        ctx.lineJoin    = 'round'
+        ctx.stroke()
+      })
+    }
+  }
+
   _unbind() {
+    this._pd?.destroy(); this._pd = null
     if (!this._canvas) return
     this._canvas.removeEventListener('pointerdown',   this._onDown)
     this._canvas.removeEventListener('pointermove',   this._onMove)
