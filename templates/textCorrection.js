@@ -359,6 +359,11 @@ function _buildHTML(orig, correct) {
       } else {
         parts.push({ type: 'span', html: span })
       }
+      // Skip the space after a comma zone: the invisible comma already occupies
+      // its natural width, so the trailing space would create a visible double-gap.
+      if (blank && i + 1 < orig.length && orig[i + 1] === ' ' && correct[i + 1] === ' ') {
+        i++
+      }
     } else {
       const ch = esc(orig[i])
       const last = parts[parts.length - 1]
