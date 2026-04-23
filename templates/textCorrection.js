@@ -29,6 +29,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._spacerR    = null
     this._pd         = null   // PenDetector instance (IR mode)
     this._erasing    = false
+    this._skin       = 'default'
   }
 
   init(activity, container, callbacks) {
@@ -87,6 +88,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
   onResize() {
     if (!this._canvas) return
+    if (this._skin === 'notebook') this._applyNotebookSkin()
     this._sizeCanvas()
     if (this._done) {
       this._recalcZones(true)
@@ -128,12 +130,14 @@ export class TextCorrectionTemplate extends BaseTemplate {
   /* ── Render ───────────────────────────────────────────────── */
   _render() {
     const { textOriginal, textCorrect, instruction } = this.activity.content
-    const textHTML = _buildHTML(textOriginal, textCorrect)
+    const textHTML    = _buildHTML(textOriginal, textCorrect)
+    const isNotebook  = this.activity.presentation?.skin === 'notebook'
+    this._skin        = isNotebook ? 'notebook' : 'default'
 
     this.container.innerHTML = `
       <div class="corr-screen fade-in">
-        <p class="corr-instruction">${esc(instruction || 'Pon las tildes que faltan')}</p>
-        <div class="corr-wrapper" id="corr-wrapper">
+        ${isNotebook ? '' : `<p class="corr-instruction">${esc(instruction || 'Pon las tildes que faltan')}</p>`}
+        <div class="corr-wrapper${isNotebook ? ' skin-notebook' : ''}" id="corr-wrapper">
           <div class="corr-text" id="corr-text">${textHTML}</div>
           <canvas class="corr-canvas" id="corr-canvas"></canvas>
         </div>
@@ -148,7 +152,28 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._recalcZones()
     this._bind()
 
+    if (isNotebook) {
+      this._applyNotebookSkin()
+      // Re-apply once web fonts are loaded to get accurate line height
+      document.fonts.ready.then(() => { if (this._canvas) this._applyNotebookSkin() })
+    }
+
     document.getElementById('btn-check').addEventListener('click', () => this._check())
+  }
+
+  /* Measure rendered line height and align repeating-gradient lines with text rows */
+  _applyNotebookSkin() {
+    const wrapper = document.getElementById('corr-wrapper')
+    const textEl  = document.getElementById('corr-text')
+    if (!wrapper || !textEl) return
+    const cs      = getComputedStyle(textEl)
+    const lineH   = parseFloat(cs.lineHeight)
+    const fontSize = parseFloat(cs.fontSize)
+    const padTop  = parseFloat(getComputedStyle(wrapper).paddingTop)
+    const leading = (lineH - fontSize) / 2
+    const offset  = Math.round(padTop + leading + fontSize)
+    wrapper.style.setProperty('--lh', `${Math.round(lineH)}px`)
+    wrapper.style.setProperty('--lh-offset', `${offset}px`)
   }
 
   _sizeCanvas() {

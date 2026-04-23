@@ -40,6 +40,13 @@ export class TextCorrectionEditor extends BaseEditor {
             <label class="form-label mb-0">🖊️ Lápiz IR (pizarra táctil)</label>
             <input class="form-check-input" type="checkbox" id="f-irpen">
           </div>
+          <div class="d-flex align-items-center gap-3">
+            <label class="form-label mb-0">🎨 Estilo visual</label>
+            <select class="form-select field-input--sm" id="f-skin">
+              <option value="default">Estándar</option>
+              <option value="notebook">Cuaderno (Kalam)</option>
+            </select>
+          </div>
         </div>
       </section>
 
@@ -69,6 +76,7 @@ export class TextCorrectionEditor extends BaseEditor {
     document.getElementById('f-timer').value       = activity.rules?.timer ?? 120
     document.getElementById('f-penalty').value     = String(activity.scoring?.penaltyRatio ?? 0)
     document.getElementById('f-irpen').checked     = activity.rules?.templateOptions?.irPen ?? false
+    document.getElementById('f-skin').value        = activity.presentation?.skin || 'default'
     document.getElementById('f-instruction').value = activity.content.instruction || ''
     document.getElementById('f-correct').value     = activity.content.textCorrect || ''
     this._updatePreview()
@@ -117,6 +125,7 @@ export class TextCorrectionEditor extends BaseEditor {
     const timer       = parseInt(document.getElementById('f-timer').value, 10) || 120
     const penalty     = parseFloat(document.getElementById('f-penalty').value) || 0
     const irPen       = document.getElementById('f-irpen').checked
+    const skin        = document.getElementById('f-skin').value || 'default'
     const correct     = document.getElementById('f-correct').value
     const instruction = document.getElementById('f-instruction').value.trim()
     const original    = _autoOriginal(correct)
@@ -138,7 +147,7 @@ export class TextCorrectionEditor extends BaseEditor {
       rules:        { timer, randomize: false, shuffleOptions: false, templateOptions: { irPen } },
       scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, penaltyRatio: penalty, maxScore: null },
       review:       { allowOverride: true, showCorrectAnswer: true, autoAdvanceToSummary: false },
-      presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }
+      presentation: { skin, layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }
     }
   }
 }
