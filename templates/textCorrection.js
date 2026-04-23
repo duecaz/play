@@ -166,12 +166,11 @@ export class TextCorrectionTemplate extends BaseTemplate {
     const wrapper = document.getElementById('corr-wrapper')
     const textEl  = document.getElementById('corr-text')
     if (!wrapper || !textEl) return
-    const cs      = getComputedStyle(textEl)
-    const lineH   = parseFloat(cs.lineHeight)
-    const fontSize = parseFloat(cs.fontSize)
-    const padTop  = parseFloat(getComputedStyle(wrapper).paddingTop)
-    const leading = (lineH - fontSize) / 2
-    const offset  = Math.round(padTop + leading + fontSize)
+    const lineH  = parseFloat(getComputedStyle(textEl).lineHeight)
+    const padTop = parseFloat(getComputedStyle(wrapper).paddingTop)
+    // offset = padTop + lineH → backward gradient tile places stripe at
+    // (padTop + lineH - 2)...(padTop + lineH): the bottom of the first line-box
+    const offset = Math.round(padTop + lineH)
     wrapper.style.setProperty('--lh', `${Math.round(lineH)}px`)
     wrapper.style.setProperty('--lh-offset', `${offset}px`)
   }
