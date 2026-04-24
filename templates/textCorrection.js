@@ -171,7 +171,9 @@ export class TextCorrectionTemplate extends BaseTemplate {
     document.getElementById('btn-check').addEventListener('click', () => this._check())
   }
 
-  /* Binary-search the largest font-size (px) at which the text fits the wrapper */
+  /* Binary-search the largest font-size (px) at which the text fits the wrapper.
+     Sets font-size on the WRAPPER so that `2.5em` in the CSS gradient always
+     equals the actual line-height — no separate JS measurement needed. */
   _fitText() {
     const wrapper = document.getElementById('corr-wrapper')
     const textEl  = document.getElementById('corr-text')
@@ -182,28 +184,18 @@ export class TextCorrectionTemplate extends BaseTemplate {
                    - parseFloat(cs.paddingBottom)
     if (availH <= 0) return
     let lo = 12, hi = 80
-    textEl.style.fontSize = hi + 'px'
+    wrapper.style.fontSize = hi + 'px'
     while (hi - lo > 0.5) {
       const mid = (lo + hi) / 2
-      textEl.style.fontSize = mid + 'px'
+      wrapper.style.fontSize = mid + 'px'
       if (textEl.scrollHeight <= availH) lo = mid
       else hi = mid
     }
-    textEl.style.fontSize = Math.floor(lo) + 'px'
+    wrapper.style.fontSize = Math.floor(lo) + 'px'
   }
 
-  /* Measure rendered line height and align repeating-gradient lines with text rows */
-  _applyNotebookSkin() {
-    const wrapper = document.getElementById('corr-wrapper')
-    const textEl  = document.getElementById('corr-text')
-    if (!wrapper || !textEl) return
-    const lineH = parseFloat(getComputedStyle(textEl).lineHeight)
-    // background-origin: content-box means position is relative to content edge.
-    // offset = lineH places the backward tile stripe at (lineH-2)..lineH from
-    // content top = bottom of first line-box. No stray stripe in padding area.
-    wrapper.style.setProperty('--lh', `${Math.round(lineH)}px`)
-    wrapper.style.setProperty('--lh-offset', `${Math.round(lineH)}px`)
-  }
+  /* No-op: em-based CSS gradient auto-aligns with wrapper font-size */
+  _applyNotebookSkin() {}
 
   _sizeCanvas() {
     const wrapper = document.getElementById('corr-wrapper')
@@ -311,15 +303,15 @@ export class TextCorrectionTemplate extends BaseTemplate {
       if (evt.tool === 'eraser' || evt.tool === 'penThick') {
         this._erasing = true
         this._erase(cx, cy)
+        this._drawEraserIndicator(cx, cy)
       } else {
         this._drawing = true
         this._current = [{ x: cx, y: cy }]
-        const lw  = 2
         const ctx = this._ctx
         ctx.beginPath()
         ctx.moveTo(cx, cy)
         ctx.strokeStyle = 'rgba(74,144,226,0.85)'
-        ctx.lineWidth   = lw
+        ctx.lineWidth   = 2
         ctx.lineCap     = 'round'
         ctx.lineJoin    = 'round'
       }
@@ -330,6 +322,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
       const { cx, cy } = this._toCanvas(evt.x, evt.y)
       if (this._erasing || evt.tool === 'penThick') {
         this._erase(cx, cy)
+        this._drawEraserIndicator(cx, cy)
       } else if (this._drawing && this._current) {
         this._current.push({ x: cx, y: cy })
         this._ctx.lineTo(cx, cy)
@@ -340,6 +333,10 @@ export class TextCorrectionTemplate extends BaseTemplate {
     })
 
     this._pd.on('penup', () => {
+      if (this._erasing) {
+        // Final redraw to remove eraser indicator circle
+        this._erase(0, 0, 0)   // radius=0 → erases nothing, just redraws to clear indicator
+      }
       this._erasing = false
       if (this._drawing && this._current?.length) {
         this._strokes.push(this._current)
@@ -357,29 +354,38 @@ export class TextCorrectionTemplate extends BaseTemplate {
     }
   }
 
-  /* Remove any stroke that passes through the erase circle, then redraw */
+  /* Remove any stroke that passes through the erase circle, then redraw.
+     Always redraws so the eraser indicator circle can be overlaid cleanly. */
   _erase(cx, cy, radius = 30) {
-    const r2  = radius * radius
-    const prev = this._strokes.length
+    const r2 = radius * radius
     this._strokes = this._strokes.filter(
       stroke => !stroke.some(pt => (pt.x - cx) ** 2 + (pt.y - cy) ** 2 <= r2)
     )
-    if (this._strokes.length !== prev) {
-      const ctx = this._ctx
-      ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
-      if (this._debugZones) this._drawZoneBorders()
-      this._strokes.forEach(stroke => {
-        if (stroke.length < 2) return
-        ctx.beginPath()
-        ctx.moveTo(stroke[0].x, stroke[0].y)
-        for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y)
-        ctx.strokeStyle = 'rgba(74,144,226,0.85)'
-        ctx.lineWidth   = 2
-        ctx.lineCap     = 'round'
-        ctx.lineJoin    = 'round'
-        ctx.stroke()
-      })
-    }
+    const ctx = this._ctx
+    ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
+    if (this._debugZones) this._drawZoneBorders()
+    this._strokes.forEach(stroke => {
+      if (stroke.length < 2) return
+      ctx.beginPath()
+      ctx.moveTo(stroke[0].x, stroke[0].y)
+      for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y)
+      ctx.strokeStyle = 'rgba(74,144,226,0.85)'
+      ctx.lineWidth   = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'
+      ctx.stroke()
+    })
+  }
+
+  /* Dashed red circle drawn on the canvas to show the eraser area */
+  _drawEraserIndicator(cx, cy, radius = 30) {
+    const ctx = this._ctx
+    ctx.save()
+    ctx.beginPath()
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+    ctx.strokeStyle = 'rgba(255,80,80,0.8)'
+    ctx.lineWidth   = 2
+    ctx.setLineDash([5, 4])
+    ctx.stroke()
+    ctx.restore()
   }
 
   _unbind() {
