@@ -1,30 +1,38 @@
 /**
- * pen-detector.js v2.0 — IR touchscreen pen detection
+ * pen-detector.js v2.1 — IR touchscreen pen detection
  * Events: pendown(evt), penmove(evt), penup()
  * evt = { x, y, tool, pressure, velocity, metric, pointCount,
  *         radiusX, radiusY, radiusMag, bboxW, bboxH, bboxArea }
- * tool = 'penThin' | 'penThick' | 'eraser' | 'none'
+ * tool = 'penThin' | 'penThick' | 'eraser' | 'palm' | 'none'
  *
  * Options:
  *   element    — required DOM element
- *   thresholds — { penThin, penThick, eraser } range overrides
+ *   thresholds — per-key overrides (merged over localStorage → DEFAULTS)
  *   smooth     — { xy: 0..1, pressure: 0..1 } (default xy=0.2, pressure=0.6)
+ *
+ * Thresholds are loaded from localStorage key 'ep-pen-thresholds' at
+ * construction time so the calibration screen can persist tuned values.
  */
 
-export const VERSION = '2.0'
+export const VERSION    = '2.1'
+export const STORAGE_KEY = 'ep-pen-thresholds'
 
 const DEFAULTS = {
-  penThin:  { min: 0,  max: 1.2  },
+  penThin:  { min: 0,   max: 1.2 },
   penThick: { min: 1.2, max: 2.5 },
-  eraser:   { min: 10, max: 30   },
+  eraser:   { min: 10,  max: 30  },
+  palm:     { minPoints: 3       },
   // 2.5–10 = finger → 'none'
+}
+
+function _loadStored() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') } catch { return null }
 }
 
 export class PenDetector {
   constructor({ element, thresholds, smooth = {} } = {}) {
     if (!element) throw new Error('PenDetector: element required')
     this._el  = element
-    this._thr = Object.assign({}, DEFAULTS, thresholds)
     this._ev  = {}
     this._b   = {}
     this._strokeTool = null
@@ -34,6 +42,16 @@ export class PenDetector {
     this._sPos   = null
     this._velPos = null
     this._sP     = 0.5
+
+    // Merge priority: DEFAULTS → localStorage → constructor argument (per-key)
+    const stored = _loadStored()
+    this._thr = {
+      penThin:  Object.assign({}, DEFAULTS.penThin,  stored?.penThin,  thresholds?.penThin),
+      penThick: Object.assign({}, DEFAULTS.penThick, stored?.penThick, thresholds?.penThick),
+      eraser:   Object.assign({}, DEFAULTS.eraser,   stored?.eraser,   thresholds?.eraser),
+      palm:     Object.assign({}, DEFAULTS.palm,     stored?.palm,     thresholds?.palm),
+    }
+
     this._el.style.touchAction = 'none'
     this._init()
   }
@@ -77,13 +95,13 @@ export class PenDetector {
       if (tx < minX) minX = tx; if (tx > maxX) maxX = tx
       if (ty < minY) minY = ty; if (ty > maxY) maxY = ty
     }
-    const n     = ts.length
-    const bboxW = maxX - minX, bboxH = maxY - minY
+    const n      = ts.length
+    const bboxW  = maxX - minX, bboxH = maxY - minY
     const metric = rSum / n
 
     const isFirst = e.type === 'touchstart' && this._strokeTool === null
     if (isFirst) {
-      this._strokeTool = this._classify(metric)
+      this._strokeTool = this._classify(metric, n)
       this._trackId    = ts[0].identifier
       this._sPos = null; this._velPos = null; this._sP = 0.5
     }
@@ -91,7 +109,7 @@ export class PenDetector {
     const tracked = Array.from(ts).find(t => t.identifier === this._trackId) || ts[0]
     const rx = tracked.radiusX || 0, ry = tracked.radiusY || 0
     const rawX = tracked.clientX - rect.left, rawY = tracked.clientY - rect.top
-    const { x, y }            = this._smoothXY(rawX, rawY)
+    const { x, y }              = this._smoothXY(rawX, rawY)
     const { pressure, velocity } = this._velPressure(rawX, rawY)
 
     this._emit(isFirst ? 'pendown' : 'penmove', {
@@ -128,8 +146,10 @@ export class PenDetector {
   }
 
   // ── classification ────────────────────────────────────────────────────────
-  _classify(m) {
+  // Palm is checked first (by simultaneous point count) before metric ranges.
+  _classify(m, n) {
     const t = this._thr
+    if (n >= t.palm.minPoints)                    return 'palm'
     if (m >= t.penThin.min  && m <= t.penThin.max)  return 'penThin'
     if (m >= t.penThick.min && m <= t.penThick.max) return 'penThick'
     if (m >= t.eraser.min   && m <= t.eraser.max)   return 'eraser'
@@ -138,7 +158,13 @@ export class PenDetector {
 
   // ── public API ────────────────────────────────────────────────────────────
   get thresholds() { return this._thr }
-  setThresholds(thr) { Object.assign(this._thr, thr); return this }
+  setThresholds(thr) {
+    if (thr.penThin)  Object.assign(this._thr.penThin,  thr.penThin)
+    if (thr.penThick) Object.assign(this._thr.penThick, thr.penThick)
+    if (thr.eraser)   Object.assign(this._thr.eraser,   thr.eraser)
+    if (thr.palm)     Object.assign(this._thr.palm,     thr.palm)
+    return this
+  }
   setSmooth({ xy, pressure } = {}) {
     if (xy       !== undefined) this._smXY = Math.max(0, Math.min(0.95, xy))
     if (pressure !== undefined) this._smP  = Math.max(0, Math.min(0.95, pressure))

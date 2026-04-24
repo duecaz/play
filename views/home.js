@@ -13,7 +13,10 @@ export function renderHome(container) {
         <span class="logo-mark">▶</span>
         <span class="logo-name">EduPlay</span>
       </div>
-      <button class="btn btn-primary" id="btn-new">+ Nueva actividad</button>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary" id="btn-calibrate" title="Calibrar lápiz IR">⚙ Calibrar</button>
+        <button class="btn btn-primary" id="btn-new">+ Nueva actividad</button>
+      </div>
     </div>
 
     <div class="home-body">
@@ -38,6 +41,7 @@ export function renderHome(container) {
 
   container.querySelector('#btn-new')?.addEventListener('click', () => Router.navigate('/create'))
   container.querySelector('#btn-new-empty')?.addEventListener('click', () => Router.navigate('/create'))
+  container.querySelector('#btn-calibrate')?.addEventListener('click', () => Router.navigate('/calibrate'))
 
   container.querySelectorAll('.btn-play-card').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); Router.navigate(`/play/${btn.dataset.id}`) })

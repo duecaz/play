@@ -9,6 +9,7 @@ import { activities }                    from './data/activities.js'
 import { renderHome }                    from './views/home.js'
 import { renderTemplateSelector }        from './views/templateSelector.js'
 import { renderPlayerView }              from './views/playerView.js'
+import { renderCalibration }             from './views/calibration.js'
 import { QuizEditor }                    from './editors/quizEditor.js'
 import { TextCorrectionEditor }          from './editors/textCorrectionEditor.js'
 
@@ -31,6 +32,7 @@ Router.on('/editor/:template/:id', ({ template, id }) => {
   else new QuizEditor(app).render(activity)
 })
 Router.on('/play/:id',         ({ id })       => renderPlayerView(app, id))
+Router.on('/calibrate',        ()             => renderCalibration(app))
 
 Router.init()
 
