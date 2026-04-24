@@ -241,12 +241,51 @@ export class TextCorrectionTemplate extends BaseTemplate {
   }
 
   _bindPointer() {
-    const c = this._canvas
-    this._onDown = e => this._pDown(e)
-    this._onMove = e => this._pMove(e)
-    this._onUp   = e => this._pUp(e)
-    c.addEventListener('pointerdown',   this._onDown)
-    c.addEventListener('pointermove',   this._onMove)
+    const c      = this._canvas
+    const active = new Set()   // tracks active pointerIds
+
+    this._onDown = e => {
+      active.add(e.pointerId)
+      if (active.size >= 3) {
+        // Palm: abort any current stroke and switch to erase
+        this._drawing = false; this._current = null
+        this._erasing = true
+        e.preventDefault()
+        const p = this._pos(e)
+        this._strokes = erase(this._ctx, this._canvas, this._strokes, p.x, p.y, 30, this._debugZones, this._zones)
+        drawEraserIndicator(this._ctx, p.x, p.y)
+        return
+      }
+      if (this._erasing) return   // palm still active
+      this._pDown(e)
+    }
+
+    this._onMove = e => {
+      if (this._erasing) {
+        e.preventDefault()
+        const p = this._pos(e)
+        this._strokes = erase(this._ctx, this._canvas, this._strokes, p.x, p.y, 30, this._debugZones, this._zones)
+        drawEraserIndicator(this._ctx, p.x, p.y)
+        return
+      }
+      this._pMove(e)
+    }
+
+    this._onUp = e => {
+      active.delete(e.pointerId)
+      if (this._erasing) {
+        if (active.size < 3) {
+          // Palm lifted — clear eraser indicator
+          this._strokes = erase(this._ctx, this._canvas, this._strokes, 0, 0, 0, this._debugZones, this._zones)
+          this._erasing = false
+        }
+        return
+      }
+      this._pUp()
+    }
+
+    c.addEventListener('pointerdown',   this._onDown, { passive: false })
+    c.addEventListener('pointermove',   this._onMove, { passive: false })
     c.addEventListener('pointerup',     this._onUp)
     c.addEventListener('pointercancel', this._onUp)
   }
@@ -300,7 +339,6 @@ export class TextCorrectionTemplate extends BaseTemplate {
         this._current = null
       }
       this._drawing = false
-      this._reportProgress()
     })
   }
 
@@ -330,7 +368,6 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
   _pDown(e) {
     if (this._done) return
-    if (e.pointerType === 'touch') return
     e.preventDefault()
     this._canvas.setPointerCapture(e.pointerId)
     this._drawing = true
@@ -363,21 +400,6 @@ export class TextCorrectionTemplate extends BaseTemplate {
       this._strokes.push(this._current)
       this._current = null
     }
-    this._reportProgress()
-  }
-
-  /* Count zones that have at least one stroke starting inside them */
-  _reportProgress() {
-    if (!this._onProgress || !this._zones.length) return
-    const covered = new Set()
-    this._strokes.forEach(s => {
-      if (!s.length) return
-      const p = s[0]
-      this._zones.forEach((z, i) => {
-        if (p.x >= z.x && p.x <= z.x + z.w && p.y >= z.y && p.y <= z.y + z.h) covered.add(i)
-      })
-    })
-    this._onProgress(covered.size, this._zones.length)
   }
 
   /* ── Check ───────────────────────────────────────────────── */

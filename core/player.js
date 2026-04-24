@@ -94,14 +94,16 @@ export const Player = {
     this._hud.setTimer(this.timeLeft)
 
     this.template.init(this.activity, this._mainEl, {
-      onScore:    pts          => this._addScore(pts),
-      onComplete: ()           => this._end(),
-      onProgress: (done, total) => this._hud.setProgress(done, total)
+      onScore:    pts => this._addScore(pts),
+      onComplete: ()  => this._end()
     })
     this.template.start()
 
     const timer = this.activity.rules?.timer ?? this.activity.config?.timer ?? 0
-    if (timer) this._startTimer()
+    if (timer) {
+      this._hud.setProgress(0, timer)
+      this._startTimer()
+    }
     this._controls.setPlayPause('playing')
   },
 
@@ -185,12 +187,14 @@ export const Player = {
   },
 
   _startTimer() {
+    const total = this.activity.rules?.timer ?? this.activity.config?.timer ?? 0
     clearInterval(this._interval)
     this._interval = setInterval(() => {
       if (!State.is(STATES.PLAYING)) return
       this.timeLeft--
       this.timeUsed++
       this._hud.setTimer(this.timeLeft)
+      this._hud.setProgress(this.timeUsed, total)
       if (this.timeLeft <= 0) {
         clearInterval(this._interval)
         this._end()
