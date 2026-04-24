@@ -53,9 +53,9 @@ export function renderHome(container) {
     btn.addEventListener('click', e => { e.stopPropagation(); Router.navigate(`/play/${btn.dataset.id}`) })
   })
   container.querySelectorAll('.btn-start-card').forEach(btn => {
-    btn.addEventListener('click', e => {
+    btn.addEventListener('click', async e => {
       e.stopPropagation()
-      document.documentElement.requestFullscreen?.().catch(() => {})
+      try { await document.documentElement.requestFullscreen() } catch {}
       Router.navigate(`/play/${btn.dataset.id}`)
     })
   })

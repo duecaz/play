@@ -2,7 +2,7 @@ import Router from '../core/router.js'
 
 export const STORAGE_KEY = 'ep-pen-thresholds'
 
-const DEFAULTS_FLAT = { penThinMax: 1.2, penThickMax: 2.5, eraserMin: 10, eraserMax: 30, palmMinPts: 3 }
+const DEFAULTS_FLAT = { penThinMax: 2.01, penThickMax: 3.0, eraserMin: 10.1, eraserMax: 100, palmMinPts: 3 }
 
 const TOOL_LABELS = {
   penThin:  'Punta fina',

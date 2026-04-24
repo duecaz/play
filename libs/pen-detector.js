@@ -18,11 +18,11 @@ export const VERSION    = '2.1'
 export const STORAGE_KEY = 'ep-pen-thresholds'
 
 const DEFAULTS = {
-  penThin:  { min: 0,   max: 1.2 },
-  penThick: { min: 1.2, max: 2.5 },
-  eraser:   { min: 10,  max: 30  },
-  palm:     { minPoints: 3       },
-  // 2.5–10 = finger → 'none'
+  penThin:  { min: 0,    max: 2.01 },
+  penThick: { min: 2.01, max: 3.0  },
+  eraser:   { min: 10.1, max: 100  },   // palm contact = large radius
+  palm:     { minPoints: 3         },
+  // 3.0–10.0 = finger → 'none'
 }
 
 function _loadStored() {

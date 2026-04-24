@@ -1,4 +1,8 @@
 /* ── Calibration screen ──────────────────────────────────── */
+#app.view-calibration {
+  height: 100vh;
+  overflow: hidden;
+}
 .view-calibration {
   width: 100%; height: 100%;
 }
