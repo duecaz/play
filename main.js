@@ -6,7 +6,6 @@ import { QuizTemplate }                  from './templates/quiz.js'
 import { TextCorrectionTemplate }        from './templates/textCorrection.js'
 import { qaModel }                       from './core/contentModels/qa.js'
 import { annotatedTextModel }            from './core/contentModels/annotatedText.js'
-import { activities }                    from './data/activities.js'
 import { renderHome }                    from './views/home.js'
 import { renderTemplateSelector }        from './views/templateSelector.js'
 import { renderPlayerView }              from './views/playerView.js'
@@ -16,7 +15,6 @@ import { TextCorrectionEditor }          from './editors/textCorrectionEditor.js
 
 Registry.register('quiz',           QuizTemplate,           { label: 'Quiz',                 icon: '❓', color: '#6c5ce7' }, qaModel)
 Registry.register('textCorrection', TextCorrectionTemplate, { label: 'Corrección de textos', icon: '✍️', color: '#f39c12' }, annotatedTextModel)
-Store.seed(activities)
 
 const app   = document.getElementById('app')
 const badge = document.getElementById('version-badge')
