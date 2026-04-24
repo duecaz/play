@@ -175,3 +175,22 @@
   0%   { transform: translateY(0) rotate(0deg);    opacity: 1; }
   100% { transform: translateY(110vh) rotate(720deg); opacity: 0.2; }
 }
+
+/* ── Portrait / mobile layout ───────────────────────────── */
+@media (orientation: portrait), (max-width: 680px) {
+  #player-stage { flex-direction: column; }
+
+  #review-panel.active {
+    width: 100%; min-width: unset;
+    height: 38vh; min-height: 180px;
+    border-left: none;
+    border-top: 1px solid var(--bs-border-color);
+  }
+
+  #hud, #controls { padding: 0.5rem 1rem; min-height: 48px; }
+  #main-area { padding: 1.25rem; }
+
+  /* Horizontal spacers used to balance the lateral review panel
+     are irrelevant in column layout — hide them via CSS */
+  .tc-spacer { display: none !important; }
+}

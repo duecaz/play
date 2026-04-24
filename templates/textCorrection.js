@@ -55,9 +55,11 @@ export class TextCorrectionTemplate extends BaseTemplate {
     if (stage && mainArea) {
       const half = 'width:140px;min-width:120px;flex-shrink:0'
       this._spacerL = document.createElement('div')
+      this._spacerL.className = 'tc-spacer'
       this._spacerL.style.cssText = half
       stage.insertBefore(this._spacerL, mainArea)
       this._spacerR = document.createElement('div')
+      this._spacerR.className = 'tc-spacer'
       this._spacerR.style.cssText = half
       stage.insertBefore(this._spacerR, rvPanel || null)
     }
