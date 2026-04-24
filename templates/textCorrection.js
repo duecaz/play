@@ -300,6 +300,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
         this._current = null
       }
       this._drawing = false
+      this._reportProgress()
     })
   }
 
@@ -362,6 +363,21 @@ export class TextCorrectionTemplate extends BaseTemplate {
       this._strokes.push(this._current)
       this._current = null
     }
+    this._reportProgress()
+  }
+
+  /* Count zones that have at least one stroke starting inside them */
+  _reportProgress() {
+    if (!this._onProgress || !this._zones.length) return
+    const covered = new Set()
+    this._strokes.forEach(s => {
+      if (!s.length) return
+      const p = s[0]
+      this._zones.forEach((z, i) => {
+        if (p.x >= z.x && p.x <= z.x + z.w && p.y >= z.y && p.y <= z.y + z.h) covered.add(i)
+      })
+    })
+    this._onProgress(covered.size, this._zones.length)
   }
 
   /* ── Check ───────────────────────────────────────────────── */

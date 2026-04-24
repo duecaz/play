@@ -10,13 +10,15 @@ export class BaseTemplate {
     this.container   = null
     this._onComplete = null
     this._onScore    = null
+    this._onProgress = null
   }
 
-  init(activity, container, { onComplete, onScore } = {}) {
+  init(activity, container, { onComplete, onScore, onProgress } = {}) {
     this.activity    = activity
     this.container   = container
     this._onComplete = onComplete
     this._onScore    = onScore
+    this._onProgress = onProgress
   }
 
   start()   {}

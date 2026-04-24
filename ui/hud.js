@@ -2,12 +2,13 @@ import { esc } from '../core/html.js'
 
 export class HUD {
   constructor(container) {
-    this._container  = container
-    this._timerEl    = null
-    this._scoreEl    = null
-    this._pctEl      = null
-    this._fsBtn      = null
-    this._onFsChange = null
+    this._container   = container
+    this._timerEl     = null
+    this._scoreEl     = null
+    this._pctEl       = null
+    this._fsBtn       = null
+    this._progressFill = null
+    this._onFsChange  = null
   }
 
   render(activity) {
@@ -35,11 +36,15 @@ export class HUD {
           </div>
         ` : ''}
       </div>
+      <div class="hud-progress" id="hud-progress" hidden>
+        <div class="hud-progress-fill" id="hud-progress-fill"></div>
+      </div>
     `
-    this._timerEl = document.getElementById('timer-value')
-    this._scoreEl = document.getElementById('score-value')
-    this._pctEl   = document.getElementById('score-pct')
-    this._fsBtn   = document.getElementById('hud-fs')
+    this._timerEl      = document.getElementById('timer-value')
+    this._scoreEl      = document.getElementById('score-value')
+    this._pctEl        = document.getElementById('score-pct')
+    this._fsBtn        = document.getElementById('hud-fs')
+    this._progressFill = document.getElementById('hud-progress-fill')
     this._fsBtn.addEventListener('click', () => this._toggleFs())
 
     const timerDiv = document.getElementById('hud-timer')
@@ -85,6 +90,15 @@ export class HUD {
     this._scoreEl.classList.remove('score-bump')
     void this._scoreEl.offsetWidth
     this._scoreEl.classList.add('score-bump')
+  }
+
+  setProgress(done, total) {
+    const el = document.getElementById('hud-progress')
+    if (!el) return
+    if (!total) { el.hidden = true; return }
+    el.hidden = false
+    if (this._progressFill)
+      this._progressFill.style.width = `${Math.min(100, Math.round(done / total * 100))}%`
   }
 
   /* ── Private ─────────────────────────────────────────────── */

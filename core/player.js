@@ -94,8 +94,9 @@ export const Player = {
     this._hud.setTimer(this.timeLeft)
 
     this.template.init(this.activity, this._mainEl, {
-      onScore:    pts => this._addScore(pts),
-      onComplete: ()  => this._end()
+      onScore:    pts          => this._addScore(pts),
+      onComplete: ()           => this._end(),
+      onProgress: (done, total) => this._hud.setProgress(done, total)
     })
     this.template.start()
 

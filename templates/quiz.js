@@ -83,6 +83,7 @@ export class QuizTemplate extends BaseTemplate {
   _render() {
     const item = this._items[this._currentIndex]
     if (!item) { this._complete(); return }
+    this._onProgress?.(this._currentIndex, this._items.length)
 
     const options = [...item.options]
     if (this.activity.rules.shuffleOptions) _shuffle(options)
@@ -162,6 +163,7 @@ export class QuizTemplate extends BaseTemplate {
   }
 
   _complete() {
+    this._onProgress?.(this._items.length, this._items.length)
     Events.emit('template:complete', {})
     this._onComplete?.()
   }

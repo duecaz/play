@@ -17,6 +17,19 @@
   background: rgba(0,0,0,0.35); backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--bs-border-color);
   min-height: 60px; z-index: 10;
+  position: relative;
+}
+
+/* ── Progress bar ───────────────────────────────────────── */
+.hud-progress {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  background: rgba(255,255,255,0.07);
+}
+.hud-progress-fill {
+  height: 100%; width: 0%;
+  background: var(--bs-primary);
+  border-radius: 0 2px 2px 0;
+  transition: width 350ms ease;
 }
 
 #controls {
