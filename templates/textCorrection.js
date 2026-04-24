@@ -88,18 +88,23 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
   onResize() {
     if (!this._canvas) return
-    if (this._skin === 'notebook') {
-      this._fitText()
-      this._applyNotebookSkin()
-    }
-    this._sizeCanvas()
-    if (this._done) {
-      this._recalcZones(true)
-      this._redrawResults()
-    } else {
-      this._recalcZones()
-      if (this._debugZones) this._drawZoneBorders()
-    }
+    // rAF defers until browser has fully settled the new layout (e.g. after fullscreen)
+    // so _fitText / _sizeCanvas / _recalcZones measure correct post-resize geometry.
+    requestAnimationFrame(() => {
+      if (!this._canvas) return
+      if (this._skin === 'notebook') {
+        this._fitText()
+        this._applyNotebookSkin()
+      }
+      this._sizeCanvas()
+      if (this._done) {
+        this._recalcZones(true)
+        this._redrawResults()
+      } else {
+        this._recalcZones()
+        if (this._debugZones) this._drawZoneBorders()
+      }
+    })
   }
 
   /* ── Review API ────────────────────────────────────────────── */
@@ -198,9 +203,10 @@ export class TextCorrectionTemplate extends BaseTemplate {
   _applyNotebookSkin() {}
 
   _sizeCanvas() {
-    const wrapper = document.getElementById('corr-wrapper')
-    if (!wrapper || !this._canvas) return
-    const r = wrapper.getBoundingClientRect()
+    if (!this._canvas) return
+    // Use canvas's own bounding rect (CSS display size = wrapper padding-box)
+    // so canvas pixels match CSS pixels exactly — no border-induced scale error.
+    const r = this._canvas.getBoundingClientRect()
     this._canvas.width  = Math.round(r.width)
     this._canvas.height = Math.round(r.height)
   }
