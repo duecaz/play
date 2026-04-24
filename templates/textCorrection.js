@@ -306,7 +306,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._pd.on('pendown', evt => {
       if (this._done || evt.tool === 'none') return
       const { cx, cy } = this._toCanvas(evt.x, evt.y)
-      if (evt.tool === 'eraser' || evt.tool === 'palm') {
+      if (evt.tool === 'eraser' || evt.tool === 'penThick' || evt.tool === 'palm') {
         this._erasing = true
         this._erase(cx, cy)
         this._drawEraserIndicator(cx, cy)
@@ -326,7 +326,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._pd.on('penmove', evt => {
       if (this._done || evt.tool === 'none') return
       const { cx, cy } = this._toCanvas(evt.x, evt.y)
-      if (this._erasing || evt.tool === 'palm') {
+      if (this._erasing || evt.tool === 'penThick' || evt.tool === 'palm') {
         this._erase(cx, cy)
         this._drawEraserIndicator(cx, cy)
       } else if (this._drawing && this._current) {
