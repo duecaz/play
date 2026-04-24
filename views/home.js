@@ -4,7 +4,7 @@ import Registry from '../core/registry.js'
 import { esc }  from '../core/html.js'
 
 export function renderHome(container) {
-  container.className = 'view-home d-flex flex-column'
+  container.className = 'view-home'
   const activities = Store.list()
 
   container.innerHTML = `
@@ -14,7 +14,7 @@ export function renderHome(container) {
         <span class="logo-name">EduPlay</span>
       </div>
       <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-outline-secondary" id="btn-clearcache" title="Limpiar caché y recargar">⟳ Limpiar caché</button>
+        <button class="btn btn-sm btn-outline-secondary" id="btn-clearcache" title="Limpiar caché y recargar">⟳ Caché</button>
         <button class="btn btn-sm btn-outline-secondary" id="btn-calibrate" title="Calibrar lápiz IR">⚙ Calibrar</button>
         <button class="btn btn-primary" id="btn-new">+ Nueva actividad</button>
       </div>
@@ -22,14 +22,14 @@ export function renderHome(container) {
 
     <div class="home-body">
       ${activities.length === 0 ? `
-        <div class="empty-state d-flex flex-column align-items-center justify-content-center gap-3 text-center fade-in">
+        <div class="empty-state fade-in">
           <div class="empty-icon">📋</div>
-          <h2 class="fs-3 fw-bold">Sin actividades todavía</h2>
+          <h2>Sin actividades todavía</h2>
           <p class="text-muted">Crea tu primera actividad interactiva</p>
-          <button class="btn btn-primary" id="btn-new-empty">+ Crear actividad</button>
+          <button class="btn btn-primary btn-lg mt-2" id="btn-new-empty">+ Crear actividad</button>
         </div>
       ` : `
-        <h2 class="fs-4 fw-bold mb-4">
+        <h2 class="home-section-title">
           Mis actividades
           <span class="badge bg-primary ms-2">${activities.length}</span>
         </h2>
@@ -44,9 +44,7 @@ export function renderHome(container) {
   container.querySelector('#btn-new-empty')?.addEventListener('click', () => Router.navigate('/create'))
   container.querySelector('#btn-calibrate')?.addEventListener('click', () => Router.navigate('/calibrate'))
   container.querySelector('#btn-clearcache')?.addEventListener('click', () => {
-    localStorage.clear()
-    sessionStorage.clear()
-    location.reload(true)
+    localStorage.clear(); sessionStorage.clear(); location.reload(true)
   })
 
   container.querySelectorAll('.btn-play-card').forEach(btn => {
@@ -78,27 +76,34 @@ export function renderHome(container) {
 
 function activityCard(a) {
   const meta  = Registry.getMeta(a.template)
+  const color = meta.color || '#4a90e2'
+  const icon  = meta.icon  || '▶'
   const label = meta.label || a.template
   const count = a.content?.items?.length || 0
+  const timer = a.rules?.timer ?? a.config?.timer
+
   return `
-    <div class="activity-card card" data-id="${a.id}">
-      <div class="card-body d-flex flex-column gap-2">
-        <div class="d-flex align-items-center justify-content-between">
-          <span class="card-template-badge">${label}</span>
-          <div class="d-flex gap-2">
-            <button class="btn-edit-card btn btn-sm btn-link p-0"
+    <div class="activity-card" data-id="${a.id}">
+      <div class="card-thumb" style="background:${color}">
+        <span class="card-thumb-icon">${icon}</span>
+      </div>
+      <div class="card-body-inner">
+        <div class="card-top-row">
+          <span class="card-template-label" style="color:${color}">${label}</span>
+          <div class="card-actions">
+            <button class="btn-edit-card card-action-btn"
               data-id="${a.id}" data-template="${a.template}" title="Editar">✏️</button>
-            <button class="btn-delete-card btn btn-sm btn-link text-danger p-0"
+            <button class="btn-delete-card card-action-btn text-danger"
               data-id="${a.id}" title="Eliminar">✕</button>
           </div>
         </div>
         <h3 class="card-title">${esc(a.title)}</h3>
         ${a.subtitle ? `<p class="card-subtitle">${esc(a.subtitle)}</p>` : ''}
-        <div class="card-meta d-flex gap-3 mt-auto pt-2 border-top">
-          <span>📝 ${count} pregunta${count !== 1 ? 's' : ''}</span>
-          ${(a.rules?.timer ?? a.config?.timer) ? `<span>⏱ ${a.rules?.timer ?? a.config?.timer}s</span>` : ''}
+        <div class="card-meta">
+          ${count ? `<span>📝 ${count} zona${count !== 1 ? 's' : ''}</span>` : ''}
+          ${timer    ? `<span>⏱ ${timer}s</span>` : ''}
         </div>
-        <div class="btn-group w-100" role="group">
+        <div class="btn-group w-100 mt-auto pt-3" role="group">
           <button class="btn-play-card btn btn-primary" data-id="${a.id}">▶ Jugar</button>
           <button class="btn-start-card btn btn-outline-primary" data-id="${a.id}">Empezar</button>
         </div>

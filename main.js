@@ -13,8 +13,8 @@ import { renderCalibration }             from './views/calibration.js'
 import { QuizEditor }                    from './editors/quizEditor.js'
 import { TextCorrectionEditor }          from './editors/textCorrectionEditor.js'
 
-Registry.register('quiz',           QuizTemplate,           { label: 'Quiz',                  icon: '❓' }, qaModel)
-Registry.register('textCorrection', TextCorrectionTemplate, { label: 'Corrección de textos',   icon: '✍️' }, annotatedTextModel)
+Registry.register('quiz',           QuizTemplate,           { label: 'Quiz',                 icon: '❓', color: '#6c5ce7' }, qaModel)
+Registry.register('textCorrection', TextCorrectionTemplate, { label: 'Corrección de textos', icon: '✍️', color: '#f39c12' }, annotatedTextModel)
 Store.seed(activities)
 
 const app = document.getElementById('app')

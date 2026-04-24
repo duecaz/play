@@ -77,7 +77,8 @@ export const Player = {
       maxScore:  this.maxScore,
       pct,
       timeUsed:  this.timeUsed,
-      overrides: result.overrides ?? []
+      overrides: result.overrides ?? [],
+      onReplay:  () => this._reset(),
     })
     this._controls.showEnd()
   },

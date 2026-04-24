@@ -6,12 +6,9 @@
   display: grid; grid-template-rows: auto 1fr auto;
 }
 
-/* Stage wraps main-area; review panel floats over it absolutely */
 #player-stage {
-  display: flex;
-  overflow: hidden;
-  min-height: 0;
-  position: relative;
+  display: flex; overflow: hidden;
+  min-height: 0; position: relative;
 }
 
 #hud {
@@ -37,20 +34,14 @@
   min-width: 0;
 }
 
-/* In itemList review mode the list manages its own scroll */
 .review-mode--list #main-area {
-  align-items: flex-start;
-  overflow-y: auto;
-  padding: 0;
+  align-items: flex-start; overflow-y: auto; padding: 0;
 }
 
-/* Review panel — shares flex row with main-area (frozenCanvas: side by side) */
 #review-panel { display: none; }
 #review-panel.active {
-  display: flex;
-  width: 280px; min-width: 240px;
-  overflow-y: auto;
-  border-left: 1px solid var(--bs-border-color);
+  display: flex; width: 280px; min-width: 240px;
+  overflow-y: auto; border-left: 1px solid var(--bs-border-color);
   background: rgba(0,0,0,0.28);
 }
 
@@ -73,7 +64,6 @@
 @keyframes timerPulse { 0%,100% { opacity:1 } 50% { opacity:0.45 } }
 
 .hud-score { display: flex; flex-direction: column; align-items: flex-end; }
-.score-label { font-size: var(--ep-sm); color: rgba(255,255,255,0.55); }
 .score-value { font-size: var(--ep-xl); font-weight: 700; font-variant-numeric: tabular-nums; }
 .score-pct   { font-size: var(--ep-sm); color: rgba(255,255,255,0.45); font-variant-numeric: tabular-nums; }
 .score-value.score-bump { animation: scoreBump 300ms ease; }
@@ -100,15 +90,118 @@
 }
 .ctrl-btn.ctrl-primary:hover { filter: brightness(0.9); }
 
-/* Wide text buttons shown in end-of-game controls */
 .ctrl-btn--wide {
   width: auto; height: 48px; border-radius: 24px;
   padding: 0 1.5rem; font-size: 1rem;
 }
 .ctrl-btn--wide.ctrl-primary { width: auto; height: 48px; font-size: 1rem; }
 
-/* Fullscreen: hide the entire controls bar */
 #player-container.fs-mode #controls { display: none; }
-
-/* HUD fullscreen button — slightly smaller than standard ctrl-btn */
 .hud-fs-btn { width: 38px; height: 38px; font-size: 1.1rem; flex-shrink: 0; }
+
+/* ── Start screen ───────────────────────────────────────── */
+.start-screen {
+  width: 100%; height: 100%; position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.start-bg {
+  position: absolute; inset: 0; opacity: 0.07; pointer-events: none;
+}
+.start-card {
+  position: relative; z-index: 1;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; overflow: hidden;
+  max-width: 460px; width: 88%;
+  box-shadow: 0 28px 64px rgba(0,0,0,0.45);
+}
+.start-card-band {
+  height: 110px;
+  display: flex; align-items: center; justify-content: center;
+}
+.start-card-icon { font-size: 3.2rem; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3)); }
+.start-card-body {
+  padding: 1.5rem 2rem 2rem;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.6rem; text-align: center;
+}
+.start-template-label {
+  font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: rgba(255,255,255,0.4); font-weight: 600;
+  margin: 0;
+}
+.start-title {
+  font-size: var(--ep-xl); font-weight: 800; line-height: 1.2; margin: 0;
+}
+.start-subtitle {
+  font-size: var(--ep-base); color: rgba(255,255,255,0.5); margin: 0;
+}
+.start-meta {
+  display: flex; gap: 2rem; justify-content: center;
+  font-size: var(--ep-sm); color: rgba(255,255,255,0.45);
+  padding: 0.25rem 0;
+}
+.btn-start {
+  margin-top: 0.5rem; border: none; cursor: pointer;
+  padding: 0.8rem 3rem; border-radius: 50px;
+  font-size: var(--ep-base); font-weight: 700; color: #fff;
+  transition: transform 150ms ease, filter 150ms ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.btn-start:hover  { filter: brightness(1.1); transform: scale(1.04); }
+.btn-start:active { transform: scale(0.97); }
+
+/* ── End screen ─────────────────────────────────────────── */
+.end-screen {
+  width: 100%; height: 100%; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.end-card {
+  position: relative; z-index: 1;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 2.25rem 2.75rem;
+  max-width: 480px; width: 90%; text-align: center;
+  box-shadow: 0 28px 64px rgba(0,0,0,0.45);
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+}
+.end-title { font-size: var(--ep-xl); font-weight: 800; margin: 0; }
+.end-score-ring {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 128px; height: 128px; border-radius: 50%;
+  border: 4px solid var(--ep-correct);
+  background: rgba(255,255,255,0.04);
+}
+.end-score-pct   { font-size: var(--ep-xxl); font-weight: 800; line-height: 1; }
+.end-score-label { font-size: var(--ep-sm); color: rgba(255,255,255,0.45); }
+.end-stats { display: flex; gap: 2.5rem; }
+.end-stat  { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
+.stat-value { font-size: var(--ep-lg); font-weight: 700; }
+.stat-label { font-size: var(--ep-sm); color: rgba(255,255,255,0.4); }
+.end-override-note { font-size: var(--ep-sm); color: rgba(255,255,255,0.5); margin: 0; }
+.end-override-diff { font-weight: 700; margin-left: 0.3em; }
+
+.end-replay-btn {
+  background: var(--bs-primary); color: #fff; border: none; cursor: pointer;
+  padding: 0.8rem 2.5rem; border-radius: 50px;
+  font-size: var(--ep-base); font-weight: 700;
+  transition: transform 150ms ease, filter 150ms ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.end-replay-btn:hover  { filter: brightness(1.1); transform: scale(1.04); }
+.end-replay-btn:active { transform: scale(0.97); }
+
+/* ── Confetti ───────────────────────────────────────────── */
+.confetti-wrap {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  overflow: hidden; pointer-events: none; z-index: 0;
+}
+.confetti-piece {
+  position: absolute; top: -24px; border-radius: 2px;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg);    opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0.2; }
+}

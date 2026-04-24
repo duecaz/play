@@ -1,21 +1,32 @@
-import { esc } from '../core/html.js'
+import { esc }   from '../core/html.js'
+import Registry from '../core/registry.js'
 
 export function renderStartScreen(container, activity, { onStart } = {}) {
   const { title, subtitle, content, rules } = activity
-  const total = content.items?.length ?? null
-  const timer = rules?.timer ?? 0
+  const meta   = Registry.getMeta(activity.template)
+  const accent = meta.color || '#4a90e2'
+  const ico    = meta.icon  || '▶'
+  const lbl    = meta.label || ''
+  const total  = content.items?.length ?? null
+  const timer  = rules?.timer ?? 0
 
   container.innerHTML = `
     <div class="start-screen fade-in">
-      <div class="text-center" style="max-width:820px; padding:4rem;">
-        <span class="badge bg-primary text-uppercase fw-bold mb-3 px-3 py-2" style="letter-spacing:.1em">Actividad</span>
-        <h1 class="start-title mb-3">${esc(title)}</h1>
-        ${subtitle ? `<p class="start-subtitle mb-4">${esc(subtitle)}</p>` : ''}
-        <div class="start-meta d-flex gap-4 justify-content-center mb-5">
-          ${total !== null ? `<span>${total} pregunta${total !== 1 ? 's' : ''}</span>` : ''}
-          ${timer ? `<span>${timer} segundos</span>` : ''}
+      <div class="start-bg" style="background:${accent}"></div>
+      <div class="start-card">
+        <div class="start-card-band" style="background:${accent}">
+          <span class="start-card-icon">${ico}</span>
         </div>
-        <button class="btn btn-primary btn-start" id="btn-start">▶ Comenzar</button>
+        <div class="start-card-body">
+          ${lbl ? `<p class="start-template-label">${esc(lbl)}</p>` : ''}
+          <h1 class="start-title">${esc(title)}</h1>
+          ${subtitle ? `<p class="start-subtitle">${esc(subtitle)}</p>` : ''}
+          <div class="start-meta">
+            ${total !== null ? `<span>✍️&nbsp;${total} zona${total !== 1 ? 's' : ''}</span>` : ''}
+            ${timer          ? `<span>⏱&nbsp;${timer} s</span>`                              : ''}
+          </div>
+          <button class="btn-start" id="btn-start" style="background:${accent}">▶ Comenzar</button>
+        </div>
       </div>
     </div>
   `
