@@ -188,7 +188,11 @@
   }
 
   #hud, #controls { padding: 0.5rem 1rem; min-height: 48px; }
-  #main-area { padding: 1.25rem; }
+
+  /* Remove side padding — spacers are hidden so the text wrapper
+     can use the full screen width */
+  #main-area { padding: 0.5rem 0; }
+  .corr-screen { padding-left: 0.5rem; padding-right: 0.5rem; }
 
   /* Horizontal spacers used to balance the lateral review panel
      are irrelevant in column layout — hide them via CSS */
