@@ -53,7 +53,11 @@ export function renderHome(container) {
     btn.addEventListener('click', e => { e.stopPropagation(); Router.navigate(`/play/${btn.dataset.id}`) })
   })
   container.querySelectorAll('.btn-start-card').forEach(btn => {
-    btn.addEventListener('click', e => { e.stopPropagation(); Router.navigate(`/play/${btn.dataset.id}`) })
+    btn.addEventListener('click', e => {
+      e.stopPropagation()
+      document.documentElement.requestFullscreen?.().catch(() => {})
+      Router.navigate(`/play/${btn.dataset.id}`)
+    })
   })
   container.querySelectorAll('.btn-edit-card').forEach(btn => {
     btn.addEventListener('click', e => {
