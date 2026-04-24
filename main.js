@@ -1,6 +1,7 @@
 import Router                           from './core/router.js'
 import Store                             from './core/storage.js'
 import Registry                          from './core/registry.js'
+import { VERSION }                        from './core/constants.js'
 import { QuizTemplate }                  from './templates/quiz.js'
 import { TextCorrectionTemplate }        from './templates/textCorrection.js'
 import { qaModel }                       from './core/contentModels/qa.js'
@@ -17,7 +18,9 @@ Registry.register('quiz',           QuizTemplate,           { label: 'Quiz',    
 Registry.register('textCorrection', TextCorrectionTemplate, { label: 'Corrección de textos', icon: '✍️', color: '#f39c12' }, annotatedTextModel)
 Store.seed(activities)
 
-const app = document.getElementById('app')
+const app   = document.getElementById('app')
+const badge = document.getElementById('version-badge')
+if (badge) badge.textContent = `v${VERSION}`
 
 Router.on('/home',             ()             => renderHome(app))
 Router.on('/create',           ()             => renderTemplateSelector(app))

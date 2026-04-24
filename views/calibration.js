@@ -131,8 +131,8 @@ export function renderCalibration(container) {
           <div class="calib-thr-row">
             <label>Borrador (max)</label>
             <div class="calib-slider-wrap">
-              <input type="range"  id="th-erase-max"   min="10" max="80" step="1">
-              <input type="number" id="th-erase-max-n" min="10" max="80" step="1">
+              <input type="range"  id="th-erase-max"   min="10" max="150" step="1">
+              <input type="number" id="th-erase-max-n" min="10" max="150" step="1">
             </div>
           </div>
           <div class="calib-thr-row">

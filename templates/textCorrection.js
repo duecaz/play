@@ -1,7 +1,9 @@
-import { BaseTemplate }     from './base.js'
-import Events               from '../core/events.js'
-import { esc }              from '../core/html.js'
-import { PenDetector }      from '../libs/pen-detector.js'
+import { BaseTemplate }  from './base.js'
+import Events             from '../core/events.js'
+import { esc }            from '../core/html.js'
+import { PenDetector }    from '../libs/pen-detector.js'
+import { buildHTML, wordAt }                                          from './tc-html.js'
+import { drawZoneBorders, redrawResults, erase, drawEraserIndicator } from './tc-draw.js'
 
 export class TextCorrectionTemplate extends BaseTemplate {
   static requiresTools  = ['pen']
@@ -11,14 +13,14 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
   constructor() {
     super()
-    this._zones   = []   // { x, y, w, h, hit, expected }
-    this._strokes = []   // array of [{x,y}] in canvas pixel coords at capture time
+    this._zones   = []
+    this._strokes = []
     this._current = null
     this._canvas  = null
     this._ctx     = null
     this._drawing = false
     this._done    = false
-    this._checkW  = 0    // canvas.width at the moment _check() ran
+    this._checkW  = 0
     this._checkH  = 0
     this._onDown  = null
     this._onMove  = null
@@ -27,7 +29,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._onDebug    = null
     this._spacerL    = null
     this._spacerR    = null
-    this._pd         = null   // PenDetector instance (IR mode)
+    this._pd         = null
     this._erasing    = false
     this._skin       = 'default'
   }
@@ -47,7 +49,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
     // Reserve half the review-panel width on each side of main-area so the
     // wrapper stays centred. freeze() removes both spacers in the same JS
     // tick the panel appears → main-area width never changes (no reflow).
-    const stage = document.getElementById('player-stage')
+    const stage    = document.getElementById('player-stage')
     const mainArea = document.getElementById('main-area')
     const rvPanel  = document.getElementById('review-panel')
     if (stage && mainArea) {
@@ -64,7 +66,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
       this._debugZones = !this._debugZones
       if (!this._done) {
         this._ctx?.clearRect(0, 0, this._canvas?.width, this._canvas?.height)
-        if (this._debugZones) this._drawZoneBorders()
+        if (this._debugZones) drawZoneBorders(this._ctx, this._zones)
       }
     }
     document.addEventListener('debug:zones', this._onDebug)
@@ -92,17 +94,14 @@ export class TextCorrectionTemplate extends BaseTemplate {
     // so _fitText / _sizeCanvas / _recalcZones measure correct post-resize geometry.
     requestAnimationFrame(() => {
       if (!this._canvas) return
-      if (this._skin === 'notebook') {
-        this._fitText()
-        this._applyNotebookSkin()
-      }
+      if (this._skin === 'notebook') this._fitText()
       this._sizeCanvas()
       if (this._done) {
         this._recalcZones(true)
-        this._redrawResults()
+        redrawResults(this._ctx, this._canvas, this._strokes, this._checkW, this._checkH)
       } else {
         this._recalcZones()
-        if (this._debugZones) this._drawZoneBorders()
+        if (this._debugZones) drawZoneBorders(this._ctx, this._zones)
       }
     })
   }
@@ -112,7 +111,6 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._done = true
     const btn = document.getElementById('btn-check')
     if (btn) btn.disabled = true
-    // Remove both spacers in the same tick the panel becomes active
     this._spacerL?.remove(); this._spacerL = null
     this._spacerR?.remove(); this._spacerR = null
   }
@@ -138,9 +136,9 @@ export class TextCorrectionTemplate extends BaseTemplate {
   /* ── Render ───────────────────────────────────────────────── */
   _render() {
     const { textOriginal, textCorrect, instruction } = this.activity.content
-    const textHTML    = _buildHTML(textOriginal, textCorrect)
-    const isNotebook  = this.activity.presentation?.skin === 'notebook'
-    this._skin        = isNotebook ? 'notebook' : 'default'
+    const textHTML   = buildHTML(textOriginal, textCorrect)
+    const isNotebook = this.activity.presentation?.skin === 'notebook'
+    this._skin       = isNotebook ? 'notebook' : 'default'
 
     this.container.innerHTML = `
       <div class="corr-screen fade-in">
@@ -157,17 +155,15 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._ctx    = this._canvas.getContext('2d')
 
     if (isNotebook) this._fitText()
-    if (isNotebook) this._applyNotebookSkin()
     this._sizeCanvas()
     this._recalcZones()
     this._bind()
 
     if (isNotebook) {
-      // Re-run full sequence once web fonts load — Kalam may change metrics
+      // Re-run once web fonts load — Kalam may change metrics
       document.fonts.ready.then(() => {
         if (!this._canvas) return
         this._fitText()
-        this._applyNotebookSkin()
         this._sizeCanvas()
         this._recalcZones()
       })
@@ -199,9 +195,6 @@ export class TextCorrectionTemplate extends BaseTemplate {
     wrapper.style.fontSize = Math.floor(lo) + 'px'
   }
 
-  /* No-op: em-based CSS gradient auto-aligns with wrapper font-size */
-  _applyNotebookSkin() {}
-
   _sizeCanvas() {
     if (!this._canvas) return
     // Use canvas's own bounding rect (CSS display size = wrapper padding-box)
@@ -211,14 +204,13 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._canvas.height = Math.round(r.height)
   }
 
-  /* Percentage-based padding: left/right 25% of char width, top 50% char height, bottom 0 */
   _recalcZones(preserveHits = false) {
     const wrapper = document.getElementById('corr-wrapper')
     if (!wrapper) return
-    const wr       = wrapper.getBoundingClientRect()
-    const prevHits = preserveHits ? this._zones.map(z => z.hit) : []
+    const wr        = wrapper.getBoundingClientRect()
+    const prevHits  = preserveHits ? this._zones.map(z => z.hit)  : []
     const prevWords = preserveHits ? this._zones.map(z => z.word) : []
-    this._zones    = []
+    this._zones     = []
     const { textCorrect } = this.activity.content
     wrapper.querySelectorAll('.acc-zone').forEach((span, i) => {
       const sr      = span.getBoundingClientRect()
@@ -228,7 +220,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
       const charIdx = span.dataset.index !== undefined ? parseInt(span.dataset.index, 10) : -1
       const word    = preserveHits && prevWords[i]
         ? prevWords[i]
-        : (charIdx >= 0 && textCorrect ? _wordAt(textCorrect, charIdx) : '')
+        : (charIdx >= 0 && textCorrect ? wordAt(textCorrect, charIdx) : '')
       this._zones.push({
         x:        sr.left - wr.left - padX,
         y:        sr.top  - wr.top  - padTop,
@@ -241,52 +233,11 @@ export class TextCorrectionTemplate extends BaseTemplate {
     })
   }
 
-  /* Dashed blue rectangles — show detection zone for each letter */
-  _drawZoneBorders() {
-    if (!this._ctx || !this._zones.length) return
-    const ctx = this._ctx
-    ctx.save()
-    ctx.strokeStyle = 'rgba(74,144,226,0.55)'
-    ctx.lineWidth   = 1.5
-    ctx.setLineDash([4, 3])
-    this._zones.forEach(z => ctx.strokeRect(z.x, z.y, z.w, z.h))
-    ctx.setLineDash([])
-    ctx.restore()
-  }
-
-  /* Redraw strokes (scaled) — called after canvas resize */
-  _redrawResults() {
-    if (!this._ctx || !this._done) return
-    const ctx    = this._ctx
-    const scaleX = this._checkW > 0 ? this._canvas.width  / this._checkW : 1
-    const scaleY = this._checkH > 0 ? this._canvas.height / this._checkH : 1
-
-    ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
-
-    this._strokes.forEach(stroke => {
-      if (stroke.length < 2) return
-      ctx.beginPath()
-      ctx.moveTo(stroke[0].x * scaleX, stroke[0].y * scaleY)
-      for (let i = 1; i < stroke.length; i++) {
-        ctx.lineTo(stroke[i].x * scaleX, stroke[i].y * scaleY)
-      }
-      ctx.strokeStyle = 'rgba(74,144,226,0.65)'
-      ctx.lineWidth   = 2
-      ctx.lineCap     = 'round'
-      ctx.lineJoin    = 'round'
-      ctx.stroke()
-    })
-    // Circles removed — zone-ok/zone-miss on the text spans give the same feedback
-  }
-
   /* ── Pointer drawing ─────────────────────────────────────── */
   _bind() {
     const irPen = this.activity.rules?.templateOptions?.irPen ?? false
-    if (irPen) {
-      this._bindIR()
-    } else {
-      this._bindPointer()
-    }
+    if (irPen) this._bindIR()
+    else       this._bindPointer()
   }
 
   _bindPointer() {
@@ -308,8 +259,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
       const { cx, cy } = this._toCanvas(evt.x, evt.y)
       if (evt.tool === 'eraser' || evt.tool === 'penThick' || evt.tool === 'palm') {
         this._erasing = true
-        this._erase(cx, cy)
-        this._drawEraserIndicator(cx, cy)
+        this._strokes = erase(this._ctx, this._canvas, this._strokes, cx, cy, 30, this._debugZones, this._zones)
+        drawEraserIndicator(this._ctx, cx, cy)
       } else {
         this._drawing = true
         this._current = [{ x: cx, y: cy }]
@@ -327,8 +278,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
       if (this._done || evt.tool === 'none') return
       const { cx, cy } = this._toCanvas(evt.x, evt.y)
       if (this._erasing || evt.tool === 'penThick' || evt.tool === 'palm') {
-        this._erase(cx, cy)
-        this._drawEraserIndicator(cx, cy)
+        this._strokes = erase(this._ctx, this._canvas, this._strokes, cx, cy, 30, this._debugZones, this._zones)
+        drawEraserIndicator(this._ctx, cx, cy)
       } else if (this._drawing && this._current) {
         this._current.push({ x: cx, y: cy })
         this._ctx.lineTo(cx, cy)
@@ -340,8 +291,8 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
     this._pd.on('penup', () => {
       if (this._erasing) {
-        // Final redraw to remove eraser indicator circle
-        this._erase(0, 0, 0)   // radius=0 → erases nothing, just redraws to clear indicator
+        // radius=0 erases nothing — just redraws to clear the indicator circle
+        this._strokes = erase(this._ctx, this._canvas, this._strokes, 0, 0, 0, this._debugZones, this._zones)
       }
       this._erasing = false
       if (this._drawing && this._current?.length) {
@@ -358,40 +309,6 @@ export class TextCorrectionTemplate extends BaseTemplate {
       cx: ex * (this._canvas.width  / r.width),
       cy: ey * (this._canvas.height / r.height)
     }
-  }
-
-  /* Remove any stroke that passes through the erase circle, then redraw.
-     Always redraws so the eraser indicator circle can be overlaid cleanly. */
-  _erase(cx, cy, radius = 30) {
-    const r2 = radius * radius
-    this._strokes = this._strokes.filter(
-      stroke => !stroke.some(pt => (pt.x - cx) ** 2 + (pt.y - cy) ** 2 <= r2)
-    )
-    const ctx = this._ctx
-    ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
-    if (this._debugZones) this._drawZoneBorders()
-    this._strokes.forEach(stroke => {
-      if (stroke.length < 2) return
-      ctx.beginPath()
-      ctx.moveTo(stroke[0].x, stroke[0].y)
-      for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y)
-      ctx.strokeStyle = 'rgba(74,144,226,0.85)'
-      ctx.lineWidth   = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'
-      ctx.stroke()
-    })
-  }
-
-  /* Dashed red circle drawn on the canvas to show the eraser area */
-  _drawEraserIndicator(cx, cy, radius = 30) {
-    const ctx = this._ctx
-    ctx.save()
-    ctx.beginPath()
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2)
-    ctx.strokeStyle = 'rgba(255,80,80,0.8)'
-    ctx.lineWidth   = 2
-    ctx.setLineDash([5, 4])
-    ctx.stroke()
-    ctx.restore()
   }
 
   _unbind() {
@@ -412,7 +329,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
   _pDown(e) {
     if (this._done) return
-    if (e.pointerType === 'touch') return   // finger: let drag/scroll pass through
+    if (e.pointerType === 'touch') return
     e.preventDefault()
     this._canvas.setPointerCapture(e.pointerId)
     this._drawing = true
@@ -450,11 +367,11 @@ export class TextCorrectionTemplate extends BaseTemplate {
   /* ── Check ───────────────────────────────────────────────── */
   _check() {
     this._done   = true
-    this._checkW = this._canvas.width    // snapshot for rescaling on redraw
+    this._checkW = this._canvas.width
     this._checkH = this._canvas.height
-    this._recalcZones()   // fresh positions, hits reset to false
+    this._recalcZones()
 
-    /* Only the START POINT of each stroke triggers a hit */
+    // Only the START POINT of each stroke triggers a hit
     this._strokes.forEach(stroke => {
       if (!stroke.length) return
       const pt = stroke[0]
@@ -475,8 +392,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
         span.classList.add(this._zones[i]?.hit ? 'zone-ok' : 'zone-miss')
       })
 
-    /* Redraw: clear canvas → trazos → círculos (strokes always visible) */
-    this._redrawResults()
+    redrawResults(this._ctx, this._canvas, this._strokes, this._checkW, this._checkH)
 
     const btnCheck = document.getElementById('btn-check')
     if (btnCheck) {
@@ -490,56 +406,4 @@ export class TextCorrectionTemplate extends BaseTemplate {
     Events.emit('answer:correct', { correct, total })
     setTimeout(() => this._onComplete?.(), 150)
   }
-}
-
-/* ── Helpers ─────────────────────────────────────────────────── */
-function _buildHTML(orig, correct) {
-  /*
-   * Build token list so blank zones (commas) attach to the preceding
-   * word in a white-space:nowrap span, preventing orphaned comma zones
-   * at the start of a wrapped line.
-   */
-  const parts = []   // { type: 'text'|'span'|'nowrap', html }
-
-  for (let i = 0; i < orig.length; i++) {
-    if (orig[i] !== correct[i]) {
-      const blank = orig[i] === '_'
-      const cls   = blank ? 'acc-zone acc-zone--blank' : 'acc-zone'
-      const span  = `<span class="${cls}" data-correct="${esc(correct[i])}" data-index="${i}">${blank ? esc(correct[i]) : esc(orig[i])}</span>`
-
-      if (blank && parts.length > 0 && parts[parts.length - 1].type === 'text') {
-        // Only wrap the last word + blank zone so the comma can't start a new line alone
-        const prev      = parts.pop()
-        const lastSpace = prev.html.lastIndexOf(' ')
-        if (lastSpace >= 0) {
-          if (lastSpace + 1 > 0) parts.push({ type: 'text', html: prev.html.slice(0, lastSpace + 1) })
-          parts.push({ type: 'nowrap', html: prev.html.slice(lastSpace + 1) + span })
-        } else {
-          parts.push({ type: 'nowrap', html: prev.html + span })
-        }
-      } else {
-        parts.push({ type: 'span', html: span })
-      }
-      // Skip the space after comma: comma has natural width so the following
-      // space would create a double-width gap that hints the comma position.
-      if (blank && i + 1 < orig.length && /[ \n]/.test(orig[i + 1]) && /[ \n]/.test(correct[i + 1])) i++
-    } else {
-      const ch = esc(orig[i])
-      const last = parts[parts.length - 1]
-      if (last?.type === 'text') last.html += ch
-      else parts.push({ type: 'text', html: ch })
-    }
-  }
-
-  return parts.map(p =>
-    p.type === 'nowrap' ? `<span class="tc-nb">${p.html}</span>` : p.html
-  ).join('')
-}
-
-function _wordAt(text, idx) {
-  let start = idx
-  let end   = idx
-  while (start > 0 && /\S/.test(text[start - 1])) start--
-  while (end < text.length - 1 && /\S/.test(text[end + 1])) end++
-  return text.slice(start, end + 1)
 }
