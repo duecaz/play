@@ -21,7 +21,7 @@ const TOOL_COLORS = {
 
 function loadFlat() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = sessionStorage.getItem(STORAGE_KEY)
     if (!raw) return { ...DEFAULTS_FLAT }
     const s = JSON.parse(raw)
     return {
@@ -35,7 +35,7 @@ function loadFlat() {
 }
 
 function saveNested(t) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
     penThin:  { min: 0,            max: t.penThinMax  },
     penThick: { min: t.penThinMax, max: t.penThickMax },
     eraser:   { min: t.eraserMin,  max: t.eraserMax   },

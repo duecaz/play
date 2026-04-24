@@ -14,6 +14,7 @@ export function renderHome(container) {
         <span class="logo-name">EduPlay</span>
       </div>
       <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary" id="btn-clearcache" title="Limpiar caché y recargar">⟳ Limpiar caché</button>
         <button class="btn btn-sm btn-outline-secondary" id="btn-calibrate" title="Calibrar lápiz IR">⚙ Calibrar</button>
         <button class="btn btn-primary" id="btn-new">+ Nueva actividad</button>
       </div>
@@ -42,8 +43,16 @@ export function renderHome(container) {
   container.querySelector('#btn-new')?.addEventListener('click', () => Router.navigate('/create'))
   container.querySelector('#btn-new-empty')?.addEventListener('click', () => Router.navigate('/create'))
   container.querySelector('#btn-calibrate')?.addEventListener('click', () => Router.navigate('/calibrate'))
+  container.querySelector('#btn-clearcache')?.addEventListener('click', () => {
+    localStorage.clear()
+    sessionStorage.clear()
+    location.reload(true)
+  })
 
   container.querySelectorAll('.btn-play-card').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); Router.navigate(`/play/${btn.dataset.id}`) })
+  })
+  container.querySelectorAll('.btn-start-card').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); Router.navigate(`/play/${btn.dataset.id}`) })
   })
   container.querySelectorAll('.btn-edit-card').forEach(btn => {
@@ -85,7 +94,10 @@ function activityCard(a) {
           <span>📝 ${count} pregunta${count !== 1 ? 's' : ''}</span>
           ${(a.rules?.timer ?? a.config?.timer) ? `<span>⏱ ${a.rules?.timer ?? a.config?.timer}s</span>` : ''}
         </div>
-        <button class="btn-play-card btn btn-primary w-100" data-id="${a.id}">▶ Jugar</button>
+        <div class="btn-group w-100" role="group">
+          <button class="btn-play-card btn btn-primary" data-id="${a.id}">▶ Jugar</button>
+          <button class="btn-start-card btn btn-outline-primary" data-id="${a.id}">Empezar</button>
+        </div>
       </div>
     </div>
   `

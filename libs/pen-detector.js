@@ -7,10 +7,10 @@
  *
  * Options:
  *   element    — required DOM element
- *   thresholds — per-key overrides (merged over localStorage → DEFAULTS)
+ *   thresholds — per-key overrides (merged over sessionStorage → DEFAULTS)
  *   smooth     — { xy: 0..1, pressure: 0..1 } (default xy=0.2, pressure=0.6)
  *
- * Thresholds are loaded from localStorage key 'ep-pen-thresholds' at
+ * Thresholds are loaded from sessionStorage key 'ep-pen-thresholds' at
  * construction time so the calibration screen can persist tuned values.
  */
 
@@ -26,7 +26,7 @@ const DEFAULTS = {
 }
 
 function _loadStored() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') } catch { return null }
+  try { return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || 'null') } catch { return null }
 }
 
 export class PenDetector {
@@ -43,7 +43,7 @@ export class PenDetector {
     this._velPos = null
     this._sP     = 0.5
 
-    // Merge priority: DEFAULTS → localStorage → constructor argument (per-key)
+    // Merge priority: DEFAULTS → sessionStorage → constructor argument (per-key)
     const stored = _loadStored()
     this._thr = {
       penThin:  Object.assign({}, DEFAULTS.penThin,  stored?.penThin,  thresholds?.penThin),
