@@ -197,13 +197,12 @@ export class TextCorrectionTemplate extends BaseTemplate {
     const wrapper = document.getElementById('corr-wrapper')
     const textEl  = document.getElementById('corr-text')
     if (!wrapper || !textEl) return
-    const lineH  = parseFloat(getComputedStyle(textEl).lineHeight)
-    const padTop = parseFloat(getComputedStyle(wrapper).paddingTop)
-    // offset = padTop + lineH → backward gradient tile places stripe at
-    // (padTop + lineH - 2)...(padTop + lineH): the bottom of the first line-box
-    const offset = Math.round(padTop + lineH)
+    const lineH = parseFloat(getComputedStyle(textEl).lineHeight)
+    // background-origin: content-box means position is relative to content edge.
+    // offset = lineH places the backward tile stripe at (lineH-2)..lineH from
+    // content top = bottom of first line-box. No stray stripe in padding area.
     wrapper.style.setProperty('--lh', `${Math.round(lineH)}px`)
-    wrapper.style.setProperty('--lh-offset', `${offset}px`)
+    wrapper.style.setProperty('--lh-offset', `${Math.round(lineH)}px`)
   }
 
   _sizeCanvas() {
@@ -309,13 +308,13 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._pd.on('pendown', evt => {
       if (this._done || evt.tool === 'none') return
       const { cx, cy } = this._toCanvas(evt.x, evt.y)
-      if (evt.tool === 'eraser') {
+      if (evt.tool === 'eraser' || evt.tool === 'penThick') {
         this._erasing = true
         this._erase(cx, cy)
       } else {
         this._drawing = true
         this._current = [{ x: cx, y: cy }]
-        const lw  = evt.tool === 'penThin' ? 2 : 3.5
+        const lw  = 2
         const ctx = this._ctx
         ctx.beginPath()
         ctx.moveTo(cx, cy)
@@ -329,7 +328,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._pd.on('penmove', evt => {
       if (this._done || evt.tool === 'none') return
       const { cx, cy } = this._toCanvas(evt.x, evt.y)
-      if (this._erasing) {
+      if (this._erasing || evt.tool === 'penThick') {
         this._erase(cx, cy)
       } else if (this._drawing && this._current) {
         this._current.push({ x: cx, y: cy })
@@ -401,6 +400,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
   _pDown(e) {
     if (this._done) return
+    if (e.pointerType === 'touch') return   // finger: let drag/scroll pass through
     e.preventDefault()
     this._canvas.setPointerCapture(e.pointerId)
     this._drawing = true
