@@ -97,8 +97,8 @@ function activityCard(a) {
           ${(a.rules?.timer ?? a.config?.timer) ? `<span>⏱ ${a.rules?.timer ?? a.config?.timer}s</span>` : ''}
         </div>
         <div class="btn-group w-100" role="group">
-          <button class="btn-play-card btn btn-primary" data-id="${a.id}">▶ Jugar</button>
-          <button class="btn-start-card btn btn-outline-primary" data-id="${a.id}">Empezar full</button>
+          <button class="btn-play-card btn btn-outline-primary" data-id="${a.id}"><i class="bi bi-fullscreen-exit me-1"></i>Empezar</button>
+          <button class="btn-start-card btn btn-primary" data-id="${a.id}"><i class="bi bi-fullscreen me-1"></i>Empezar</button>
         </div>
       </div>
     </div>
