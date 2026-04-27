@@ -13,6 +13,7 @@ export class HUD {
 
   render(activity) {
     const { title, presentation } = activity
+    this._scoreMode = presentation?.scoreMode ?? 'full'
     this._container.innerHTML = `
       <div class="hud-left">
         <button class="ctrl-btn hud-fs-btn" id="hud-fs" title="Pantalla completa">
@@ -81,11 +82,16 @@ export class HUD {
 
   setScore(score, maxScore) {
     if (!this._scoreEl) return
-    this._scoreEl.textContent = maxScore > 0 ? `${score} / ${maxScore}` : score
-    if (this._pctEl) {
-      this._pctEl.textContent = maxScore > 0
-        ? Math.round(score / maxScore * 100) + '%'
-        : ''
+    if (this._scoreMode === 'points') {
+      this._scoreEl.textContent = score
+      if (this._pctEl) this._pctEl.textContent = ''
+    } else {
+      this._scoreEl.textContent = maxScore > 0 ? `${score} / ${maxScore}` : score
+      if (this._pctEl) {
+        this._pctEl.textContent = maxScore > 0
+          ? Math.round(score / maxScore * 100) + '%'
+          : ''
+      }
     }
     this._scoreEl.classList.remove('score-bump')
     void this._scoreEl.offsetWidth

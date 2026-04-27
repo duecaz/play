@@ -51,6 +51,10 @@ export class QuizEditor extends BaseEditor {
               <option value="1">−1 punto</option>
             </select>
           </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="f-score-only">
+            <label class="form-check-label" for="f-score-only">Solo puntaje (sin fracción ni %)</label>
+          </div>
         </div>
       </section>
 
@@ -68,7 +72,8 @@ export class QuizEditor extends BaseEditor {
     document.getElementById('f-timer').value       = activity.rules?.timer ?? 60
     document.getElementById('f-randomize').checked = activity.rules?.randomize ?? true
     document.getElementById('f-shuffle').checked   = activity.rules?.shuffleOptions ?? true
-    document.getElementById('f-penalty').value     = String(activity.scoring?.penaltyRatio ?? 0)
+    document.getElementById('f-penalty').value       = String(activity.scoring?.penaltyRatio ?? 0)
+    document.getElementById('f-score-only').checked  = activity.presentation?.scoreMode === 'points'
 
     this._questions = activity.content.items.map(item => {
       const opts = [...item.options]
@@ -165,6 +170,7 @@ export class QuizEditor extends BaseEditor {
     const randomize = document.getElementById('f-randomize').checked
     const shuffle   = document.getElementById('f-shuffle').checked
     const penalty   = parseFloat(document.getElementById('f-penalty').value) || 0
+    const scoreOnly = document.getElementById('f-score-only').checked
 
     return {
       id:       Store.uid(),
@@ -183,7 +189,7 @@ export class QuizEditor extends BaseEditor {
       rules:        { timer, randomize, shuffleOptions: shuffle, templateOptions: {} },
       scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, penaltyRatio: penalty, maxScore: null },
       review:       { allowOverride: true, showCorrectAnswer: true, autoAdvanceToSummary: false },
-      presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false }
+      presentation: { skin: 'default', layout: 'center', sound: false, showTimer: true, showScore: true, teams: false, scoreMode: scoreOnly ? 'points' : 'full' }
     }
   }
 
