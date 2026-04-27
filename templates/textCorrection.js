@@ -214,10 +214,22 @@ export class TextCorrectionTemplate extends BaseTemplate {
     const prevWords = preserveHits ? this._zones.map(z => z.word) : []
     this._zones     = []
     const { textCorrect } = this.activity.content
-    wrapper.querySelectorAll('.acc-zone').forEach((span, i) => {
-      const sr      = span.getBoundingClientRect()
+
+    const spans = [...wrapper.querySelectorAll('.acc-zone')]
+    const rects = spans.map(s => s.getBoundingClientRect())
+
+    // Uniform horizontal padding: widest non-blank zone × 0.25 used for ALL zones
+    // so narrow chars like 'í' get the same hit area as wide ones like 'ó'
+    let maxW = 0
+    spans.forEach((s, i) => {
+      if (!s.classList.contains('acc-zone--blank')) maxW = Math.max(maxW, rects[i].width)
+    })
+    const padXFixed = maxW * 0.25
+
+    spans.forEach((span, i) => {
+      const sr      = rects[i]
       const isBlank = span.classList.contains('acc-zone--blank')
-      const padX    = isBlank ? 18 : sr.width * 0.25
+      const padX    = isBlank ? 18 : padXFixed
       const padTop  = sr.height * 0.50
       const charIdx = span.dataset.index !== undefined ? parseInt(span.dataset.index, 10) : -1
       const word    = preserveHits && prevWords[i]

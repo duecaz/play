@@ -98,7 +98,7 @@ function activityCard(a) {
         </div>
         <div class="btn-group w-100" role="group">
           <button class="btn-play-card btn btn-primary" data-id="${a.id}">▶ Jugar</button>
-          <button class="btn-start-card btn btn-outline-primary" data-id="${a.id}">Empezar</button>
+          <button class="btn-start-card btn btn-outline-primary" data-id="${a.id}">Empezar full</button>
         </div>
       </div>
     </div>
