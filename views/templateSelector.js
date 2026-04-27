@@ -2,7 +2,8 @@ import Router from '../core/router.js'
 
 const TEMPLATES = [
   { id: 'quiz',           icon: '❓', name: 'Quiz',                 desc: 'Pregunta con 4 opciones de respuesta',          ready: true  },
-  { id: 'textCorrection', icon: '✍️', name: 'Corrección de textos', desc: 'Pon las tildes con el stylus sobre el texto',   ready: true  },
+  { id: 'textCorrection', icon: '✍️', name: 'Corrección de textos', desc: 'Pon las tildes y las comas con el stylus',      ready: true  },
+  { id: 'tildes',         icon: 'á',  name: 'Tildes',               desc: 'Pon solo las tildes — 10 puntos por acierto',   ready: true  },
   { id: 'match',          icon: '🔗', name: 'Relacionar',           desc: 'Conecta conceptos de dos columnas',             ready: false },
   { id: 'sort',           icon: '📂', name: 'Clasificar',           desc: 'Agrupa elementos en categorías',                ready: false }
 ]

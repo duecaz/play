@@ -448,7 +448,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
 
     const btnCheck = document.getElementById('btn-check')
     if (btnCheck) {
-      btnCheck.textContent = `${correct} / ${total} correctas ✓`
+      btnCheck.textContent = this._scoreLabel(correct, total)
       btnCheck.disabled    = true
     }
 
@@ -457,5 +457,9 @@ export class TextCorrectionTemplate extends BaseTemplate {
     if (netScore !== 0) this._onScore?.(netScore)
     Events.emit('answer:correct', { correct, total })
     setTimeout(() => this._onComplete?.(), 150)
+  }
+
+  _scoreLabel(correct, total) {
+    return `${correct} / ${total} correctas ✓`
   }
 }
