@@ -11,6 +11,7 @@ import { renderHome }                    from './views/home.js'
 import { renderTemplateSelector }        from './views/templateSelector.js'
 import { renderPlayerView }              from './views/playerView.js'
 import { renderCalibration }             from './views/calibration.js'
+import { renderLockScreen }             from './views/lockScreen.js'
 import { QuizEditor }                    from './editors/quizEditor.js'
 import { TextCorrectionEditor }          from './editors/textCorrectionEditor.js'
 import { TildesEditor }                 from './editors/tildesEditor.js'
@@ -40,10 +41,17 @@ Router.on('/editor/:template/:id', ({ template, id }) => {
 Router.on('/play/:id',         ({ id })       => renderPlayerView(app, id))
 Router.on('/calibrate',        ()             => renderCalibration(app))
 
-Router.init()
+function boot() {
+  Router.init()
+  Store.sync().then(() => {
+    const hash = window.location.hash.replace('#', '') || '/home'
+    if (hash === '/home' || hash === '/') renderHome(app)
+  })
+}
 
-// Pull from Supabase on startup; re-render home if it's the active view
-Store.sync().then(() => {
-  const hash = window.location.hash.replace('#', '') || '/home'
-  if (hash === '/home' || hash === '/') renderHome(app)
-})
+const savedPin = localStorage.getItem('eduplay_pin')
+if (savedPin && !sessionStorage.getItem('eduplay_unlocked')) {
+  renderLockScreen(app, boot)
+} else {
+  boot()
+}
