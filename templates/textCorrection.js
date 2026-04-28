@@ -80,6 +80,7 @@ export class TextCorrectionTemplate extends BaseTemplate {
   resume() {}
 
   destroy() {
+    document.getElementById('main-area')?.classList.remove('main-area--notebook')
     this._spacerL?.remove(); this._spacerL = null
     this._spacerR?.remove(); this._spacerR = null
     this._unbind()
@@ -170,6 +171,11 @@ export class TextCorrectionTemplate extends BaseTemplate {
         this._recalcZones()
       })
     }
+
+    // Notebook needs #main-area to stretch so corr-screen height:100% resolves.
+    // align-items:center (default) makes percentage heights resolve as auto.
+    document.getElementById('main-area')
+      ?.classList.toggle('main-area--notebook', isNotebook)
 
     document.getElementById('btn-check').addEventListener('click', () => this._check())
   }
