@@ -46,22 +46,23 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._checkW     = 0
     this._checkH     = 0
 
-    // Reserve half the review-panel width on each side of main-area so the
-    // wrapper stays centred. freeze() removes both spacers in the same JS
-    // tick the panel appears → main-area width never changes (no reflow).
-    const stage    = document.getElementById('player-stage')
-    const mainArea = document.getElementById('main-area')
-    const rvPanel  = document.getElementById('review-panel')
-    if (stage && mainArea) {
-      const half = 'width:140px;min-width:120px;flex-shrink:0'
-      this._spacerL = document.createElement('div')
-      this._spacerL.className = 'tc-spacer'
-      this._spacerL.style.cssText = half
-      stage.insertBefore(this._spacerL, mainArea)
-      this._spacerR = document.createElement('div')
-      this._spacerR.className = 'tc-spacer'
-      this._spacerR.style.cssText = half
-      stage.insertBefore(this._spacerR, rvPanel || null)
+    // Spacers keep the wrapper centred when the review panel slides in.
+    // Skip for activities that never show the review panel (skipReview = true).
+    if (!this.constructor.skipReview) {
+      const stage    = document.getElementById('player-stage')
+      const mainArea = document.getElementById('main-area')
+      const rvPanel  = document.getElementById('review-panel')
+      if (stage && mainArea) {
+        const half = 'width:140px;min-width:120px;flex-shrink:0'
+        this._spacerL = document.createElement('div')
+        this._spacerL.className = 'tc-spacer'
+        this._spacerL.style.cssText = half
+        stage.insertBefore(this._spacerL, mainArea)
+        this._spacerR = document.createElement('div')
+        this._spacerR.className = 'tc-spacer'
+        this._spacerR.style.cssText = half
+        stage.insertBefore(this._spacerR, rvPanel || null)
+      }
     }
 
     this._onDebug = () => {
