@@ -56,7 +56,14 @@
 }
 #main-area.main-area--equipo .corr-wrapper {
   max-width: none;
-  border-radius: 16px;
+  border-radius: 20px;
+}
+/* background-clip:border-box hace que el fondo (líneas+color) rellene
+   el wrapper completo — sin esto solo rellena el content-box y las
+   esquinas redondeadas quedan invisibles con el texto pegado al borde */
+#main-area.main-area--equipo .corr-wrapper.skin-notebook {
+  background-clip: border-box;
+  padding: 0.75rem 3rem 2rem;
 }
 
 /* font-size is set on the wrapper so `em` in the gradient always = lineHeight.
