@@ -14,6 +14,7 @@ export class HUD {
   render(activity) {
     const { title, presentation } = activity
     this._scoreMode = presentation?.scoreMode ?? 'full'
+    this._teamMode  = presentation?.teamMode  ?? false
     this._container.innerHTML = `
       <div class="hud-left">
         <button class="ctrl-btn hud-fs-btn" id="hud-fs" title="Pantalla completa">
@@ -30,12 +31,24 @@ export class HUD {
         ` : ''}
       </div>
       <div class="hud-right">
-        ${presentation.showScore ? `
+        ${presentation.showScore ? (this._teamMode ? `
+          <div class="hud-score hud-score--team">
+            <div class="score-seg">
+              <span class="score-seg-lbl">Tú</span>
+              <span class="score-value" id="score-round">—</span>
+            </div>
+            <span class="score-seg-sep">|</span>
+            <div class="score-seg">
+              <span class="score-seg-lbl">Equipo</span>
+              <span class="score-value" id="score-value">0</span>
+            </div>
+          </div>
+        ` : `
           <div class="hud-score">
             <span class="score-value" id="score-value">0</span>
             <span class="score-pct" id="score-pct"></span>
           </div>
-        ` : ''}
+        `) : ''}
       </div>
       <div class="hud-progress" id="hud-progress" hidden>
         <div class="hud-progress-fill" id="hud-progress-fill"></div>
@@ -96,6 +109,16 @@ export class HUD {
     this._scoreEl.classList.remove('score-bump')
     void this._scoreEl.offsetWidth
     this._scoreEl.classList.add('score-bump')
+  }
+
+  setRoundScore(pts) {
+    const el = document.getElementById('score-round')
+    if (el) {
+      el.textContent = `${pts}`
+      el.classList.remove('score-bump')
+      void el.offsetWidth
+      el.classList.add('score-bump')
+    }
   }
 
   setProgress(done, total) {

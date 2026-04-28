@@ -1,6 +1,6 @@
 /* Shared constants — import what you need, never duplicate */
 
-export const VERSION = '0.9.32'
+export const VERSION = '0.9.33'
 
 export const LETTERS = ['A', 'B', 'C', 'D']
 

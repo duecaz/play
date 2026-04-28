@@ -80,6 +80,17 @@
 .score-value { font-size: var(--ep-xl); font-weight: 700; font-variant-numeric: tabular-nums; }
 .score-pct   { font-size: var(--ep-sm); color: rgba(255,255,255,0.45); font-variant-numeric: tabular-nums; }
 .score-value.score-bump { animation: scoreBump 300ms ease; }
+/* Team score layout */
+.hud-score--team { flex-direction: row; align-items: center; gap: .6rem; }
+.score-seg       { display: flex; flex-direction: column; align-items: center; }
+.score-seg-lbl   { font-size: .65rem; text-transform: uppercase; letter-spacing: .04em; color: rgba(255,255,255,0.4); line-height: 1; }
+.score-seg-sep   { color: rgba(255,255,255,0.25); font-size: 1.2rem; line-height: 1; }
+/* Round badge inside activity */
+.round-badge {
+  text-align: center; font-size: .8rem; font-weight: 700; letter-spacing: .05em;
+  color: rgba(255,255,255,0.5); padding-bottom: .25rem;
+  text-transform: uppercase;
+}
 @keyframes scoreBump {
   0%   { transform: scale(1); }
   50%  { transform: scale(1.35); color: var(--ep-correct); }
