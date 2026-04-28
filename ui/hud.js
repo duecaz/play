@@ -34,13 +34,13 @@ export class HUD {
         ${presentation.showScore ? (this._teamMode ? `
           <div class="hud-score hud-score--team">
             <div class="score-seg">
-              <span class="score-seg-lbl">Tú</span>
-              <span class="score-value" id="score-round">—</span>
-            </div>
-            <span class="score-seg-sep">|</span>
-            <div class="score-seg">
-              <span class="score-seg-lbl">Equipo</span>
               <span class="score-value" id="score-value">0</span>
+              <span class="score-seg-lbl">Grupo</span>
+            </div>
+            <span class="score-seg-sep">·</span>
+            <div class="score-seg">
+              <span class="score-value" id="score-round">—</span>
+              <span class="score-seg-lbl">Individual</span>
             </div>
           </div>
         ` : `

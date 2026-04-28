@@ -160,7 +160,7 @@ export class TildesEquipoEditor extends BaseEditor {
       content:  { rounds, maxScore: totalMaxScore },
       rules:        { timer, randomize: false, shuffleOptions: false, templateOptions: { irPen } },
       scoring:      { mode: 'perItem', pointsPerCorrect: 10, pointsPerWrong: 0, penaltyRatio: penalty, maxScore: null },
-      review:       { allowOverride: false, showCorrectAnswer: true, autoAdvanceToSummary: false },
+      review:       { allowOverride: false, showCorrectAnswer: true, autoAdvanceToSummary: false, skipReview: true },
       presentation: { skin, layout: 'center', sound: false, showTimer: true, showScore: true, teams: true, scoreMode: scoreOnly ? 'points' : 'full' }
     }
   }

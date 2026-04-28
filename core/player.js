@@ -129,6 +129,11 @@ export const Player = {
 
     this._controls.showReview()
 
+    if (this.activity.review?.skipReview) {
+      this._finalize({ scoreAuto: this.score, scoreFinal: this.score, overrides: [] })
+      return
+    }
+
     ReviewController.start(this.template, this.activity, this._mainEl, this._reviewEl, {
       onEnd:         result => this._finalize(result),
       onScoreChange: score  => this._hud.setScore(score, this.maxScore)
