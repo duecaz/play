@@ -29,7 +29,7 @@ export class BaseEditor {
           <p class="section-hint mt-1">${this.subtitle}</p>
         </div>
         <button class="btn btn-primary" id="btn-save">
-          ${isEdit ? 'Guardar cambios ▶' : 'Crear actividad ▶'}
+          ${isEdit ? 'Guardar cambios' : 'Guardar actividad'}
         </button>
       </div>
       <div class="editor-body">
@@ -61,6 +61,6 @@ export class BaseEditor {
     const model = Registry.getModel(activity.template)
     if (model) activity.schemaVersion = model.version
     Store.save(activity)
-    Router.navigate(`/play/${activity.id}`)
+    Router.navigate('/home')
   }
 }

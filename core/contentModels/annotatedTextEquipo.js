@@ -2,7 +2,7 @@ import { annotatedTextModel } from './annotatedText.js'
 
 export const annotatedTextEquipoModel = {
   id: 'annotatedTextEquipo',
-  version: 1,
+  version: 2,
 
   validate(content) {
     if (!Array.isArray(content?.rounds) || content.rounds.length < 2)
