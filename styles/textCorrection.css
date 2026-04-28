@@ -52,7 +52,7 @@
 
 /* Equipo — cuaderno ocupa todo el ancho, sin márgenes laterales */
 #main-area.main-area--equipo .corr-screen {
-  padding: 0.5rem 1rem 0.75rem;
+  padding: 0.5rem 2.5rem 0.75rem;
 }
 #main-area.main-area--equipo .corr-wrapper {
   max-width: none;
