@@ -27,8 +27,14 @@ export class TildesEquipoTemplate extends TildesTemplate {
       onComplete: () => this._handleRoundComplete()
     }
 
-    // Give parent only the first round's content so _render() works normally
-    super.init({ ...activity, content: { ...this._rounds[0] } }, container, wrappedCallbacks)
+    // Normalize presentation so old activities without these fields still behave correctly
+    const pres = activity.presentation ?? {}
+    const normalizedActivity = {
+      ...activity,
+      presentation: { skin: 'notebook', scoreMode: 'points', ...pres, teams: true },
+      content: { ...this._rounds[0] }
+    }
+    super.init(normalizedActivity, container, wrappedCallbacks)
   }
 
   start() {

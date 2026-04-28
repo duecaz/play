@@ -90,14 +90,18 @@ export const Player = {
     this.timeLeft = this.activity.rules?.timer ?? this.activity.config?.timer ?? 0
     this.timeUsed = 0
 
-    this._hud.setScore(0, this.maxScore)
-    this._hud.setTimer(this.timeLeft)
-
     this.template.init(this.activity, this._mainEl, {
       onScore:      pts => this._addScore(pts),
       onComplete:   ()  => this._end(),
       onRoundScore: pts => this._hud.setRoundScore(pts)
     })
+
+    // Re-render HUD with the template's activity — templates may normalize
+    // presentation fields (e.g. teams, scoreMode, skin) for old saved activities
+    this._hud.render(this.template.activity)
+    this._hud.setScore(0, this.maxScore)
+    this._hud.setTimer(this.timeLeft)
+
     this.template.start()
 
     const timer = this.activity.rules?.timer ?? this.activity.config?.timer ?? 0
