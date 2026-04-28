@@ -15,7 +15,7 @@ export class HUD {
   render(activity) {
     const { title, presentation } = activity
     this._scoreMode   = presentation?.scoreMode ?? 'full'
-    this._teamMode    = presentation?.teamMode  ?? false
+    this._teamMode    = presentation?.teams     ?? false
     this._roundScores = []
     this._container.innerHTML = `
       <div class="hud-left">
