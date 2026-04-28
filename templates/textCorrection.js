@@ -157,6 +157,10 @@ export class TextCorrectionTemplate extends BaseTemplate {
     this._canvas = document.getElementById('corr-canvas')
     this._ctx    = this._canvas.getContext('2d')
 
+    // Must be set BEFORE _fitText()/_sizeCanvas() so layout reflects stretch height
+    document.getElementById('main-area')
+      ?.classList.toggle('main-area--notebook', isNotebook)
+
     if (isNotebook) this._fitText()
     this._sizeCanvas()
     this._recalcZones()
@@ -171,11 +175,6 @@ export class TextCorrectionTemplate extends BaseTemplate {
         this._recalcZones()
       })
     }
-
-    // Notebook needs #main-area to stretch so corr-screen height:100% resolves.
-    // align-items:center (default) makes percentage heights resolve as auto.
-    document.getElementById('main-area')
-      ?.classList.toggle('main-area--notebook', isNotebook)
 
     document.getElementById('btn-check').addEventListener('click', () => this._check())
   }
