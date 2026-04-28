@@ -1,6 +1,7 @@
 import { TildesTemplate } from './tildes.js'
 
 export class TildesEquipoTemplate extends TildesTemplate {
+  static skipReview = true
   constructor() {
     super()
     this._rounds        = []

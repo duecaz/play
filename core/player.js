@@ -127,13 +127,13 @@ export const Player = {
     clearInterval(this._interval)
     if (!State.go(STATES.REVIEW)) return
 
-    this._controls.showReview()
-
-    if (this.activity.review?.skipReview) {
+    const skip = this.template.constructor.skipReview || this.activity.review?.skipReview
+    if (skip) {
       this._finalize({ scoreAuto: this.score, scoreFinal: this.score, overrides: [] })
       return
     }
 
+    this._controls.showReview()
     ReviewController.start(this.template, this.activity, this._mainEl, this._reviewEl, {
       onEnd:         result => this._finalize(result),
       onScoreChange: score  => this._hud.setScore(score, this.maxScore)
