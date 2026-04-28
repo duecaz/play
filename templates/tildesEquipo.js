@@ -52,21 +52,22 @@ export class TildesEquipoTemplate extends TildesTemplate {
   _handleRoundComplete() {
     this._onRoundScore?.(this._lastRoundPts)
 
-    if (this._round >= this._roundCount - 1) {
-      this._finalComplete?.()
-      return
-    }
-
-    // Replace disabled "Comprobar" button with "Siguiente alumno" button
     const btnCheck = document.getElementById('btn-check')
     if (!btnCheck) return
+    const isLast = this._round >= this._roundCount - 1
+
     const btnNext = document.createElement('button')
     btnNext.className = 'btn btn-success btn-lg btn-corr-check'
-    btnNext.innerHTML = `Alumno ${this._round + 2} <i class="bi bi-arrow-right-circle"></i>`
-    btnNext.addEventListener('click', () => {
-      this._round++
-      this._advanceRound()
-    })
+    if (isLast) {
+      btnNext.innerHTML = `Finalizar <i class="bi bi-flag-fill"></i>`
+      btnNext.addEventListener('click', () => this._finalComplete?.())
+    } else {
+      btnNext.innerHTML = `Alumno ${this._round + 2} <i class="bi bi-arrow-right-circle"></i>`
+      btnNext.addEventListener('click', () => {
+        this._round++
+        this._advanceRound()
+      })
+    }
     btnCheck.replaceWith(btnNext)
   }
 
