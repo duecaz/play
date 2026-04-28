@@ -1,3 +1,5 @@
+import Store from '../core/storage.js'
+
 export function renderLockScreen(container, onUnlock) {
   _renderGrid(container, {
     hint: 'Dibuja el patrón para entrar',
@@ -24,7 +26,7 @@ export function renderPatternConfig(container, onDone) {
         firstSeq = seq
         step2()
       },
-      onExtra: () => { localStorage.removeItem('eduplay_pattern'); onDone() }
+      onExtra: () => { Store.removePattern(); onDone() }
     })
   }
 
@@ -33,7 +35,7 @@ export function renderPatternConfig(container, onDone) {
       hint: 'Confirma el patrón',
       onComplete: seq => {
         if (seq.join('-') === firstSeq.join('-')) {
-          localStorage.setItem('eduplay_pattern', seq.join('-'))
+          Store.savePattern(seq.join('-'))
           onDone()
         } else {
           _shake(container, 'Los patrones no coinciden')

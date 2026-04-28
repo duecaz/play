@@ -32,3 +32,12 @@ export async function sbDelete(table, id) {
   })
   if (!r.ok) throw new Error(`[sb] delete ${table}: ${r.status}`)
 }
+
+export async function sbGetOne(table, id) {
+  const r = await fetch(`${BASE}/${table}?id=eq.${encodeURIComponent(id)}&select=id,data&limit=1`, {
+    headers: AUTH
+  })
+  if (!r.ok) throw new Error(`[sb] get ${table}/${id}: ${r.status}`)
+  const rows = await r.json()
+  return rows[0] ?? null
+}

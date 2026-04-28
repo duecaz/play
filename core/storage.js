@@ -1,4 +1,4 @@
-import { sbList, sbUpsert, sbDelete } from './supabase.js'
+import { sbList, sbUpsert, sbDelete, sbGetOne } from './supabase.js'
 
 const KEY = 'eduplay_activities'
 
@@ -35,15 +35,50 @@ const Store = {
     if (this.list().length === 0) activities.forEach(a => _lsWrite(a))
   },
 
+  /* ── Pattern sync ──────────────────────────────────────── */
+
+  savePattern(pattern) {
+    localStorage.setItem('eduplay_pattern', pattern)
+    sbUpsert('activities', { id: '__settings__', data: { pattern }, updated_at: new Date().toISOString() })
+      .catch(e => console.warn('[Store] pattern save failed:', e))
+  },
+
+  removePattern() {
+    localStorage.removeItem('eduplay_pattern')
+    sbDelete('activities', '__settings__')
+      .catch(e => console.warn('[Store] pattern delete failed:', e))
+  },
+
+  async syncPattern() {
+    try {
+      const row = await sbGetOne('activities', '__settings__')
+      if (row?.data?.pattern) {
+        localStorage.setItem('eduplay_pattern', row.data.pattern)
+      } else {
+        localStorage.removeItem('eduplay_pattern')
+      }
+    } catch (e) {
+      console.warn('[Store] pattern sync failed, using local:', e)
+    }
+  },
+
   /* ── Cloud sync (call once on startup) ───────────────────── */
 
   async sync() {
     try {
       const rows = await sbList('activities')
-      if (!rows.length) return
-      // Merge: remote wins for shared IDs, local-only entries survive
+      // Sync pattern from settings row
+      const settingsRow = rows.find(r => r.id === '__settings__')
+      if (settingsRow?.data?.pattern) {
+        localStorage.setItem('eduplay_pattern', settingsRow.data.pattern)
+      } else {
+        localStorage.removeItem('eduplay_pattern')
+      }
+      // Merge activities (exclude __settings__)
+      const actRows = rows.filter(r => r.id !== '__settings__')
+      if (!actRows.length) return
       const localMap  = Object.fromEntries(this.list().map(a => [a.id, a]))
-      const remoteMap = Object.fromEntries(rows.map(r => [r.id, _migrate(r.data)]))
+      const remoteMap = Object.fromEntries(actRows.map(r => [r.id, _migrate(r.data)]))
       const merged    = Object.values({ ...localMap, ...remoteMap })
       localStorage.setItem(KEY, JSON.stringify(merged))
     } catch (e) {

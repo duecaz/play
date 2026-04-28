@@ -64,8 +64,10 @@ function boot() {
   })
 }
 
-if (localStorage.getItem('eduplay_pattern') && !_unlocked) {
-  renderLockScreen(app, () => { _unlocked = true; boot() })
-} else {
-  boot()
-}
+Store.syncPattern().then(() => {
+  if (localStorage.getItem('eduplay_pattern') && !_unlocked) {
+    renderLockScreen(app, () => { _unlocked = true; boot() })
+  } else {
+    boot()
+  }
+})
