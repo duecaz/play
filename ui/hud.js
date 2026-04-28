@@ -2,19 +2,21 @@ import { esc } from '../core/html.js'
 
 export class HUD {
   constructor(container) {
-    this._container   = container
-    this._timerEl     = null
-    this._scoreEl     = null
-    this._pctEl       = null
-    this._fsBtn       = null
+    this._container    = container
+    this._timerEl      = null
+    this._scoreEl      = null
+    this._pctEl        = null
+    this._fsBtn        = null
     this._progressFill = null
-    this._onFsChange  = null
+    this._onFsChange   = null
+    this._roundScores  = []
   }
 
   render(activity) {
     const { title, presentation } = activity
-    this._scoreMode = presentation?.scoreMode ?? 'full'
-    this._teamMode  = presentation?.teamMode  ?? false
+    this._scoreMode   = presentation?.scoreMode ?? 'full'
+    this._teamMode    = presentation?.teamMode  ?? false
+    this._roundScores = []
     this._container.innerHTML = `
       <div class="hud-left">
         <button class="ctrl-btn hud-fs-btn" id="hud-fs" title="Pantalla completa">
@@ -33,15 +35,7 @@ export class HUD {
       <div class="hud-right">
         ${presentation.showScore ? (this._teamMode ? `
           <div class="hud-score hud-score--team">
-            <div class="score-seg">
-              <span class="score-value" id="score-value">0</span>
-              <span class="score-seg-lbl">Grupo</span>
-            </div>
-            <span class="score-seg-sep">·</span>
-            <div class="score-seg">
-              <span class="score-value" id="score-round">—</span>
-              <span class="score-seg-lbl">Individual</span>
-            </div>
+            <span class="score-rounds" id="score-rounds">—</span>
           </div>
         ` : `
           <div class="hud-score">
@@ -94,6 +88,7 @@ export class HUD {
   }
 
   setScore(score, maxScore) {
+    if (this._teamMode) return   // team display handled by setRoundScore
     if (!this._scoreEl) return
     if (this._scoreMode === 'points') {
       this._scoreEl.textContent = score
@@ -112,13 +107,16 @@ export class HUD {
   }
 
   setRoundScore(pts) {
-    const el = document.getElementById('score-round')
-    if (el) {
-      el.textContent = `${pts}`
-      el.classList.remove('score-bump')
-      void el.offsetWidth
-      el.classList.add('score-bump')
-    }
+    if (!this._teamMode) return
+    const el = document.getElementById('score-rounds')
+    if (!el) return
+    this._roundScores.push(pts)
+    const nums  = this._roundScores.join('  +  ')
+    const total = this._roundScores.reduce((s, p) => s + p, 0)
+    el.textContent = this._roundScores.length > 1 ? `${nums}  =  ${total}` : `${nums}`
+    el.classList.remove('score-bump')
+    void el.offsetWidth
+    el.classList.add('score-bump')
   }
 
   setProgress(done, total) {
