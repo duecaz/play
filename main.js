@@ -28,7 +28,15 @@ const app   = document.getElementById('app')
 const badge = document.getElementById('version-badge')
 if (badge) badge.textContent = `v${VERSION}`
 
-Router.on('/home',             ()             => renderHome(app))
+let _unlocked = false
+
+Router.on('/home', () => {
+  if (localStorage.getItem('eduplay_pattern') && !_unlocked) {
+    renderLockScreen(app, () => { _unlocked = true; renderHome(app) })
+    return
+  }
+  renderHome(app)
+})
 Router.on('/create',           ()             => renderTemplateSelector(app))
 Router.on('/editor/:template', ({ template }) => {
   if (template === 'textCorrection')  new TextCorrectionEditor(app).render()
@@ -47,8 +55,6 @@ Router.on('/editor/:template/:id', ({ template, id }) => {
 Router.on('/play/:id',             ({ id }) => renderPlayerView(app, id))
 Router.on('/calibrate',            ()       => renderCalibration(app))
 Router.on('/configure-pattern',    ()       => renderPatternConfig(app, () => Router.navigate('/home')))
-
-let _unlocked = false
 
 function boot() {
   Router.init()
