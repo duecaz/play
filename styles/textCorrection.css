@@ -50,6 +50,15 @@
   padding: 0;
 }
 
+/* Equipo — cuaderno ocupa todo el ancho, sin márgenes laterales */
+#main-area.main-area--equipo .corr-screen {
+  padding: 0.5rem 0 0.75rem;
+}
+#main-area.main-area--equipo .corr-wrapper {
+  max-width: none;
+  border-radius: 0;
+}
+
 /* font-size is set on the wrapper so `em` in the gradient always = lineHeight.
    _fitText() overrides font-size; em units auto-align without any JS measurement. */
 .corr-wrapper.skin-notebook {

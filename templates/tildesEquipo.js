@@ -85,6 +85,7 @@ export class TildesEquipoTemplate extends TildesTemplate {
   /* Show round number in the instruction area */
   _render() {
     super._render()
+    document.getElementById('main-area')?.classList.add('main-area--equipo')
     // Append round badge to wrapper so teacher can see which student is up
     const wrapper = document.getElementById('corr-wrapper')
     if (wrapper && this._roundCount > 1) {
@@ -93,5 +94,10 @@ export class TildesEquipoTemplate extends TildesTemplate {
       badge.textContent = `Alumno ${this._round + 1} / ${this._roundCount}`
       wrapper.parentElement?.insertBefore(badge, wrapper)
     }
+  }
+
+  destroy() {
+    document.getElementById('main-area')?.classList.remove('main-area--equipo')
+    super.destroy()
   }
 }
