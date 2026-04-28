@@ -11,7 +11,7 @@ import { renderHome }                    from './views/home.js'
 import { renderTemplateSelector }        from './views/templateSelector.js'
 import { renderPlayerView }              from './views/playerView.js'
 import { renderCalibration }             from './views/calibration.js'
-import { renderLockScreen }             from './views/lockScreen.js'
+import { renderLockScreen, renderPatternConfig } from './views/lockScreen.js'
 import { QuizEditor }                    from './editors/quizEditor.js'
 import { TextCorrectionEditor }          from './editors/textCorrectionEditor.js'
 import { TildesEditor }                 from './editors/tildesEditor.js'
@@ -38,8 +38,11 @@ Router.on('/editor/:template/:id', ({ template, id }) => {
   else if (template === 'tildes')    new TildesEditor(app).render(activity)
   else new QuizEditor(app).render(activity)
 })
-Router.on('/play/:id',         ({ id })       => renderPlayerView(app, id))
-Router.on('/calibrate',        ()             => renderCalibration(app))
+Router.on('/play/:id',             ({ id }) => renderPlayerView(app, id))
+Router.on('/calibrate',            ()       => renderCalibration(app))
+Router.on('/configure-pattern',    ()       => renderPatternConfig(app, () => Router.navigate('/home')))
+
+let _unlocked = false
 
 function boot() {
   Router.init()
@@ -49,9 +52,8 @@ function boot() {
   })
 }
 
-const savedPin = localStorage.getItem('eduplay_pin')
-if (savedPin && !sessionStorage.getItem('eduplay_unlocked')) {
-  renderLockScreen(app, boot)
+if (localStorage.getItem('eduplay_pattern') && !_unlocked) {
+  renderLockScreen(app, () => { _unlocked = true; boot() })
 } else {
   boot()
 }

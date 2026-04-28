@@ -15,7 +15,7 @@ export function renderHome(container) {
       </div>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-secondary" id="btn-clearcache" title="Limpiar caché y recargar">⟳ Caché</button>
-        <button class="btn btn-sm btn-outline-secondary" id="btn-pin" title="Configurar PIN de acceso"><i class="bi bi-lock"></i> PIN</button>
+        <button class="btn btn-sm btn-outline-secondary" id="btn-pin" title="Configurar patrón de acceso"><i class="bi bi-lock"></i> Patrón</button>
         <button class="btn btn-sm btn-outline-secondary" id="btn-calibrate" title="Calibrar lápiz IR">⚙ Calibrar</button>
         <button class="btn btn-primary" id="btn-new">+ Nueva actividad</button>
       </div>
@@ -44,22 +44,7 @@ export function renderHome(container) {
   container.querySelector('#btn-new')?.addEventListener('click', () => Router.navigate('/create'))
   container.querySelector('#btn-new-empty')?.addEventListener('click', () => Router.navigate('/create'))
   container.querySelector('#btn-calibrate')?.addEventListener('click', () => Router.navigate('/calibrate'))
-  container.querySelector('#btn-pin')?.addEventListener('click', () => {
-    const current = localStorage.getItem('eduplay_pin')
-    const msg = current
-      ? `PIN actual: ${current}\n\nEscribe el nuevo PIN (vacío para desactivar el bloqueo):`
-      : 'Nuevo PIN de acceso\n(deja vacío para no usar bloqueo):'
-    const pin = prompt(msg, '')
-    if (pin === null) return
-    if (pin.trim()) {
-      localStorage.setItem('eduplay_pin', pin.trim())
-      alert('PIN guardado. Los alumnos necesitarán introducirlo para entrar.')
-    } else {
-      localStorage.removeItem('eduplay_pin')
-      sessionStorage.removeItem('eduplay_unlocked')
-      alert('Bloqueo desactivado.')
-    }
-  })
+  container.querySelector('#btn-pin')?.addEventListener('click', () => Router.navigate('/configure-pattern'))
   container.querySelector('#btn-clearcache')?.addEventListener('click', () => {
     localStorage.clear(); sessionStorage.clear(); location.reload(true)
   })
